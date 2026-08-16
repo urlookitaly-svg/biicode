@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0B1320">
+<title>BIICODE</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0B1320;color:white;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:480px;margin:auto;padding:20px 20px 100px}.head{height:70px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #203149;margin-bottom:20px}
+.logo{width:48px;height:48px;border-radius:12px;background:#07101d;display:grid;place-items:center;font-size:25px;font-weight:900}.logo b{color:#1565FF}
+.brand{font-size:21px;font-weight:900}.tag{font-size:8px;color:#9AA7B8;letter-spacing:1px}
+h1{font-size:28px;margin:10px 0 18px}.muted{color:#94A1B3;font-size:13px}
+.card{background:#111D2D;border:1px solid #203149;border-radius:18px;padding:16px;margin-bottom:14px}
+.bike{display:flex;gap:15px;align-items:center}.pic{width:90px;height:80px;background:#0A1523;border-radius:14px;display:grid;place-items:center;font-size:42px}
+.name{font-size:17px;font-weight:800}.id{font-size:12px;color:#94A1B3;margin-top:5px}
+.status{display:inline-block;padding:4px 9px;border-radius:10px;font-size:10px;font-weight:800;margin-top:7px;background:#22C55E}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.action{background:#111D2D;color:white;border:1px solid #203149;border-radius:16px;padding:18px;text-align:left;min-height:110px;font-size:14px}.ico{font-size:27px;color:#1565FF;display:block;margin-bottom:12px}
+button{font:inherit;cursor:pointer}.primary{width:100%;padding:16px;border:0;border-radius:14px;background:#1565FF;color:white;font-weight:800;margin-top:8px}
+input{width:100%;padding:14px;background:#111D2D;border:1px solid #2A3B52;border-radius:12px;color:white;font-size:16px;margin:7px 0 14px}
+label{font-size:12px;color:#AAB5C4}.nav{position:fixed;bottom:0;left:0;right:0;height:72px;background:#0E1A2A;border-top:1px solid #203149;display:flex;justify-content:space-around;align-items:center}.nav button{background:none;border:0;color:#9AA4B2;font-size:11px}.plus{background:#1565FF!important;color:white!important;width:56px;height:56px;border-radius:50%;font-size:30px!important;margin-top:-25px}
+.modal{position:fixed;inset:0;background:#0B1320;z-index:5;overflow:auto}.modal>div{max-width:480px;margin:auto;padding:20px}.back{background:none;border:0;color:#1565FF;font-weight:700;padding:0 0 20px}
+.qr{background:white;padding:12px;border-radius:12px;width:max-content;margin:18px auto}.alert{padding:14px;border-radius:12px;margin:15px 0;background:#10271C;color:#A9EFC4}.stolen{background:#29151B;color:#FFB4BC}
+</style>
+</head>
+<body>
+
+<main>
+<div class="head">
+<div class="logo">b<b>◯</b></div>
+<div><div class="brand">BIICODE</div><div class="tag">LA TUA BICI. UN'IDENTITÀ UNICA.</div></div>
+</div>
+<div id="app"></div>
+</main>
+
+<div class="nav">
+<button onclick="home()">⌂<br>Home</button>
+<button onclick="bikes()">🚲<br>Bici</button>
+<button class="plus" onclick="add()">+</button>
+<button onclick="activity()">▤<br>Attività</button>
+<button onclick="profile()">○<br>Profilo</button>
+</div>
+
+<div id="modal"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+let data=JSON.parse(localStorage.getItem("biicode")||"null")||[
+{id:"IT-7F82K91X",brand:"Trek",model:"Fuel EX 8",year:"2022",color:"Nero / Rosso",frame:"WTU1234567890",stolen:false}
+];
+
+function save(){localStorage.setItem("biicode",JSON.stringify(data))}
+function id(){let c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",s="IT-";for(let i=0;i<8;i++)s+=c[Math.random()*c.length|0];return s}
+function card(b){return `<div class="card bike" onclick="detail('${b.id}')"><div class="pic">🚲</div><div><div class="name">${b.brand} ${b.model}</div><div class="id">${b.id}</div><span class="status" style="background:${b.stolen?'#EF4444':'#22C55E'}">${b.stolen?'RUBATA':'ATTIVA'}</span></div></div>`}
+
+function home(){
+app.innerHTML=`<div class="muted">Ciao Claudio 👋</div><h1>Le mie bici</h1>
+${data.map(card).join("")}
+<div class="grid">
+<button class="action" onclick="scan()"><span class="ico">⌗</span><b>Scansiona QR</b><br><span class="muted">Verifica una bici</span></button>
+<button class="action" onclick="add()"><span class="ico">+</span><b>Immatricola</b><br><span class="muted">Registra una bici</span></button>
+<button class="action" onclick="quick()"><span class="ico">⚠</span><b>Segnala furto</b><br><span class="muted">Proteggi la tua bici</span></button>
+<button class="action" onclick="alert('Funzione in arrivo')"><span class="ico">↔</span><b>Trasferisci</b><br><span class="muted">Proprietà</span></button>
+</div>`}
+
+function bikes(){
+app.innerHTML=`<h1>Le mie bici</h1>${data.map(card).join("")}<button class="primary" onclick="add()">+ IMMATRICOLA UNA BICI</button>`
+}
+
+function add(){
+modal.innerHTML=`<div><button class="back" onclick="closeM()">‹ Annulla</button><h1>Immatricola la tua bici</h1>
+<label>Marca</label><input id="a" placeholder="Es. Trek">
+<label>Modello</label><input id="b" placeholder="Es. Fuel EX 8">
+<label>Anno</label><input id="c" placeholder="2026">
+<label>Colore</label><input id="d" placeholder="Nero">
+<label>Numero telaio</label><input id="e" placeholder="Numero telaio">
+<button class="primary" onclick="create()">IMMATRICOLA BICI</button></div>`
+}
+
+function create(){
+if(!a.value||!b.value||!e.value){alert("Inserisci almeno marca, modello e numero telaio");return}
+let x={id:id(),brand:a.value,model:b.value,year:c.value,color:d.value,frame:e.value,stolen:false};
+data.unshift(x);save();closeM();detail(x.id)
+}
+
+function detail(x){
+let b=data.find(q=>q.id==x);
+modal.innerHTML=`<div><button class="back" onclick="closeM()">‹ Indietro</button><h1>${b.brand} ${b.model}</h1>
+<div class="card"><div class="muted">BIICODE ID</div><div class="name">${b.id}</div>
+<div id="qr" class="qr"></div>
+<div class="muted">NUMERO TELAIO</div><div class="name">${b.frame}</div><br>
+<div class="muted">ANNO / COLORE</div><div class="name">${b.year} • ${b.color}</div>
+<div class="alert ${b.stolen?'stolen':''}">${b.stolen?'🔴 QUESTA BICI RISULTA RUBATA':'🟢 QUESTA BICI RISULTA ATTIVA'}</div>
+<button class="primary" style="background:${b.stolen?'#22C55E':'#EF4444'}" onclick="toggle('${b.id}')">${b.stolen?'SEGNALA COME RECUPERATA':'SEGNALA FURTO'}</button>
+</div></div>`;
+new QRCode(qr,{text:"BIICODE:"+b.id,width:190,height:190})
+}
+
+function toggle(x){let b=data.find(q=>q.id==x);b.stolen=!b.stolen;save();detail(x)}
+function quick(){if(data.length)toggle(data[0].id)}
+function scan(){alert("Lo scanner QR sarà collegato alla fotocamera nella prossima versione.")}
+function activity(){app.innerHTML="<h1>Attività</h1><div class='card'><b>Bici registrata</b><div class='muted'>BIICODE • Oggi</div></div><div class='card'><b>QR pronto</b><div class='muted'>Identificativo associato</div></div>"}
+function profile(){app.innerHTML="<h1>Profilo</h1><div class='card'><div class='name'>Claudio</div><div class='muted'>Account BIICODE demo</div><br><div class='muted'>Bici registrate: "+data.length+"</div></div>"}
+function closeM(){modal.innerHTML=""}
+home()
+</script>
+</body>
+</html>
