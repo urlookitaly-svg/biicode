@@ -1,50 +1,76 @@
 <!doctype html>
 <html lang="it">
+
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0B1320">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+
+<meta
+  name="theme-color"
+  content="#0B1320"
+>
 
 <title>BIICODE</title>
 
 <style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
 *{
   box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body{
+html{
   margin:0;
   padding:0;
   background:#0B1320;
-  color:white;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
 body{
+  margin:0;
+  padding:0;
   min-height:100vh;
+  min-height:100dvh;
+  background:#0B1320;
+  color:#FFFFFF;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
+
+
+/* =========================================================
+   APP PRINCIPALE
+========================================================= */
 
 main{
+  width:100%;
   max-width:480px;
-  margin:auto;
-  padding:20px 20px 120px;
+  margin:0 auto;
+
+  padding:
+    20px
+    20px
+    calc(110px + env(safe-area-inset-bottom));
+
+  min-height:100vh;
+  min-height:100dvh;
 }
 
-.logo{
-  width:48px;
-  height:48px;
-  border-radius:12px;
-  background:#07101d;
-  display:grid;
-  place-items:center;
-  font-size:25px;
-  font-weight:900;
-}
 
-.logo b{
-  color:#1565FF;
-}
+/* =========================================================
+   HEADER
+========================================================= */
 
 .head{
   display:flex;
@@ -53,20 +79,53 @@ main{
   margin-bottom:30px;
 }
 
+.logo{
+  width:48px;
+  height:48px;
+
+  flex:none;
+
+  border-radius:12px;
+
+  background:#07101D;
+
+  display:grid;
+  place-items:center;
+
+  font-size:25px;
+  font-weight:900;
+}
+
+.logo b{
+  color:#1565FF;
+}
+
 .brand{
   font-size:21px;
   font-weight:900;
 }
 
 .tag{
+  margin-top:2px;
+
   font-size:8px;
+
   color:#9AA7B8;
+
   letter-spacing:1px;
 }
 
+
+/* =========================================================
+   TESTI
+========================================================= */
+
 h1{
-  font-size:28px;
   margin:10px 0 18px;
+
+  font-size:28px;
+  line-height:1.15;
+  font-weight:900;
 }
 
 .muted{
@@ -74,11 +133,20 @@ h1{
   font-size:13px;
 }
 
+
+/* =========================================================
+   CARD
+========================================================= */
+
 .card{
   background:#111D2D;
+
   border:1px solid #203149;
+
   border-radius:18px;
+
   padding:16px;
+
   margin-bottom:14px;
 }
 
@@ -86,16 +154,23 @@ h1{
   display:flex;
   gap:15px;
   align-items:center;
+
+  cursor:pointer;
 }
 
 .pic{
   width:90px;
   height:80px;
+
   flex:none;
+
   background:#0A1523;
+
   border-radius:14px;
+
   display:grid;
   place-items:center;
+
   font-size:42px;
 }
 
@@ -105,171 +180,450 @@ h1{
 }
 
 .id{
-  font-size:12px;
-  color:#94A1B3;
   margin-top:5px;
+
+  font-size:12px;
+
+  color:#94A1B3;
 }
 
 .status{
   display:inline-block;
+
   padding:4px 9px;
+
   border-radius:10px;
+
+  margin-top:7px;
+
   font-size:10px;
   font-weight:800;
-  margin-top:7px;
 }
+
+
+/* =========================================================
+   GRIGLIA HOME
+========================================================= */
 
 .grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
   gap:10px;
 }
 
 .action{
-  background:#111D2D;
-  color:white;
-  border:1px solid #203149;
-  border-radius:16px;
-  padding:18px;
-  text-align:left;
+  width:100%;
+
   min-height:110px;
+
+  padding:18px;
+
+  background:#111D2D;
+  color:#FFFFFF;
+
+  border:1px solid #203149;
+
+  border-radius:16px;
+
+  text-align:left;
+
   font-size:14px;
+
+  cursor:pointer;
+}
+
+.action:active{
+  transform:scale(.98);
 }
 
 .ico{
-  font-size:27px;
-  color:#1565FF;
   display:block;
+
   margin-bottom:12px;
+
+  font-size:27px;
+
+  color:#1565FF;
 }
+
+
+/* =========================================================
+   BUTTON
+========================================================= */
 
 button{
   font:inherit;
   cursor:pointer;
+
+  -webkit-appearance:none;
+  appearance:none;
 }
 
 .primary{
+  display:block;
+
   width:100%;
+
+  min-height:58px;
+
   padding:16px;
+
   border:0;
+
   border-radius:14px;
+
   background:#1565FF;
-  color:white;
-  font-weight:800;
-  margin-top:8px;
-}
 
-input{
-  width:100%;
-  padding:14px;
-  background:#111D2D;
-  border:1px solid #2A3B52;
-  border-radius:12px;
-  color:white;
+  color:#FFFFFF;
+
   font-size:16px;
-  margin:7px 0 14px;
+  font-weight:900;
+
+  text-align:center;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 6px 20px rgba(21,101,255,.20);
 }
 
-input:focus{
-  outline:2px solid #1565FF;
-  border-color:#1565FF;
+.primary:active{
+  transform:scale(.98);
 }
+
+
+/* =========================================================
+   INPUT
+========================================================= */
 
 label{
-  font-size:12px;
+  display:block;
+
+  margin-top:4px;
+
+  font-size:13px;
+  font-weight:600;
+
   color:#AAB5C4;
 }
 
+input{
+  display:block;
+
+  width:100%;
+
+  min-height:58px;
+
+  padding:15px;
+
+  margin:
+    7px
+    0
+    20px;
+
+  background:#111D2D;
+
+  border:1px solid #2A3B52;
+
+  border-radius:14px;
+
+  color:#FFFFFF;
+
+  font-family:inherit;
+
+  font-size:17px;
+
+  outline:none;
+
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+input::placeholder{
+  color:#7F8B9A;
+}
+
+input:focus{
+  border-color:#1565FF;
+
+  box-shadow:
+    0 0 0 2px rgba(21,101,255,.20);
+}
+
+
+/* =========================================================
+   NAVIGAZIONE
+========================================================= */
+
 .nav{
   position:fixed;
-  z-index:20;
-  bottom:0;
+
+  z-index:100;
+
   left:0;
   right:0;
-  height:82px;
+  bottom:0;
+
+  height:
+    calc(82px + env(safe-area-inset-bottom));
+
+  padding-bottom:
+    env(safe-area-inset-bottom);
+
   background:#0E1A2A;
+
   border-top:1px solid #203149;
+
   display:flex;
+
   justify-content:space-around;
+
   align-items:center;
 }
 
 .nav button{
+  width:20%;
+
+  height:65px;
+
+  padding:0;
+
   background:none;
+
   border:0;
+
   color:#9AA4B2;
-  font-size:11px;
+
+  font-size:12px;
+  font-weight:600;
+
+  text-align:center;
+}
+
+.nav button:active{
+  color:#FFFFFF;
 }
 
 .plus{
+  width:58px!important;
+  height:58px!important;
+
+  flex:none;
+
+  margin-top:-28px;
+
+  border-radius:50%!important;
+
   background:#1565FF!important;
-  color:white!important;
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  font-size:30px!important;
-  margin-top:-25px;
+
+  color:#FFFFFF!important;
+
+  font-size:32px!important;
+  font-weight:400!important;
+
+  box-shadow:
+    0 8px 25px rgba(21,101,255,.30);
 }
 
-/* FINESTRA MODULO */
+
+/* =========================================================
+   NASCONDI NAVIGAZIONE DURANTE IL MODULO
+========================================================= */
+
+body.form-open .nav{
+  display:none;
+}
+
+body.form-open main{
+  display:none;
+}
+
+
+/* =========================================================
+   PAGINA MODULO
+========================================================= */
+
 .modal{
   position:fixed;
-  z-index:50;
-  top:0;
-  left:0;
-  right:0;
-  bottom:110px;
+
+  z-index:500;
+
+  inset:0;
+
+  width:100%;
+  height:100%;
+
+  height:100dvh;
+
   background:#0B1320;
+
   overflow-y:auto;
   overflow-x:hidden;
+
   -webkit-overflow-scrolling:touch;
-  padding:20px 20px 40px;
+
+  overscroll-behavior:contain;
+
+  padding:
+    calc(20px + env(safe-area-inset-top))
+    20px
+    calc(50px + env(safe-area-inset-bottom));
+
+  display:none;
 }
 
-.modal > div{
-  max-width:480px;
-  margin:0 auto;
-  padding-bottom:20px;
+.modal.active{
+  display:block;
 }
+
+.modal-content{
+  width:100%;
+
+  max-width:480px;
+
+  margin:0 auto;
+
+  padding-bottom:40px;
+}
+
+
+/* =========================================================
+   BACK
+========================================================= */
 
 .back{
+  display:block;
+
+  padding:8px 0 20px;
+
   background:none;
+
   border:0;
+
   color:#1565FF;
+
   font-size:18px;
   font-weight:800;
-  padding:8px 0 18px;
+
+  text-align:left;
 }
 
-.qr{
-  background:white;
-  padding:12px;
-  border-radius:12px;
-  width:max-content;
-  margin:18px auto;
+
+/* =========================================================
+   AREA PULSANTE FORM
+========================================================= */
+
+.form-actions{
+  width:100%;
+
+  margin-top:10px;
+
+  padding-top:5px;
+
+  padding-bottom:30px;
 }
+
+
+/* =========================================================
+   QR
+========================================================= */
+
+.qr{
+  width:max-content;
+
+  margin:
+    20px
+    auto;
+
+  padding:12px;
+
+  background:#FFFFFF;
+
+  border-radius:12px;
+}
+
+
+/* =========================================================
+   ALERT
+========================================================= */
 
 .alert{
   padding:14px;
-  border-radius:12px;
+
   margin:15px 0;
+
+  border-radius:12px;
+
   background:#10271C;
+
   color:#A9EFC4;
+
+  font-size:14px;
+  font-weight:700;
 }
 
 .stolen{
   background:#29151B;
+
   color:#FFB4BC;
 }
 
-/* SPAZIO EXTRA SOTTO IL PULSANTE */
-.form-actions{
-  padding-bottom:40px;
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:380px){
+
+  main{
+    padding-left:15px;
+    padding-right:15px;
+  }
+
+  .modal{
+    padding-left:15px;
+    padding-right:15px;
+  }
+
+  h1{
+    font-size:26px;
+  }
+
+  .grid{
+    gap:8px;
+  }
+
+  .action{
+    padding:15px;
+  }
+
 }
+
+
+/* =========================================================
+   PREVENZIONE OVERFLOW
+========================================================= */
+
+img,
+svg,
+canvas{
+  max-width:100%;
+}
+
 </style>
+
 </head>
 
+
 <body>
+
+
+<!-- =======================================================
+     APP
+======================================================== -->
 
 <main>
 
@@ -280,72 +634,120 @@ label{
     </div>
 
     <div>
-      <div class="brand">BIICODE</div>
+
+      <div class="brand">
+        BIICODE
+      </div>
+
       <div class="tag">
         LA TUA BICI. UN'IDENTITÀ UNICA.
       </div>
+
     </div>
 
   </div>
+
 
   <div id="app"></div>
 
 </main>
 
 
-<!-- NAVIGAZIONE -->
+<!-- =======================================================
+     NAVIGAZIONE
+======================================================== -->
 
-<div class="nav">
+<div
+  id="navigation"
+  class="nav"
+>
 
-  <button onclick="home()">
-    ⌂<br>
+  <button
+    type="button"
+    onclick="home()"
+  >
+    ⌂
+    <br>
     Home
   </button>
 
-  <button onclick="bikes()">
-    🚲<br>
+
+  <button
+    type="button"
+    onclick="bikes()"
+  >
+    🚲
+    <br>
     Bici
   </button>
 
-  <button class="plus" onclick="add()">
+
+  <button
+    type="button"
+    class="plus"
+    onclick="add()"
+  >
     +
   </button>
 
-  <button onclick="activity()">
-    ▤<br>
+
+  <button
+    type="button"
+    onclick="activity()"
+  >
+    ▤
+    <br>
     Attività
   </button>
 
-  <button onclick="profile()">
-    ○<br>
+
+  <button
+    type="button"
+    onclick="profile()"
+  >
+    ○
+    <br>
     Profilo
   </button>
 
 </div>
 
 
-<!-- MODALE -->
+<!-- =======================================================
+     MODULO
+======================================================== -->
 
-<div id="modal"></div>
+<div
+  id="modal"
+  class="modal"
+>
+</div>
 
 
-<!-- QR CODE -->
+<!-- =======================================================
+     QR CODE
+======================================================== -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<!-- SUPABASE -->
+
+<!-- =======================================================
+     SUPABASE
+======================================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
-/* =========================
+/* =========================================================
    DATI LOCALI
-========================= */
+========================================================= */
 
 let data =
-  JSON.parse(localStorage.getItem("biicode") || "null")
+  JSON.parse(
+    localStorage.getItem("biicode") || "null"
+  )
   ||
   [
     {
@@ -361,25 +763,44 @@ let data =
   ];
 
 
-/* =========================
+/* =========================================================
    SUPABASE
-========================= */
+========================================================= */
 
-const { createClient } = supabase;
+const {
+  createClient
+} = supabase;
+
 
 const SUPABASE_URL =
   "https://swzkrwdqfgetwcmaiqty.supabase.co";
 
+
 const SUPABASE_KEY =
   "sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";
 
+
 const db =
-  createClient(SUPABASE_URL,SUPABASE_KEY);
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
-/* =========================
-   SALVATAGGIO LOCALE
-========================= */
+/* =========================================================
+   ELEMENTI
+========================================================= */
+
+const app =
+  document.getElementById("app");
+
+const modal =
+  document.getElementById("modal");
+
+
+/* =========================================================
+   SALVA LOCALE
+========================================================= */
 
 function save(){
 
@@ -391,139 +812,252 @@ function save(){
 }
 
 
-/* =========================
-   GENERATORE ID
-========================= */
+/* =========================================================
+   GENERA ID
+========================================================= */
 
-function id(){
+function generateId(){
 
-  let c =
+  const characters =
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-  let s = "IT-";
+  let result = "IT-";
 
-  for(let i=0;i<8;i++){
+  for(
+    let i = 0;
+    i < 8;
+    i++
+  ){
 
-    s += c[Math.floor(Math.random()*c.length)];
+    result +=
+      characters[
+        Math.floor(
+          Math.random() *
+          characters.length
+        )
+      ];
 
   }
 
-  return s;
+  return result;
 
 }
 
 
-/* =========================
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
    CARD BICI
-========================= */
+========================================================= */
 
 function card(b){
 
+  const stolen =
+    b.stolen === true;
+
+
   return `
+
     <div
       class="card bike"
-      onclick="detail('${b.id}')"
+      onclick="detail('${escapeHTML(b.id)}')"
     >
 
       <div class="pic">
         🚲
       </div>
 
+
       <div>
 
         <div class="name">
-          ${b.brand} ${b.model}
+
+          ${escapeHTML(b.brand)}
+          ${escapeHTML(b.model)}
+
         </div>
 
+
         <div class="id">
-          ${b.id}
+
+          ${escapeHTML(b.id)}
+
         </div>
+
 
         <span
           class="status"
-          style="background:${b.stolen ? '#EF4444' : '#22C55E'}"
+          style="
+            background:
+            ${stolen
+              ? "#EF4444"
+              : "#22C55E"};
+          "
         >
-          ${b.stolen ? 'RUBATA' : 'ATTIVA'}
+
+          ${stolen
+            ? "RUBATA"
+            : "ATTIVA"}
+
         </span>
 
       </div>
 
     </div>
+
   `;
 
 }
 
 
-/* =========================
+/* =========================================================
    HOME
-========================= */
+========================================================= */
 
 function home(){
 
-  document.getElementById("app").innerHTML = `
+  closeM();
+
+
+  app.innerHTML = `
 
     <div class="muted">
       Ciao Claudio 👋
     </div>
 
+
     <h1>
       Le mie bici
     </h1>
 
-    ${data.map(card).join("")}
+
+    ${
+      data.length
+      ? data.map(card).join("")
+      : `
+        <div class="card">
+
+          <div class="name">
+            Nessuna bici registrata
+          </div>
+
+          <div class="muted">
+            Registra la tua prima bici.
+          </div>
+
+        </div>
+      `
+    }
+
 
     <div class="grid">
 
+
       <button
+        type="button"
         class="action"
         onclick="scan()"
       >
-        <span class="ico">⌗</span>
-        <b>Scansiona QR</b>
+
+        <span class="ico">
+          ⌗
+        </span>
+
+        <b>
+          Scansiona QR
+        </b>
+
         <br>
+
         <span class="muted">
           Verifica una bici
         </span>
+
       </button>
 
 
       <button
+        type="button"
         class="action"
         onclick="add()"
       >
-        <span class="ico">+</span>
-        <b>Immatricola</b>
+
+        <span class="ico">
+          +
+        </span>
+
+        <b>
+          Immatricola
+        </b>
+
         <br>
+
         <span class="muted">
           Registra una bici
         </span>
+
       </button>
 
 
       <button
+        type="button"
         class="action"
         onclick="quick()"
       >
-        <span class="ico">⚠</span>
-        <b>Segnala furto</b>
+
+        <span class="ico">
+          ⚠
+        </span>
+
+        <b>
+          Segnala furto
+        </b>
+
         <br>
+
         <span class="muted">
           Proteggi la tua bici
         </span>
+
       </button>
 
 
       <button
+        type="button"
         class="action"
         onclick="alert('Funzione in arrivo')"
       >
-        <span class="ico">↔</span>
-        <b>Trasferisci</b>
+
+        <span class="ico">
+          ↔
+        </span>
+
+        <b>
+          Trasferisci
+        </b>
+
         <br>
+
         <span class="muted">
           Proprietà
         </span>
+
       </button>
+
 
     </div>
 
@@ -532,25 +1066,45 @@ function home(){
 }
 
 
-/* =========================
-   PAGINA BICI
-========================= */
+/* =========================================================
+   BICI
+========================================================= */
 
 function bikes(){
 
-  document.getElementById("app").innerHTML = `
+  closeM();
+
+
+  app.innerHTML = `
 
     <h1>
       Le mie bici
     </h1>
 
-    ${data.map(card).join("")}
+
+    ${
+      data.length
+      ? data.map(card).join("")
+      : `
+        <div class="card">
+
+          <div class="name">
+            Nessuna bici
+          </div>
+
+        </div>
+      `
+    }
+
 
     <button
+      type="button"
       class="primary"
       onclick="add()"
     >
+
       + IMMATRICOLA UNA BICI
+
     </button>
 
   `;
@@ -558,127 +1112,177 @@ function bikes(){
 }
 
 
-/* =========================
-   IMMATRICOLA
-========================= */
+/* =========================================================
+   APRI MODULO
+========================================================= */
 
-function add(){
+function openForm(content){
 
-  const modal =
-    document.getElementById("modal");
+  document.body.classList.add("form-open");
+
+  modal.classList.add("active");
 
   modal.innerHTML = `
-
-    <div>
-
-      <button
-        class="back"
-        onclick="closeM()"
-      >
-        ‹ Annulla
-      </button>
-
-
-      <h1>
-        Immatricola la tua bici
-      </h1>
-
-
-      <label>
-        Marca
-      </label>
-
-      <input
-        id="bikeBrand"
-        placeholder="Es. Trek"
-      >
-
-
-      <label>
-        Modello
-      </label>
-
-      <input
-        id="bikeModel"
-        placeholder="Es. Fuel EX 8"
-      >
-
-
-      <label>
-        Anno
-      </label>
-
-      <input
-        id="bikeYear"
-        type="number"
-        placeholder="Es. 2022"
-      >
-
-
-      <label>
-        Colore
-      </label>
-
-      <input
-        id="bikeColor"
-        placeholder="Es. Nero"
-      >
-
-
-      <label>
-        Numero telaio
-      </label>
-
-      <input
-        id="bikeFrame"
-        placeholder="Numero telaio"
-      >
-
-
-      <div class="form-actions">
-
-        <button
-          class="primary"
-          onclick="createBike()"
-        >
-          IMMATRICOLA BICI
-        </button>
-
-      </div>
-
+    <div class="modal-content">
+      ${content}
     </div>
-
   `;
+
+
+  /*
+     Torniamo sempre all'inizio del modulo.
+  */
+
+  modal.scrollTop = 0;
+
+
+  /*
+     Piccolo ritardo per Safari/iPhone.
+  */
+
+  setTimeout(() => {
+
+    modal.scrollTop = 0;
+
+  },50);
 
 }
 
 
-/* =========================
+/* =========================================================
+   IMMATRICOLA
+========================================================= */
+
+function add(){
+
+  openForm(`
+
+    <button
+      type="button"
+      class="back"
+      onclick="closeM()"
+    >
+      ‹ Annulla
+    </button>
+
+
+    <h1>
+      Immatricola la tua bici
+    </h1>
+
+
+    <label for="bikeBrand">
+      Marca
+    </label>
+
+    <input
+      id="bikeBrand"
+      type="text"
+      autocomplete="off"
+      placeholder="Es. Trek"
+    >
+
+
+    <label for="bikeModel">
+      Modello
+    </label>
+
+    <input
+      id="bikeModel"
+      type="text"
+      autocomplete="off"
+      placeholder="Es. Fuel EX 8"
+    >
+
+
+    <label for="bikeYear">
+      Anno
+    </label>
+
+    <input
+      id="bikeYear"
+      type="number"
+      inputmode="numeric"
+      placeholder="Es. 2022"
+    >
+
+
+    <label for="bikeColor">
+      Colore
+    </label>
+
+    <input
+      id="bikeColor"
+      type="text"
+      autocomplete="off"
+      placeholder="Es. Nero"
+    >
+
+
+    <label for="bikeFrame">
+      Numero telaio
+    </label>
+
+    <input
+      id="bikeFrame"
+      type="text"
+      autocomplete="off"
+      placeholder="Numero telaio"
+    >
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        id="createBikeButton"
+        class="primary"
+        onclick="createBike()"
+      >
+
+        IMMATRICOLA BICI
+
+      </button>
+
+    </div>
+
+  `);
+
+}
+
+
+/* =========================================================
    CREA BICI
-========================= */
+========================================================= */
 
 async function createBike(){
 
-  const brand =
-    document.getElementById("bikeBrand").value.trim();
+  const brandInput =
+    document.getElementById("bikeBrand");
 
-  const model =
-    document.getElementById("bikeModel").value.trim();
+  const modelInput =
+    document.getElementById("bikeModel");
 
-  const year =
-    document.getElementById("bikeYear").value.trim();
+  const yearInput =
+    document.getElementById("bikeYear");
 
-  const color =
-    document.getElementById("bikeColor").value.trim();
+  const colorInput =
+    document.getElementById("bikeColor");
 
-  const frame =
-    document.getElementById("bikeFrame").value.trim();
+  const frameInput =
+    document.getElementById("bikeFrame");
 
 
-  if(!brand || !model || !frame){
+  if(
+    !brandInput ||
+    !modelInput ||
+    !yearInput ||
+    !colorInput ||
+    !frameInput
+  ){
 
     alert(
-      "Inserisci marca, modello e numero telaio"
+      "Errore nel modulo."
     );
 
     return;
@@ -686,9 +1290,56 @@ async function createBike(){
   }
 
 
+  const brand =
+    brandInput.value.trim();
+
+  const model =
+    modelInput.value.trim();
+
+  const year =
+    yearInput.value.trim();
+
+  const color =
+    colorInput.value.trim();
+
+  const frame =
+    frameInput.value.trim();
+
+
+  if(
+    !brand ||
+    !model ||
+    !frame
+  ){
+
+    alert(
+      "Inserisci marca, modello e numero telaio."
+    );
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "createBikeButton"
+    );
+
+
+  if(button){
+
+    button.disabled = true;
+
+    button.textContent =
+      "SALVATAGGIO...";
+
+  }
+
+
   const x = {
 
-    id:id(),
+    id:generateId(),
 
     brand:brand,
 
@@ -707,32 +1358,146 @@ async function createBike(){
   };
 
 
-  const {error} = await db
-    .from("bikes")
-    .insert([{
+  /*
+     Salvataggio Supabase
+  */
 
-      biicode_id:x.id,
+  try{
 
-      brand:x.brand,
+    const {
+      error
+    } = await db
+      .from("bikes")
+      .insert([{
 
-      model:x.model,
+        biicode_id:x.id,
 
-      year:x.year,
+        brand:x.brand,
 
-      color:x.color,
+        model:x.model,
 
-      frame_number:x.frame_number,
+        year:x.year,
 
-      status:x.status
+        color:x.color,
 
-    }]);
+        frame_number:x.frame_number,
+
+        status:x.status
+
+      }]);
 
 
-  if(error){
+    if(error){
+
+      console.error(
+        "Supabase:",
+        error
+      );
+
+
+      /*
+         Non perdiamo i dati se
+         Supabase non risponde.
+      */
+
+      const saveAnyway =
+        confirm(
+          "Supabase non ha accettato il salvataggio.\n\n" +
+          "Vuoi comunque salvare la bici localmente?"
+        );
+
+
+      if(!saveAnyway){
+
+        if(button){
+
+          button.disabled = false;
+
+          button.textContent =
+            "IMMATRICOLA BICI";
+
+        }
+
+        return;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "Errore Supabase:",
+      error
+    );
+
+
+    const saveAnyway =
+      confirm(
+        "Impossibile collegarsi a Supabase.\n\n" +
+        "Vuoi comunque salvare la bici localmente?"
+      );
+
+
+    if(!saveAnyway){
+
+      if(button){
+
+        button.disabled = false;
+
+        button.textContent =
+          "IMMATRICOLA BICI";
+
+      }
+
+      return;
+
+    }
+
+  }
+
+
+  /*
+     Salvataggio locale
+  */
+
+  data.unshift(x);
+
+  save();
+
+
+  /*
+     Chiudiamo il modulo
+  */
+
+  closeM();
+
+
+  /*
+     Mostriamo la bici appena creata
+  */
+
+  detail(x.id);
+
+}
+
+
+/* =========================================================
+   DETTAGLIO
+========================================================= */
+
+function detail(idValue){
+
+  const b =
+    data.find(
+      q => q.id === idValue
+    );
+
+
+  if(!b){
 
     alert(
-      "Errore salvataggio Supabase: "
-      + error.message
+      "Bici non trovata."
     );
 
     return;
@@ -740,169 +1505,201 @@ async function createBike(){
   }
 
 
-  data.unshift(x);
+  openForm(`
 
-  save();
+    <button
+      type="button"
+      class="back"
+      onclick="closeM()"
+    >
+      ‹ Indietro
+    </button>
 
-  closeM();
 
-  detail(x.id);
+    <h1>
+      ${escapeHTML(b.brand)}
+      ${escapeHTML(b.model)}
+    </h1>
+
+
+    <div class="card">
+
+
+      <div class="muted">
+        BIICODE ID
+      </div>
+
+
+      <div class="name">
+        ${escapeHTML(b.id)}
+      </div>
+
+
+      <div
+        id="qr"
+        class="qr"
+      ></div>
+
+
+      <div class="muted">
+        NUMERO TELAIO
+      </div>
+
+
+      <div class="name">
+        ${escapeHTML(
+          b.frame_number || "-"
+        )}
+      </div>
+
+
+      <br>
+
+
+      <div class="muted">
+        ANNO / COLORE
+      </div>
+
+
+      <div class="name">
+
+        ${escapeHTML(
+          b.year || "-"
+        )}
+
+        •
+
+        ${escapeHTML(
+          b.color || "-"
+        )}
+
+      </div>
+
+
+      <div
+        class="alert
+        ${b.stolen ? "stolen" : ""}"
+      >
+
+        ${
+          b.stolen
+          ? "🔴 QUESTA BICI RISULTA RUBATA"
+          : "🟢 QUESTA BICI RISULTA ATTIVA"
+        }
+
+      </div>
+
+
+      <button
+        type="button"
+        class="primary"
+        style="
+          background:
+          ${b.stolen
+            ? "#22C55E"
+            : "#EF4444"};
+        "
+        onclick="toggle('${escapeHTML(b.id)}')"
+      >
+
+        ${
+          b.stolen
+          ? "SEGNALA COME RECUPERATA"
+          : "SEGNALA FURTO"
+        }
+
+      </button>
+
+
+    </div>
+
+  `);
+
+
+  const qrElement =
+    document.getElementById("qr");
+
+
+  if(
+    qrElement &&
+    typeof QRCode !== "undefined"
+  ){
+
+    new QRCode(
+      qrElement,
+      {
+        text:
+          "BIICODE:" + b.id,
+
+        width:190,
+
+        height:190
+      }
+    );
+
+  }
 
 }
 
 
-/* =========================
-   DETTAGLIO BICI
-========================= */
+/* =========================================================
+   FURTO / RECUPERO
+========================================================= */
 
-function detail(x){
+function toggle(idValue){
 
   const b =
-    data.find(q => q.id === x);
+    data.find(
+      q => q.id === idValue
+    );
 
 
   if(!b){
-
-    alert("Bici non trovata");
 
     return;
 
   }
 
 
-  document.getElementById("modal").innerHTML = `
-
-    <div>
-
-      <button
-        class="back"
-        onclick="closeM()"
-      >
-        ‹ Indietro
-      </button>
+  b.stolen =
+    !b.stolen;
 
 
-      <h1>
-        ${b.brand} ${b.model}
-      </h1>
+  save();
 
 
-      <div class="card">
+  detail(idValue);
 
-        <div class="muted">
-          BIICODE ID
-        </div>
-
-        <div class="name">
-          ${b.id}
-        </div>
+}
 
 
-        <div
-          id="qr"
-          class="qr"
-        ></div>
+/* =========================================================
+   SEGNALA FURTO RAPIDO
+========================================================= */
+
+function quick(){
+
+  if(!data.length){
+
+    alert(
+      "Non hai ancora registrato nessuna bici."
+    );
+
+    return;
+
+  }
 
 
-        <div class="muted">
-          NUMERO TELAIO
-        </div>
-
-        <div class="name">
-          ${b.frame_number || "-"}
-        </div>
-
-        <br>
-
-
-        <div class="muted">
-          ANNO / COLORE
-        </div>
-
-        <div class="name">
-          ${b.year || "-"}
-          •
-          ${b.color || "-"}
-        </div>
-
-
-        <div
-          class="alert ${b.stolen ? 'stolen' : ''}"
-        >
-          ${
-            b.stolen
-            ? '🔴 QUESTA BICI RISULTA RUBATA'
-            : '🟢 QUESTA BICI RISULTA ATTIVA'
-          }
-        </div>
-
-
-        <button
-          class="primary"
-          style="background:${b.stolen ? '#22C55E' : '#EF4444'}"
-          onclick="toggle('${b.id}')"
-        >
-          ${
-            b.stolen
-            ? 'SEGNALA COME RECUPERATA'
-            : 'SEGNALA FURTO'
-          }
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  new QRCode(
-    document.getElementById("qr"),
-    {
-      text:"BIICODE:"+b.id,
-      width:190,
-      height:190
-    }
+  toggle(
+    data[0].id
   );
 
 }
 
 
-/* =========================
-   FURTO / RECUPERO
-========================= */
-
-function toggle(x){
-
-  const b =
-    data.find(q => q.id === x);
-
-  if(!b) return;
-
-  b.stolen =
-    !b.stolen;
-
-  save();
-
-  detail(x);
-
-}
-
-
-function quick(){
-
-  if(data.length){
-
-    toggle(data[0].id);
-
-  }
-
-}
-
-
-/* =========================
+/* =========================================================
    SCANNER
-========================= */
+========================================================= */
 
 function scan(){
 
@@ -913,17 +1710,21 @@ function scan(){
 }
 
 
-/* =========================
+/* =========================================================
    ATTIVITÀ
-========================= */
+========================================================= */
 
 function activity(){
 
-  document.getElementById("app").innerHTML = `
+  closeM();
+
+
+  app.innerHTML = `
 
     <h1>
       Attività
     </h1>
+
 
     <div class="card">
 
@@ -955,17 +1756,21 @@ function activity(){
 }
 
 
-/* =========================
+/* =========================================================
    PROFILO
-========================= */
+========================================================= */
 
 function profile(){
 
-  document.getElementById("app").innerHTML = `
+  closeM();
+
+
+  app.innerHTML = `
 
     <h1>
       Profilo
     </h1>
+
 
     <div class="card">
 
@@ -973,15 +1778,20 @@ function profile(){
         Claudio
       </div>
 
+
       <div class="muted">
         Account BIICODE demo
       </div>
 
+
       <br>
 
+
       <div class="muted">
+
         Bici registrate:
         ${data.length}
+
       </div>
 
     </div>
@@ -991,71 +1801,104 @@ function profile(){
 }
 
 
-/* =========================
-   CHIUDI MODALE
-========================= */
+/* =========================================================
+   CHIUDI MODULO
+========================================================= */
 
 function closeM(){
 
-  document.getElementById("modal").innerHTML = "";
+  document.body.classList.remove(
+    "form-open"
+  );
+
+  modal.classList.remove(
+    "active"
+  );
+
+  modal.innerHTML = "";
 
 }
 
 
-/* =========================
-   CARICAMENTO SUPABASE
-========================= */
+/* =========================================================
+   CARICA DATI SUPABASE
+========================================================= */
 
 async function loadData(){
 
-  const {
-    data:rows,
-    error
-  } =
-    await db
-      .from("bikes")
-      .select("*");
+  try{
+
+    const {
+      data:rows,
+      error
+    } =
+      await db
+        .from("bikes")
+        .select("*");
 
 
-  if(error){
+    if(error){
 
-    console.log(
-      "Errore caricamento Supabase:",
-      error.message
+      console.warn(
+        "Supabase non disponibile:",
+        error.message
+      );
+
+      home();
+
+      return;
+
+    }
+
+
+    /*
+       Se Supabase contiene dati,
+       li utilizziamo.
+    */
+
+    if(
+      Array.isArray(rows) &&
+      rows.length > 0
+    ){
+
+      data =
+        rows.map(
+          r => ({
+
+            id:r.biicode_id,
+
+            brand:r.brand,
+
+            model:r.model,
+
+            year:r.year,
+
+            color:r.color,
+
+            frame_number:
+              r.frame_number,
+
+            stolen:
+              r.stolen === true,
+
+            status:
+              r.status || "active"
+
+          })
+        );
+
+
+      save();
+
+    }
+
+
+  }catch(error){
+
+    console.warn(
+      "Errore collegamento Supabase:",
+      error
     );
-
-    home();
-
-    return;
-
-  }
-
-
-  if(rows && rows.length){
-
-    data =
-      rows.map(r => ({
-
-        id:r.biicode_id,
-
-        brand:r.brand,
-
-        model:r.model,
-
-        year:r.year,
-
-        color:r.color,
-
-        frame_number:r.frame_number,
-
-        stolen:false,
-
-        status:r.status || "active"
-
-      }));
-
-
-    save();
 
   }
 
@@ -1065,13 +1908,16 @@ async function loadData(){
 }
 
 
-/* =========================
-   AVVIO APP
-========================= */
+/* =========================================================
+   AVVIO
+========================================================= */
+
+home();
 
 loadData();
 
 </script>
 
 </body>
+
 </html>
