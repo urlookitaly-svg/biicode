@@ -44,11 +44,18 @@ label{font-size:12px;color:#AAB5C4}.nav{position:fixed;bottom:0;left:0;right:0;h
 <div id="modal"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 let data=JSON.parse(localStorage.getItem("biicode")||"null")||[
 {id:"IT-7F82K91X",brand:"Trek",model:"Fuel EX 8",year:"2022",color:"Nero / Rosso",frame:"WTU1234567890",stolen:false}
 ];
+const { createClient } = supabase;
 
+const SUPABASE_URL = "https://swzkrwdqfgetwcmaiqty.supabase.co";
+const SUPABASE_KEY = "sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";
+
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 function save(){localStorage.setItem("biicode",JSON.stringify(data))}
 function id(){let c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",s="IT-";for(let i=0;i<8;i++)s+=c[Math.random()*c.length|0];return s}
 function card(b){return `<div class="card bike" onclick="detail('${b.id}')"><div class="pic">🚲</div><div><div class="name">${b.brand} ${b.model}</div><div class="id">${b.id}</div><span class="status" style="background:${b.stolen?'#EF4444':'#22C55E'}">${b.stolen?'RUBATA':'ATTIVA'}</span></div></div>`}
@@ -71,10 +78,43 @@ function add(){
 modal.innerHTML=`<div><button class="back" onclick="closeM()">‹ Annulla</button><h1>Immatricola la tua bici</h1>
 <label>Marca</label><input id="a" placeholder="Es. Trek">
 <label>Modello</label><input id="b" placeholder="Es. Fuel EX 8">
-<label>Anno</label><input id="c" placeholder="2026">
-<label>Colore</label><input id="d" placeholder="Nero">
-<label>Numero telaio</label><input id="e" placeholder="Numero telaio">
-<button class="primary" onclick="create()">IMMATRICOLA BICI</button></div>`
+async function create(){
+  if(!a.value || !b.value || !e.value){
+    alert("Inserisci Marca, Modello e Numero telaio");
+    return;
+  }
+
+  let x={
+    id:id(),
+    brand:a.value,
+    model:b.value,
+    year:c.value,
+    color:d.value,
+    frame_number:e.value,
+    status:"active"
+  };
+
+  const { error } = await db
+    .from("bikes")
+    .insert([{
+      biicode_id:x.id,
+      brand:x.brand,
+      model:x.model,
+      year:x.year,
+      color:x.color,
+      frame_number:x.frame_number,
+      status:x.status
+    }]);
+
+  if(error){
+    alert("Errore salvataggio: " + error.message);
+    return;
+  }
+
+  data.unshift(x);
+  save();
+  closeM();
+  detail(x.id);
 }
 
 function create(){
