@@ -75,78 +75,68 @@ app.innerHTML=`<h1>Le mie bici</h1>${data.map(card).join("")}<button class="prim
 }
 
 function add(){
-modal.innerHTML=`<div><button class="back" onclick="closeM()">‹ Annulla</button><h1>Immatricola la tua bici</h1>
-<label>Marca</label><input id="a" placeholder="Es. Trek">
-<label>Modello</label><input id="b" placeholder="Es. Fuel EX 8">
-async function create(){
-  if(!a.value || !b.value || !e.value){
-    alert("Inserisci Marca, Modello e Numero telaio");
-    return;
-  }
+modal.innerHTML=`<div>
+<button class="back" onclick="closeM()">‹ Annulla</button>
+<h1>Immatricola la tua bici</h1>
 
-  let x={
-    id:id(),
-    brand:a.value,
-    model:b.value,
-    year:c.value,
-    color:d.value,
-    frame_number:e.value,
-    status:"active"
-  };
+<label>Marca</label>
+<input id="a" placeholder="Es. Trek">
 
-  const { error } = await db
-    .from("bikes")
-    .insert([{
-      biicode_id:x.id,
-      brand:x.brand,
-      model:x.model,
-      year:x.year,
-      color:x.color,
-      frame_number:x.frame_number,
-      status:x.status
-    }]);
+<label>Modello</label>
+<input id="b" placeholder="Es. Fuel EX 8">
 
-  if(error){
-    alert("Errore salvataggio: " + error.message);
-    return;
-  }
+<label>Anno</label>
+<input id="c" type="number" placeholder="Es. 2022">
 
-  data.unshift(x);
-  save();
-  closeM();
-  detail(x.id);
+<label>Colore</label>
+<input id="d" placeholder="Es. Nero">
+
+<label>Numero telaio</label>
+<input id="e" placeholder="Numero telaio">
+
+<button class="primary" onclick="create()">IMMATRICOLA BICI</button>
+</div>`
 }
 
 async function create(){
-  if(!a.value || !b.value || !e.value){
-    alert("Inserisci marca, modello e numero telaio");
-    return;
-  }
 
-  let x={
-    id:id(),
-    brand:a.value,
-    model:b.value,
-    year:c.value,
-    color:d.value,
-    serial:e.value
-  };
+if(!a.value || !b.value || !e.value){
+alert("Inserisci marca, modello e numero telaio");
+return;
+}
 
-  const {error}=await db
-    .from("bikes")
-    .insert({
-      biicode_id:x.id
-    });
+let x={
+id:id(),
+brand:a.value.trim(),
+model:b.value.trim(),
+year:c.value.trim(),
+color:d.value.trim(),
+frame_number:e.value.trim(),
+stolen:false,
+status:"active"
+};
 
-  if(error){
-    alert("Errore salvataggio: "+error.message);
-    return;
-  }
+const {error}=await db
+.from("bikes")
+.insert([{
+biicode_id:x.id,
+brand:x.brand,
+model:x.model,
+year:x.year,
+color:x.color,
+frame_number:x.frame_number,
+status:x.status
+}]);
 
-  data.unshift(x);
-  save();
-  closeM();
-  detail(x.id);
+if(error){
+alert("Errore salvataggio Supabase: "+error.message);
+return;
+}
+
+data.unshift(x);
+save();
+closeM();
+detail(x.id);
 }
 
 function detail(x){
