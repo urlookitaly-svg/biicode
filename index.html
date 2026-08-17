@@ -158,7 +158,32 @@ function scan(){alert("Lo scanner QR sarà collegato alla fotocamera nella pross
 function activity(){app.innerHTML="<h1>Attività</h1><div class='card'><b>Bici registrata</b><div class='muted'>BIICODE • Oggi</div></div><div class='card'><b>QR pronto</b><div class='muted'>Identificativo associato</div></div>"}
 function profile(){app.innerHTML="<h1>Profilo</h1><div class='card'><div class='name'>Claudio</div><div class='muted'>Account BIICODE demo</div><br><div class='muted'>Bici registrate: "+data.length+"</div></div>"}
 function closeM(){modal.innerHTML=""}
-home()
+async function loadData(){
+  const {data:rows,error}=await db.from("bikes").select("*");
+
+  if(error){
+    alert("Errore caricamento Supabase: "+error.message);
+    home();
+    return;
+  }
+
+  if(rows){
+    data=rows.map(r=>({
+      id:r.biicode_id,
+      brand:r.brand,
+      model:r.model,
+      year:r.year,
+      color:r.color,
+      frame_number:r.frame_number,
+      stolen:false,
+      status:r.status || "active"
+    }));
+  }
+
+  home();
+}
+
+loadData();
 </script>
 </body>
 </html>
