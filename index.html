@@ -117,10 +117,36 @@ async function create(){
   detail(x.id);
 }
 
-function create(){
-if(!a.value||!b.value||!e.value){alert("Inserisci almeno marca, modello e numero telaio");return}
-let x={id:id(),brand:a.value,model:b.value,year:c.value,color:d.value,frame:e.value,stolen:false};
-data.unshift(x);save();closeM();detail(x.id)
+async function create(){
+  if(!a.value || !b.value || !e.value){
+    alert("Inserisci marca, modello e numero telaio");
+    return;
+  }
+
+  let x={
+    id:id(),
+    brand:a.value,
+    model:b.value,
+    year:c.value,
+    color:d.value,
+    serial:e.value
+  };
+
+  const {error}=await db
+    .from("bikes")
+    .insert({
+      biicode_id:x.id
+    });
+
+  if(error){
+    alert("Errore salvataggio: "+error.message);
+    return;
+  }
+
+  data.unshift(x);
+  save();
+  closeM();
+  detail(x.id);
 }
 
 function detail(x){
