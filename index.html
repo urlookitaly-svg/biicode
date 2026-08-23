@@ -1761,70 +1761,48 @@ function generateQR(bikeId){
 async function toggle(idValue){
 
   const b =
-    findBike(idValue);
-
+    data.find(
+      q => q.id === idValue
+    );
 
   if(!b){
-
+    alert("Bici non trovata.");
     return;
-
   }
 
 
-  const newStolenStatus =
+  const nuovoStato =
     !b.stolen;
 
 
-  const button =
-    document.getElementById(
-      "toggleButton"
-    );
-
-
-  if(button){
-
-    button.disabled = true;
-
-    button.textContent =
-      "AGGIORNAMENTO...";
-
-  }
-
+  /*
+     Aggiorna Supabase
+  */
 
   try{
 
     const {
       error
-    } =
-      await db
-        .from("bikes")
-        .update({
-
-          stolen:
-            newStolenStatus
-
-        })
-        .eq(
-          "biicode_id",
-          idValue
-        );
+    } = await db
+      .from("bikes")
+      .update({
+        stolen: nuovoStato
+      })
+      .eq(
+        "biicode_id",
+        idValue
+      );
 
 
     if(error){
 
       console.error(
+        "Errore aggiornamento furto:",
         error
       );
 
-
       alert(
-        "Impossibile aggiornare lo stato della bici:\n\n" +
-        error.message
-      );
-
-
-      detail(
-        idValue
+        "Impossibile aggiornare lo stato della bici su Supabase."
       );
 
       return;
@@ -1832,32 +1810,33 @@ async function toggle(idValue){
     }
 
 
+    /*
+       Aggiorna i dati locali
+       SOLO dopo la conferma di Supabase
+    */
+
     b.stolen =
-      newStolenStatus;
+      nuovoStato;
+
+    save();
 
 
-    saveLocal();
+    /*
+       Ricarica il dettaglio
+    */
 
-
-    detail(
-      idValue
-    );
+    detail(idValue);
 
 
   }catch(error){
 
     console.error(
+      "Errore:",
       error
     );
 
-
     alert(
-      "Errore di connessione."
-    );
-
-
-    detail(
-      idValue
+      "Errore di collegamento con Supabase."
     );
 
   }
