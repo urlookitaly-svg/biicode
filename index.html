@@ -1625,17 +1625,20 @@ function detail(idValue){
     typeof QRCode !== "undefined"
   ){
 
-    new QRCode(
-      qrElement,
-      {
-        text:
-          "BIICODE:" + b.id,
+    const publicUrl =
+  window.location.origin +
+  window.location.pathname +
+  "?bike=" +
+  encodeURIComponent(b.id);
 
-        width:190,
-
-        height:190
-      }
-    );
+new QRCode(
+  document.getElementById("qr"),
+  {
+    text: publicUrl,
+    width:190,
+    height:190
+  }
+);
 
   }
 
@@ -1914,7 +1917,113 @@ async function loadData(){
 
 home();
 
-loadData();
+function publicBike(){
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const bikeId = params.get("bike");
+
+  if(!bikeId){
+    return false;
+  }
+
+  const b = data.find(
+    q => q.id === bikeId
+  );
+
+  if(!b){
+
+    document.getElementById("app").innerHTML = `
+      <h1>Bici non trovata</h1>
+
+      <div class="card">
+        <div class="name">
+          Questo BIICODE non è associato
+          a nessuna bici registrata.
+        </div>
+      </div>
+    `;
+
+    document.querySelector(".nav").style.display="none";
+
+    return true;
+  }
+
+  document.querySelector(".nav").style.display="none";
+
+  document.getElementById("app").innerHTML = `
+
+    <div class="muted">
+      BIICODE
+    </div>
+
+    <h1>
+      ${b.brand} ${b.model}
+    </h1>
+
+    <div class="card">
+
+      <div class="muted">
+        IDENTIFICATIVO
+      </div>
+
+      <div class="name">
+        ${b.id}
+      </div>
+
+      <br>
+
+      <div class="muted">
+        ANNO
+      </div>
+
+      <div class="name">
+        ${b.year || "-"}
+      </div>
+
+      <br>
+
+      <div class="muted">
+        COLORE
+      </div>
+
+      <div class="name">
+        ${b.color || "-"}
+      </div>
+
+      <div class="alert ${b.stolen ? "stolen" : ""}">
+        ${
+          b.stolen
+          ? "🔴 QUESTA BICI RISULTA RUBATA"
+          : "🟢 QUESTA BICI RISULTA ATTIVA"
+        }
+      </div>
+
+      <button
+        class="primary"
+        onclick="alert('Funzione contatto proprietario in arrivo')"
+      >
+        CONTATTA IL PROPRIETARIO
+      </button>
+
+    </div>
+
+  `;
+
+  return true;
+}
+
+async function startApp(){
+
+  await loadData();
+
+  publicBike();
+
+}
+
+startApp();
 
 </script>
 
