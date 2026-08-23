@@ -52,11 +52,6 @@ body{
     sans-serif;
 }
 
-button,
-input{
-  font:inherit;
-}
-
 
 /* =========================================================
    APP PRINCIPALE
@@ -65,6 +60,7 @@ input{
 main{
   width:100%;
   max-width:480px;
+
   margin:0 auto;
 
   padding:
@@ -144,10 +140,6 @@ h1{
   font-size:13px;
 }
 
-.small{
-  font-size:11px;
-}
-
 
 /* =========================================================
    CARD
@@ -192,7 +184,6 @@ h1{
 .name{
   font-size:17px;
   font-weight:800;
-  word-break:break-word;
 }
 
 .id{
@@ -214,8 +205,6 @@ h1{
 
   font-size:10px;
   font-weight:800;
-
-  color:#FFFFFF;
 }
 
 
@@ -273,6 +262,7 @@ h1{
 ========================================================= */
 
 button{
+  font:inherit;
   cursor:pointer;
 
   -webkit-appearance:none;
@@ -353,6 +343,8 @@ input{
   border-radius:14px;
 
   color:#FFFFFF;
+
+  font-family:inherit;
 
   font-size:17px;
 
@@ -450,16 +442,17 @@ input:focus{
 
 
 /* =========================================================
-   MODULO
+   NASCONDI NAV DURANTE MODULO
 ========================================================= */
 
 body.form-open .nav{
   display:none;
 }
 
-body.form-open main{
-  display:none;
-}
+
+/* =========================================================
+   MODAL / PAGINA MODULO
+========================================================= */
 
 .modal{
   position:fixed;
@@ -469,7 +462,6 @@ body.form-open main{
   inset:0;
 
   width:100%;
-  height:100%;
   height:100dvh;
 
   background:#0B1320;
@@ -478,8 +470,6 @@ body.form-open main{
   overflow-x:hidden;
 
   -webkit-overflow-scrolling:touch;
-
-  overscroll-behavior:contain;
 
   padding:
     calc(20px + env(safe-area-inset-top))
@@ -495,7 +485,6 @@ body.form-open main{
 
 .modal-content{
   width:100%;
-
   max-width:480px;
 
   margin:0 auto;
@@ -527,7 +516,7 @@ body.form-open main{
 
 
 /* =========================================================
-   FORM
+   FORM ACTIONS
 ========================================================= */
 
 .form-actions{
@@ -548,21 +537,13 @@ body.form-open main{
 .qr{
   width:max-content;
 
-  max-width:100%;
-
-  margin:
-    20px
-    auto;
+  margin:20px auto;
 
   padding:12px;
 
   background:#FFFFFF;
 
   border-radius:12px;
-}
-
-.qr img{
-  display:block;
 }
 
 
@@ -587,21 +568,7 @@ body.form-open main{
 
 .stolen{
   background:#29151B;
-
   color:#FFB4BC;
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading{
-  padding:25px 10px;
-
-  color:#94A1B3;
-
-  text-align:center;
 }
 
 
@@ -687,7 +654,7 @@ canvas{
 
 <!-- =======================================================
      NAVIGAZIONE
-======================================================== -->
+========================================================= -->
 
 <div
   id="navigation"
@@ -747,7 +714,7 @@ canvas{
 
 <!-- =======================================================
      MODULO
-======================================================== -->
+========================================================= -->
 
 <div
   id="modal"
@@ -756,19 +723,30 @@ canvas{
 
 
 <!-- =======================================================
-     LIBRERIE
+     QR CODE
 ========================================================= -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+
+<!-- =======================================================
+     SUPABASE
+========================================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
+
 /* =========================================================
-   CONFIGURAZIONE SUPABASE
+   SUPABASE
 ========================================================= */
+
+const {
+  createClient
+} = supabase;
+
 
 const SUPABASE_URL =
   "https://swzkrwdqfgetwcmaiqty.supabase.co";
@@ -778,16 +756,18 @@ const SUPABASE_KEY =
   "sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";
 
 
-const {
-  createClient
-} = supabase;
-
-
 const db =
   createClient(
     SUPABASE_URL,
     SUPABASE_KEY
   );
+
+
+/* =========================================================
+   DATI
+========================================================= */
+
+let data = [];
 
 
 /* =========================================================
@@ -807,17 +787,10 @@ const navigation =
 
 
 /* =========================================================
-   DATI
+   SALVA CACHE LOCALE
 ========================================================= */
 
-let data = [];
-
-
-/* =========================================================
-   SALVATAGGIO LOCALE BACKUP
-========================================================= */
-
-function saveLocal(){
+function save(){
 
   localStorage.setItem(
     "biicode",
@@ -827,41 +800,41 @@ function saveLocal(){
 }
 
 
+/* =========================================================
+   CARICA CACHE LOCALE
+========================================================= */
+
 function loadLocal(){
 
   try{
 
-    const saved =
+    const local =
       JSON.parse(
         localStorage.getItem("biicode") || "[]"
       );
 
+    if(Array.isArray(local)){
 
-    if(
-      Array.isArray(saved)
-    ){
-
-      return saved;
+      data = local;
 
     }
 
   }catch(error){
 
     console.warn(
-      "Errore lettura dati locali:",
+      "Errore cache locale:",
       error
     );
 
+    data = [];
+
   }
-
-
-  return [];
 
 }
 
 
 /* =========================================================
-   GENERA BIICODE
+   GENERA BIICODE ID
 ========================================================= */
 
 function generateId(){
@@ -869,9 +842,7 @@ function generateId(){
   const characters =
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-
   let result = "IT-";
-
 
   for(
     let i = 0;
@@ -888,7 +859,6 @@ function generateId(){
       ];
 
   }
-
 
   return result;
 
@@ -912,14 +882,46 @@ function escapeHTML(value){
 
 
 /* =========================================================
-   TROVA BICI
+   NORMALIZZA BICI
 ========================================================= */
 
-function findBike(idValue){
+function normalizeBike(row){
 
-  return data.find(
-    bike => bike.id === idValue
-  );
+  return {
+
+    id:
+      row.biicode_id ||
+      row.id ||
+      "",
+
+    brand:
+      row.brand ||
+      "",
+
+    model:
+      row.model ||
+      "",
+
+    year:
+      row.year ||
+      "",
+
+    color:
+      row.color ||
+      "",
+
+    frame_number:
+      row.frame_number ||
+      "",
+
+    stolen:
+      row.stolen === true,
+
+    status:
+      row.status ||
+      "active"
+
+  };
 
 }
 
@@ -967,19 +969,15 @@ function card(b){
           class="status"
           style="
             background:
-            ${
-              stolen
+            ${stolen
               ? "#EF4444"
-              : "#22C55E"
-            };
+              : "#22C55E"};
           "
         >
 
-          ${
-            stolen
+          ${stolen
             ? "RUBATA"
-            : "ATTIVA"
-          }
+            : "ATTIVA"}
 
         </span>
 
@@ -1000,7 +998,6 @@ function home(){
 
   closeM();
 
-
   navigation.style.display =
     "flex";
 
@@ -1008,7 +1005,7 @@ function home(){
   app.innerHTML = `
 
     <div class="muted">
-      BIICODE
+      Ciao Claudio 👋
     </div>
 
 
@@ -1115,7 +1112,7 @@ function home(){
       <button
         type="button"
         class="action"
-        onclick="alert('Funzione trasferimento proprietà in arrivo')"
+        onclick="alert('Funzione trasferimento in arrivo')"
       >
 
         <span class="ico">
@@ -1143,13 +1140,12 @@ function home(){
 
 
 /* =========================================================
-   PAGINA BICI
+   BICI
 ========================================================= */
 
 function bikes(){
 
   closeM();
-
 
   navigation.style.display =
     "flex";
@@ -1170,7 +1166,7 @@ function bikes(){
         <div class="card">
 
           <div class="name">
-            Nessuna bici registrata
+            Nessuna bici
           </div>
 
         </div>
@@ -1204,11 +1200,9 @@ function openForm(content){
     "form-open"
   );
 
-
   modal.classList.add(
     "active"
   );
-
 
   modal.innerHTML = `
 
@@ -1224,41 +1218,17 @@ function openForm(content){
   modal.scrollTop = 0;
 
 
-  setTimeout(
-    () => {
+  setTimeout(() => {
 
-      modal.scrollTop = 0;
+    modal.scrollTop = 0;
 
-    },
-    50
-  );
+  },50);
 
 }
 
 
 /* =========================================================
-   CHIUDI MODULO
-========================================================= */
-
-function closeM(){
-
-  document.body.classList.remove(
-    "form-open"
-  );
-
-
-  modal.classList.remove(
-    "active"
-  );
-
-
-  modal.innerHTML = "";
-
-}
-
-
-/* =========================================================
-   IMMATRICOLA BICI
+   IMMATRICOLA
 ========================================================= */
 
 function add(){
@@ -1268,7 +1238,7 @@ function add(){
     <button
       type="button"
       class="back"
-      onclick="closeM()"
+      onclick="closeM(); home();"
     >
       ‹ Annulla
     </button>
@@ -1323,7 +1293,7 @@ function add(){
       id="bikeColor"
       type="text"
       autocomplete="off"
-      placeholder="Es. Nero / Rosso"
+      placeholder="Es. Nero"
     >
 
 
@@ -1365,39 +1335,36 @@ function add(){
 
 async function createBike(){
 
-  const brand =
-    document
-      .getElementById("bikeBrand")
-      .value
-      .trim();
+  const brandInput =
+    document.getElementById("bikeBrand");
 
+  const modelInput =
+    document.getElementById("bikeModel");
+
+  const yearInput =
+    document.getElementById("bikeYear");
+
+  const colorInput =
+    document.getElementById("bikeColor");
+
+  const frameInput =
+    document.getElementById("bikeFrame");
+
+
+  const brand =
+    brandInput.value.trim();
 
   const model =
-    document
-      .getElementById("bikeModel")
-      .value
-      .trim();
-
+    modelInput.value.trim();
 
   const year =
-    document
-      .getElementById("bikeYear")
-      .value
-      .trim();
-
+    yearInput.value.trim();
 
   const color =
-    document
-      .getElementById("bikeColor")
-      .value
-      .trim();
-
+    colorInput.value.trim();
 
   const frame =
-    document
-      .getElementById("bikeFrame")
-      .value
-      .trim();
+    frameInput.value.trim();
 
 
   if(
@@ -1427,7 +1394,7 @@ async function createBike(){
     "SALVATAGGIO...";
 
 
-  const bike = {
+  const x = {
 
     id:
       generateId(),
@@ -1439,10 +1406,10 @@ async function createBike(){
       model,
 
     year:
-      year || null,
+      year,
 
     color:
-      color || null,
+      color,
 
     frame_number:
       frame,
@@ -1459,52 +1426,49 @@ async function createBike(){
   try{
 
     const {
+      data:insertedRows,
       error
-    } =
-      await db
-        .from("bikes")
-        .insert([
+    } = await db
+      .from("bikes")
+      .insert([{
 
-          {
+        biicode_id:
+          x.id,
 
-            biicode_id:
-              bike.id,
+        brand:
+          x.brand,
 
-            brand:
-              bike.brand,
+        model:
+          x.model,
 
-            model:
-              bike.model,
+        year:
+          x.year,
 
-            year:
-              bike.year,
+        color:
+          x.color,
 
-            color:
-              bike.color,
+        frame_number:
+          x.frame_number,
 
-            frame_number:
-              bike.frame_number,
+        stolen:
+          false,
 
-            stolen:
-              false,
+        status:
+          "active"
 
-            status:
-              "active"
-
-          }
-
-        ]);
+      }])
+      .select();
 
 
     if(error){
 
       console.error(
+        "Errore Supabase:",
         error
       );
 
-
       alert(
-        "Errore durante il salvataggio su BIICODE:\n\n" +
+        "La bici NON è stata immatricolata su Supabase.\n\n" +
         error.message
       );
 
@@ -1519,31 +1483,56 @@ async function createBike(){
     }
 
 
-    data.unshift(
-      bike
-    );
+    /*
+       Se Supabase ha restituito
+       la riga appena creata,
+       usiamo quella.
+    */
+
+    if(
+      insertedRows &&
+      insertedRows.length
+    ){
+
+      const bike =
+        normalizeBike(
+          insertedRows[0]
+        );
+
+      data.unshift(
+        bike
+      );
+
+    }else{
+
+      data.unshift(
+        x
+      );
+
+    }
 
 
-    saveLocal();
+    save();
 
 
     closeM();
 
 
     detail(
-      bike.id
+      x.id
     );
 
 
   }catch(error){
 
     console.error(
+      "Errore:",
       error
     );
 
 
     alert(
-      "Impossibile collegarsi a Supabase."
+      "Errore di collegamento con Supabase."
     );
 
 
@@ -1564,7 +1553,9 @@ async function createBike(){
 function detail(idValue){
 
   const b =
-    findBike(idValue);
+    data.find(
+      q => q.id === idValue
+    );
 
 
   if(!b){
@@ -1578,22 +1569,24 @@ function detail(idValue){
   }
 
 
+  const stolen =
+    b.stolen === true;
+
+
   openForm(`
 
     <button
       type="button"
       class="back"
-      onclick="closeM()"
+      onclick="closeM(); home();"
     >
       ‹ Indietro
     </button>
 
 
     <h1>
-
       ${escapeHTML(b.brand)}
       ${escapeHTML(b.model)}
-
     </h1>
 
 
@@ -1654,12 +1647,12 @@ function detail(idValue){
       <div
         class="
           alert
-          ${b.stolen ? "stolen" : ""}
+          ${stolen ? "stolen" : ""}
         "
       >
 
         ${
-          b.stolen
+          stolen
           ? "🔴 QUESTA BICI RISULTA RUBATA"
           : "🟢 QUESTA BICI RISULTA ATTIVA"
         }
@@ -1673,17 +1666,15 @@ function detail(idValue){
         class="primary"
         style="
           background:
-          ${
-            b.stolen
+          ${stolen
             ? "#22C55E"
-            : "#EF4444"
-          };
+            : "#EF4444"};
         "
         onclick="toggle('${escapeHTML(b.id)}')"
       >
 
         ${
-          b.stolen
+          stolen
           ? "SEGNALA COME RECUPERATA"
           : "SEGNALA FURTO"
         }
@@ -1696,66 +1687,47 @@ function detail(idValue){
   `);
 
 
-  generateQR(
-    b.id
-  );
-
-}
-
-
-/* =========================================================
-   GENERA QR
-========================================================= */
-
-function generateQR(bikeId){
-
   const qrElement =
     document.getElementById("qr");
 
 
   if(
-    !qrElement ||
-    typeof QRCode === "undefined"
+    qrElement &&
+    typeof QRCode !== "undefined"
   ){
 
-    return;
+    const publicUrl =
+      window.location.origin +
+      window.location.pathname +
+      "?bike=" +
+      encodeURIComponent(
+        b.id
+      );
 
-  }
 
+    new QRCode(
+      qrElement,
+      {
 
-  qrElement.innerHTML = "";
+        text:
+          publicUrl,
 
+        width:
+          190,
 
-  const publicUrl =
-    window.location.origin +
-    window.location.pathname +
-    "?bike=" +
-    encodeURIComponent(
-      bikeId
+        height:
+          190
+
+      }
     );
 
-
-  new QRCode(
-    qrElement,
-    {
-
-      text:
-        publicUrl,
-
-      width:
-        190,
-
-      height:
-        190
-
-    }
-  );
+  }
 
 }
 
 
 /* =========================================================
-   FURTO / RECUPERO
+   SEGNALA FURTO / RECUPERA BICI
 ========================================================= */
 
 async function toggle(idValue){
@@ -1765,9 +1737,15 @@ async function toggle(idValue){
       q => q.id === idValue
     );
 
+
   if(!b){
-    alert("Bici non trovata.");
+
+    alert(
+      "Bici non trovata."
+    );
+
     return;
+
   }
 
 
@@ -1775,35 +1753,72 @@ async function toggle(idValue){
     !b.stolen;
 
 
-  /*
-     Aggiorna Supabase
-  */
+  const button =
+    document.getElementById(
+      "toggleButton"
+    );
+
+
+  if(button){
+
+    button.disabled = true;
+
+    button.textContent =
+      nuovoStato
+      ? "SEGNALAZIONE IN CORSO..."
+      : "AGGIORNAMENTO IN CORSO...";
+
+  }
+
 
   try{
 
+    /*
+       Aggiorna direttamente
+       la bici su Supabase.
+    */
+
     const {
+      data:updatedRows,
       error
     } = await db
       .from("bikes")
       .update({
-        stolen: nuovoStato
+
+        stolen:
+          nuovoStato
+
       })
       .eq(
         "biicode_id",
         idValue
-      );
+      )
+      .select();
 
 
     if(error){
 
       console.error(
-        "Errore aggiornamento furto:",
+        "Errore aggiornamento:",
         error
       );
 
       alert(
-        "Impossibile aggiornare lo stato della bici su Supabase."
+        "Impossibile aggiornare lo stato della bici.\n\n" +
+        error.message
       );
+
+
+      if(button){
+
+        button.disabled = false;
+
+        button.textContent =
+          b.stolen
+          ? "SEGNALA COME RECUPERATA"
+          : "SEGNALA FURTO";
+
+      }
 
       return;
 
@@ -1811,33 +1826,89 @@ async function toggle(idValue){
 
 
     /*
-       Aggiorna i dati locali
-       SOLO dopo la conferma di Supabase
+       Verifica che una riga
+       sia stata realmente aggiornata.
     */
 
-    b.stolen =
-      nuovoStato;
+    if(
+      !updatedRows ||
+      updatedRows.length === 0
+    ){
+
+      alert(
+        "Nessuna bici è stata aggiornata su Supabase.\n\n" +
+        "Controlla le policy RLS."
+      );
+
+
+      if(button){
+
+        button.disabled = false;
+
+      }
+
+      return;
+
+    }
+
+
+    /*
+       Aggiorniamo il dato locale
+       usando il valore confermato
+       da Supabase.
+    */
+
+    const updatedBike =
+      normalizeBike(
+        updatedRows[0]
+      );
+
+
+    const index =
+      data.findIndex(
+        q => q.id === idValue
+      );
+
+
+    if(index !== -1){
+
+      data[index] =
+        updatedBike;
+
+    }
+
 
     save();
 
 
     /*
-       Ricarica il dettaglio
+       Ricarichiamo la schermata
+       con il nuovo stato.
     */
 
-    detail(idValue);
+    detail(
+      idValue
+    );
 
 
   }catch(error){
 
     console.error(
-      "Errore:",
+      "Errore collegamento:",
       error
     );
+
 
     alert(
       "Errore di collegamento con Supabase."
     );
+
+
+    if(button){
+
+      button.disabled = false;
+
+    }
 
   }
 
@@ -1845,7 +1916,7 @@ async function toggle(idValue){
 
 
 /* =========================================================
-   FURTO RAPIDO
+   SEGNALA FURTO RAPIDO
 ========================================================= */
 
 function quick(){
@@ -1875,7 +1946,7 @@ function quick(){
 function scan(){
 
   alert(
-    "Lo scanner QR con fotocamera sarà la prossima funzione da aggiungere."
+    "Lo scanner QR sarà collegato alla fotocamera nella prossima versione."
   );
 
 }
@@ -1888,7 +1959,6 @@ function scan(){
 function activity(){
 
   closeM();
-
 
   navigation.style.display =
     "flex";
@@ -1903,36 +1973,28 @@ function activity(){
 
     ${
       data.length
-      ? data.map(
-          b => `
+      ? data.map(b => `
 
-            <div class="card">
+        <div class="card">
 
-              <b>
-                ${escapeHTML(b.brand)}
-                ${escapeHTML(b.model)}
-              </b>
+          <b>
 
-              <div class="muted">
-                BIICODE ${escapeHTML(b.id)}
-              </div>
+            ${escapeHTML(b.brand)}
+            ${escapeHTML(b.model)}
 
-              <br>
+          </b>
 
-              <div class="muted">
+          <div class="muted">
 
-                ${
-                  b.stolen
-                  ? "🚨 Segnalata come rubata"
-                  : "🟢 Bici attiva"
-                }
+            ${b.stolen
+              ? "Segnalata come rubata"
+              : "Bici attiva"}
 
-              </div>
+          </div>
 
-            </div>
+        </div>
 
-          `
-        ).join("")
+      `).join("")
       : `
 
         <div class="card">
@@ -1959,9 +2021,14 @@ function profile(){
 
   closeM();
 
-
   navigation.style.display =
     "flex";
+
+
+  const stolenCount =
+    data.filter(
+      b => b.stolen
+    ).length;
 
 
   app.innerHTML = `
@@ -1974,12 +2041,12 @@ function profile(){
     <div class="card">
 
       <div class="name">
-        BIICODE
+        Claudio
       </div>
 
 
       <div class="muted">
-        Account demo
+        Account BIICODE
       </div>
 
 
@@ -1993,6 +2060,17 @@ function profile(){
 
       </div>
 
+
+      <br>
+
+
+      <div class="muted">
+
+        Bici segnalate rubate:
+        ${stolenCount}
+
+      </div>
+
     </div>
 
   `;
@@ -2001,7 +2079,26 @@ function profile(){
 
 
 /* =========================================================
-   CARICA BICI DA SUPABASE
+   CHIUDI MODULO
+========================================================= */
+
+function closeM(){
+
+  document.body.classList.remove(
+    "form-open"
+  );
+
+  modal.classList.remove(
+    "active"
+  );
+
+  modal.innerHTML = "";
+
+}
+
+
+/* =========================================================
+   CARICA TUTTE LE BICI DA SUPABASE
 ========================================================= */
 
 async function loadData(){
@@ -2011,98 +2108,46 @@ async function loadData(){
     const {
       data:rows,
       error
-    } =
-      await db
-        .from("bikes")
-        .select(`
-          biicode_id,
-          brand,
-          model,
-          year,
-          color,
-          frame_number,
-          stolen,
-          status,
-          created_at
-        `)
-        .order(
-          "created_at",
-          {
-            ascending:false
-          }
-        );
+    } = await db
+      .from("bikes")
+      .select("*");
 
 
     if(error){
 
-      console.warn(
-        "Supabase:",
-        error.message
+      console.error(
+        "Errore caricamento Supabase:",
+        error
       );
 
 
-      data =
-        loadLocal();
-
+      loadLocal();
 
       return;
 
     }
 
 
-    if(
+    data =
       Array.isArray(rows)
-    ){
-
-      data =
-        rows.map(
-          row => ({
-
-            id:
-              row.biicode_id,
-
-            brand:
-              row.brand,
-
-            model:
-              row.model,
-
-            year:
-              row.year,
-
-            color:
-              row.color,
-
-            frame_number:
-              row.frame_number,
-
-            stolen:
-              row.stolen === true,
-
-            status:
-              row.status || "active",
-
-            created_at:
-              row.created_at
-
-          })
-        );
+      ? rows.map(
+          normalizeBike
+        )
+      : [];
 
 
-      saveLocal();
+    save();
 
-    }
 
   }catch(error){
 
-    console.warn(
-      "Errore caricamento:",
+    console.error(
+      "Errore collegamento Supabase:",
       error
     );
 
 
-    data =
-      loadLocal();
+    loadLocal();
 
   }
 
@@ -2110,7 +2155,70 @@ async function loadData(){
 
 
 /* =========================================================
-   PAGINA PUBBLICA DEL QR
+   CARICA UNA SOLA BICI PUBBLICA
+========================================================= */
+
+async function loadPublicBike(bikeId){
+
+  try{
+
+    const {
+      data:rows,
+      error
+    } = await db
+      .from("bikes")
+      .select("*")
+      .eq(
+        "biicode_id",
+        bikeId
+      )
+      .limit(1);
+
+
+    if(error){
+
+      console.error(
+        "Errore ricerca bici:",
+        error
+      );
+
+
+      return null;
+
+    }
+
+
+    if(
+      !rows ||
+      rows.length === 0
+    ){
+
+      return null;
+
+    }
+
+
+    return normalizeBike(
+      rows[0]
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "Errore:",
+      error
+    );
+
+    return null;
+
+  }
+
+}
+
+
+/* =========================================================
+   PAGINA PUBBLICA QR
 ========================================================= */
 
 async function publicBike(){
@@ -2132,198 +2240,65 @@ async function publicBike(){
   }
 
 
+  /*
+     Nascondiamo navigazione
+     e header app.
+  */
+
   navigation.style.display =
+    "none";
+
+
+  document.querySelector(".head").style.display =
     "none";
 
 
   app.innerHTML = `
 
-    <div class="loading">
-      Verifica BIICODE in corso...
+    <h1>
+      Verifica BIICODE
+    </h1>
+
+
+    <div class="card">
+
+      <div class="muted">
+        VERIFICA IN CORSO...
+      </div>
+
     </div>
 
   `;
 
 
-  try{
+  /*
+     IMPORTANTISSIMO:
+     la bici viene letta
+     direttamente da Supabase.
+  */
 
-    const {
-      data:row,
-      error
-    } =
-      await db
-        .from("bikes")
-        .select(`
-          biicode_id,
-          brand,
-          model,
-          year,
-          color,
-          stolen,
-          status
-        `)
-        .eq(
-          "biicode_id",
-          bikeId
-        )
-        .maybeSingle();
-
-
-    if(error){
-
-      throw error;
-
-    }
-
-
-    if(!row){
-
-      app.innerHTML = `
-
-        <h1>
-          Bici non trovata
-        </h1>
-
-
-        <div class="card">
-
-          <div class="name">
-            Questo BIICODE non è associato
-            a nessuna bici registrata.
-          </div>
-
-        </div>
-
-      `;
-
-
-      return true;
-
-    }
-
-
-    const isStolen =
-      row.stolen === true;
-
-
-    app.innerHTML = `
-
-      <div class="muted">
-        VERIFICA BIICODE
-      </div>
-
-
-      <h1>
-        ${escapeHTML(row.brand)}
-        ${escapeHTML(row.model)}
-      </h1>
-
-
-      <div class="card">
-
-
-        <div class="muted">
-          BIICODE ID
-        </div>
-
-
-        <div class="name">
-          ${escapeHTML(row.biicode_id)}
-        </div>
-
-
-        <br>
-
-
-        <div class="muted">
-          ANNO
-        </div>
-
-
-        <div class="name">
-          ${escapeHTML(
-            row.year || "-"
-          )}
-        </div>
-
-
-        <br>
-
-
-        <div class="muted">
-          COLORE
-        </div>
-
-
-        <div class="name">
-          ${escapeHTML(
-            row.color || "-"
-          )}
-        </div>
-
-
-        <div
-          class="
-            alert
-            ${isStolen ? "stolen" : ""}
-          "
-        >
-
-          ${
-            isStolen
-            ? "🚨 ATTENZIONE: QUESTA BICI RISULTA RUBATA"
-            : "🟢 QUESTA BICI RISULTA ATTIVA"
-          }
-
-        </div>
-
-
-        <button
-          type="button"
-          class="primary"
-          onclick="contactOwner()"
-        >
-
-          CONTATTA IL PROPRIETARIO
-
-        </button>
-
-
-      </div>
-
-    `;
-
-
-    return true;
-
-
-  }catch(error){
-
-    console.error(
-      error
+  const b =
+    await loadPublicBike(
+      bikeId
     );
 
 
+  if(!b){
+
     app.innerHTML = `
 
       <h1>
-        Errore di verifica
+        Bici non trovata
       </h1>
 
 
       <div class="card">
 
         <div class="name">
-          Non è stato possibile verificare
-          questo BIICODE.
-        </div>
 
+          Questo BIICODE non è associato
+          a nessuna bici registrata.
 
-        <br>
-
-
-        <div class="muted">
-          Riprova tra qualche istante.
         </div>
 
       </div>
@@ -2335,18 +2310,129 @@ async function publicBike(){
 
   }
 
-}
+
+  const stolen =
+    b.stolen === true;
 
 
-/* =========================================================
-   CONTATTA PROPRIETARIO
-========================================================= */
+  app.innerHTML = `
 
-function contactOwner(){
+    <div class="muted">
+      BIICODE
+    </div>
 
-  alert(
-    "La funzione di contatto del proprietario sarà aggiunta nella prossima versione."
-  );
+
+    <h1>
+      ${escapeHTML(b.brand)}
+      ${escapeHTML(b.model)}
+    </h1>
+
+
+    <div class="card">
+
+
+      <div class="muted">
+        BIICODE ID
+      </div>
+
+
+      <div class="name">
+        ${escapeHTML(b.id)}
+      </div>
+
+
+      <br>
+
+
+      <div class="muted">
+        NUMERO TELAIO
+      </div>
+
+
+      <div class="name">
+        ${escapeHTML(
+          b.frame_number || "-"
+        )}
+      </div>
+
+
+      <br>
+
+
+      <div class="muted">
+        ANNO / COLORE
+      </div>
+
+
+      <div class="name">
+
+        ${escapeHTML(
+          b.year || "-"
+        )}
+
+        •
+
+        ${escapeHTML(
+          b.color || "-"
+        )}
+
+      </div>
+
+
+      <div
+        class="
+          alert
+          ${stolen ? "stolen" : ""}
+        "
+      >
+
+        ${
+          stolen
+          ? "🔴 ATTENZIONE: QUESTA BICI RISULTA RUBATA"
+          : "🟢 QUESTA BICI RISULTA ATTIVA"
+        }
+
+      </div>
+
+
+      ${
+        stolen
+        ? `
+
+          <button
+            type="button"
+            class="primary"
+            style="background:#EF4444;"
+            onclick="alert('Se ritieni di aver trovato questa bici, contatta le autorità competenti.')"
+          >
+
+            HO TROVATO QUESTA BICI
+
+          </button>
+
+        `
+        : `
+
+          <button
+            type="button"
+            class="primary"
+            onclick="alert('Funzione contatto proprietario in arrivo')"
+          >
+
+            CONTATTA IL PROPRIETARIO
+
+          </button>
+
+        `
+      }
+
+
+    </div>
+
+  `;
+
+
+  return true;
 
 }
 
@@ -2356,6 +2442,11 @@ function contactOwner(){
 ========================================================= */
 
 async function startApp(){
+
+  /*
+     Prima controlliamo se siamo
+     su una pagina QR pubblica.
+  */
 
   const params =
     new URLSearchParams(
@@ -2367,12 +2458,6 @@ async function startApp(){
     params.get("bike");
 
 
-  /*
-     Se siamo su un QR,
-     carichiamo direttamente
-     la bici richiesta da Supabase.
-  */
-
   if(bikeId){
 
     await publicBike();
@@ -2383,18 +2468,9 @@ async function startApp(){
 
 
   /*
-     Altrimenti carichiamo
+     Altrimenti avviamo
      l'app normale.
   */
-
-  app.innerHTML = `
-
-    <div class="loading">
-      Caricamento BIICODE...
-    </div>
-
-  `;
-
 
   await loadData();
 
@@ -2405,6 +2481,7 @@ async function startApp(){
 
 
 startApp();
+
 
 </script>
 
