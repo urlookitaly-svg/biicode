@@ -179,6 +179,17 @@ h1{
   place-items:center;
 
   font-size:42px;
+
+  overflow:hidden;
+}
+
+.pic img{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
 }
 
 .name{
@@ -205,8 +216,6 @@ h1{
 
   font-size:10px;
   font-weight:800;
-
-  color:#FFFFFF;
 }
 
 
@@ -369,6 +378,141 @@ input:focus{
 
 
 /* =========================================================
+   FOTO
+========================================================= */
+
+.photo-box{
+  margin-top:8px;
+  margin-bottom:20px;
+}
+
+.photo-info{
+  margin-bottom:12px;
+
+  color:#94A1B3;
+
+  font-size:12px;
+}
+
+.photo-add{
+  width:100%;
+
+  min-height:58px;
+
+  padding:15px;
+
+  background:#111D2D;
+
+  border:2px dashed #2A3B52;
+
+  border-radius:14px;
+
+  color:#FFFFFF;
+
+  font-weight:800;
+
+  text-align:center;
+}
+
+.photo-add:active{
+  transform:scale(.98);
+}
+
+.photo-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:10px;
+
+  margin-top:12px;
+}
+
+.photo-item{
+  position:relative;
+
+  aspect-ratio:1;
+
+  overflow:hidden;
+
+  border-radius:12px;
+
+  background:#07101D;
+
+  border:1px solid #203149;
+}
+
+.photo-item img{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
+}
+
+.remove-photo{
+  position:absolute;
+
+  top:6px;
+  right:6px;
+
+  width:28px;
+  height:28px;
+
+  padding:0;
+
+  border:0;
+
+  border-radius:50%;
+
+  background:#EF4444;
+
+  color:#FFFFFF;
+
+  font-size:18px;
+  font-weight:900;
+
+  line-height:28px;
+
+  text-align:center;
+}
+
+.detail-photos{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,1fr);
+
+  gap:10px;
+
+  margin-top:15px;
+}
+
+.detail-photo{
+  aspect-ratio:1;
+
+  overflow:hidden;
+
+  border-radius:14px;
+
+  background:#07101D;
+}
+
+.detail-photo img{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
+
+  cursor:pointer;
+}
+
+
+/* =========================================================
    NAVIGAZIONE
 ========================================================= */
 
@@ -453,7 +597,7 @@ body.form-open .nav{
 
 
 /* =========================================================
-   MODAL / PAGINA MODULO
+   MODAL
 ========================================================= */
 
 .modal{
@@ -575,6 +719,63 @@ body.form-open .nav{
 
 
 /* =========================================================
+   FOTO GRANDE
+========================================================= */
+
+.photo-viewer{
+  position:fixed;
+
+  z-index:2000;
+
+  inset:0;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:rgba(0,0,0,.92);
+}
+
+.photo-viewer.active{
+  display:flex;
+}
+
+.photo-viewer img{
+  max-width:100%;
+  max-height:85dvh;
+
+  object-fit:contain;
+
+  border-radius:12px;
+}
+
+.close-viewer{
+  position:absolute;
+
+  top:
+    calc(15px + env(safe-area-inset-top));
+
+  right:20px;
+
+  width:44px;
+  height:44px;
+
+  border:0;
+
+  border-radius:50%;
+
+  background:#FFFFFF;
+
+  color:#0B1320;
+
+  font-size:25px;
+}
+
+
+/* =========================================================
    MOBILE
 ========================================================= */
 
@@ -606,7 +807,7 @@ body.form-open .nav{
 
 
 /* =========================================================
-   PREVENZIONE OVERFLOW
+   OVERFLOW
 ========================================================= */
 
 img,
@@ -715,13 +916,41 @@ canvas{
 
 
 <!-- =======================================================
-     MODULO
+     MODAL
 ========================================================= -->
 
 <div
   id="modal"
   class="modal"
 ></div>
+
+
+<!-- =======================================================
+     VISUALIZZATORE FOTO
+========================================================= -->
+
+<div
+  id="photoViewer"
+  class="photo-viewer"
+  onclick="closePhotoViewer()"
+>
+
+  <button
+    type="button"
+    class="close-viewer"
+    onclick="event.stopPropagation(); closePhotoViewer();"
+  >
+    ×
+  </button>
+
+  <img
+    id="viewerImage"
+    src=""
+    alt="Foto bicicletta"
+    onclick="event.stopPropagation()"
+  >
+
+</div>
 
 
 <!-- =======================================================
@@ -766,10 +995,30 @@ const db =
 
 
 /* =========================================================
+   CONFIGURAZIONE FOTO
+========================================================= */
+
+const PHOTO_BUCKET =
+  "bike-photos";
+
+
+const MAX_PHOTOS =
+  5;
+
+
+/* =========================================================
    DATI
 ========================================================= */
 
 let data = [];
+
+
+/*
+   Foto temporanee selezionate
+   durante l'immatricolazione.
+*/
+
+let selectedPhotos = [];
 
 
 /* =========================================================
@@ -789,7 +1038,7 @@ const navigation =
 
 
 /* =========================================================
-   SALVA CACHE LOCALE
+   CACHE LOCALE
 ========================================================= */
 
 function save(){
@@ -802,10 +1051,6 @@ function save(){
 }
 
 
-/* =========================================================
-   CARICA CACHE LOCALE
-========================================================= */
-
 function loadLocal(){
 
   try{
@@ -817,9 +1062,7 @@ function loadLocal(){
 
     if(Array.isArray(local)){
 
-      data = local.map(
-        normalizeBike
-      );
+      data = local;
 
     }
 
@@ -886,16 +1129,27 @@ function escapeHTML(value){
 
 
 /* =========================================================
+   NORMALIZZA FOTO
+========================================================= */
+
+function normalizePhotos(value){
+
+  if(Array.isArray(value)){
+
+    return value.filter(Boolean);
+
+  }
+
+  return [];
+
+}
+
+
+/* =========================================================
    NORMALIZZA BICI
 ========================================================= */
 
 function normalizeBike(row){
-
-  const isStolen =
-    row.stolen === true ||
-    row.stolen === "true" ||
-    row.status === "stolen";
-
 
   return {
 
@@ -925,17 +1179,93 @@ function normalizeBike(row){
       "",
 
     stolen:
-      isStolen,
+      row.stolen === true,
 
     status:
-      isStolen
-      ? "stolen"
-      : (
-          row.status ||
-          "active"
-        )
+      row.status ||
+      "active",
+
+    photos:
+      normalizePhotos(
+        row.photos
+      )
 
   };
+
+}
+
+
+/* =========================================================
+   URL FOTO SUPABASE
+========================================================= */
+
+function getPhotoUrl(path){
+
+  if(!path){
+
+    return "";
+
+  }
+
+
+  /*
+     Se per qualche motivo
+     è già un URL completo.
+  */
+
+  if(
+    String(path).startsWith("http://") ||
+    String(path).startsWith("https://")
+  ){
+
+    return path;
+
+  }
+
+
+  const {
+    data:publicData
+  } = db
+    .storage
+    .from(PHOTO_BUCKET)
+    .getPublicUrl(path);
+
+
+  return publicData.publicUrl;
+
+}
+
+
+/* =========================================================
+   FOTO COPERTINA
+========================================================= */
+
+function bikeCover(b){
+
+  if(
+    b.photos &&
+    b.photos.length
+  ){
+
+    const url =
+      getPhotoUrl(
+        b.photos[0]
+      );
+
+
+    return `
+
+      <img
+        src="${escapeHTML(url)}"
+        alt="Foto bicicletta"
+      >
+
+    `;
+
+  }
+
+
+  return "🚲";
 
 }
 
@@ -958,7 +1288,9 @@ function card(b){
     >
 
       <div class="pic">
-        🚲
+
+        ${bikeCover(b)}
+
       </div>
 
 
@@ -1247,6 +1579,9 @@ function openForm(content){
 
 function add(){
 
+  selectedPhotos = [];
+
+
   openForm(`
 
     <button
@@ -1323,6 +1658,54 @@ function add(){
     >
 
 
+    <label>
+      Fotografie della bici
+    </label>
+
+
+    <div class="photo-box">
+
+
+      <div class="photo-info">
+
+        Puoi aggiungere fino a
+        ${MAX_PHOTOS} fotografie.
+        Le foto rimarranno private.
+
+      </div>
+
+
+      <input
+        id="bikePhotos"
+        type="file"
+        accept="image/*"
+        multiple
+        capture="environment"
+        style="display:none"
+        onchange="handlePhotoSelection(event)"
+      >
+
+
+      <button
+        type="button"
+        class="photo-add"
+        onclick="document.getElementById('bikePhotos').click()"
+      >
+
+        📷 AGGIUNGI FOTO
+
+      </button>
+
+
+      <div
+        id="photoPreview"
+        class="photo-grid"
+      ></div>
+
+
+    </div>
+
+
     <div class="form-actions">
 
       <button
@@ -1339,6 +1722,184 @@ function add(){
     </div>
 
   `);
+
+}
+
+
+/* =========================================================
+   SELEZIONE FOTO
+========================================================= */
+
+function handlePhotoSelection(event){
+
+  const files =
+    Array.from(
+      event.target.files || []
+    );
+
+
+  if(!files.length){
+
+    return;
+
+  }
+
+
+  const availableSlots =
+    MAX_PHOTOS -
+    selectedPhotos.length;
+
+
+  if(availableSlots <= 0){
+
+    alert(
+      `Puoi caricare al massimo ${MAX_PHOTOS} foto.`
+    );
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  const filesToAdd =
+    files.slice(
+      0,
+      availableSlots
+    );
+
+
+  if(
+    files.length >
+    availableSlots
+  ){
+
+    alert(
+      `Sono state selezionate solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
+    );
+
+  }
+
+
+  filesToAdd.forEach(file => {
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    const preview =
+      URL.createObjectURL(
+        file
+      );
+
+
+    selectedPhotos.push({
+
+      file:
+        file,
+
+      preview:
+        preview
+
+    });
+
+  });
+
+
+  event.target.value = "";
+
+
+  renderPhotoPreview();
+
+}
+
+
+/* =========================================================
+   ANTEPRIMA FOTO
+========================================================= */
+
+function renderPhotoPreview(){
+
+  const container =
+    document.getElementById(
+      "photoPreview"
+    );
+
+
+  if(!container){
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    selectedPhotos
+      .map(
+        (photo,index) => `
+
+          <div class="photo-item">
+
+            <img
+              src="${escapeHTML(photo.preview)}"
+              alt="Anteprima foto ${index + 1}"
+            >
+
+
+            <button
+              type="button"
+              class="remove-photo"
+              onclick="removeSelectedPhoto(${index})"
+            >
+              ×
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   ELIMINA FOTO SELEZIONATA
+========================================================= */
+
+function removeSelectedPhoto(index){
+
+  const photo =
+    selectedPhotos[index];
+
+
+  if(
+    photo &&
+    photo.preview
+  ){
+
+    URL.revokeObjectURL(
+      photo.preview
+    );
+
+  }
+
+
+  selectedPhotos.splice(
+    index,
+    1
+  );
+
+
+  renderPhotoPreview();
 
 }
 
@@ -1405,39 +1966,123 @@ async function createBike(){
   button.disabled = true;
 
   button.textContent =
-    "SALVATAGGIO...";
+    "CREAZIONE BICI...";
 
 
-  const x = {
+  const bikeId =
+    generateId();
 
-    id:
-      generateId(),
 
-    brand:
-      brand,
-
-    model:
-      model,
-
-    year:
-      year,
-
-    color:
-      color,
-
-    frame_number:
-      frame,
-
-    stolen:
-      false,
-
-    status:
-      "active"
-
-  };
+  let uploadedPhotos =
+    [];
 
 
   try{
+
+
+    /*
+       -----------------------------------------------------
+       1. CARICAMENTO FOTO
+       -----------------------------------------------------
+    */
+
+    if(selectedPhotos.length){
+
+      button.textContent =
+        "CARICAMENTO FOTO...";
+
+
+      for(
+        let i = 0;
+        i < selectedPhotos.length;
+        i++
+      ){
+
+        const photo =
+          selectedPhotos[i];
+
+
+        const file =
+          photo.file;
+
+
+        const extension =
+          file.name
+            .split(".")
+            .pop()
+            ?.toLowerCase()
+          ||
+          "jpg";
+
+
+        const safeExtension =
+          extension.replace(
+            /[^a-z0-9]/gi,
+            ""
+          );
+
+
+        const filePath =
+          `${bikeId}/${Date.now()}_${i}.${safeExtension}`;
+
+
+        const {
+          error:uploadError
+        } = await db
+          .storage
+          .from(PHOTO_BUCKET)
+          .upload(
+            filePath,
+            file,
+            {
+
+              cacheControl:
+                "3600",
+
+              upsert:
+                false,
+
+              contentType:
+                file.type
+
+            }
+          );
+
+
+        if(uploadError){
+
+          console.error(
+            "Errore upload foto:",
+            uploadError
+          );
+
+
+          throw new Error(
+            "Impossibile caricare una fotografia: " +
+            uploadError.message
+          );
+
+        }
+
+
+        uploadedPhotos.push(
+          filePath
+        );
+
+      }
+
+    }
+
+
+    /*
+       -----------------------------------------------------
+       2. CREA BICI
+       -----------------------------------------------------
+    */
+
+    button.textContent =
+      "IMMATRICOLAZIONE...";
+
 
     const {
       data:insertedRows,
@@ -1447,28 +2092,31 @@ async function createBike(){
       .insert([{
 
         biicode_id:
-          x.id,
+          bikeId,
 
         brand:
-          x.brand,
+          brand,
 
         model:
-          x.model,
+          model,
 
         year:
-          x.year,
+          year,
 
         color:
-          x.color,
+          color,
 
         frame_number:
-          x.frame_number,
+          frame,
 
         stolen:
           false,
 
         status:
-          "active"
+          "active",
+
+        photos:
+          uploadedPhotos
 
       }])
       .select();
@@ -1481,20 +2129,21 @@ async function createBike(){
         error
       );
 
-      alert(
-        "La bici NON è stata immatricolata su Supabase.\n\n" +
+
+      throw new Error(
         error.message
       );
 
-
-      button.disabled = false;
-
-      button.textContent =
-        "IMMATRICOLA BICI";
-
-      return;
-
     }
+
+
+    /*
+       -----------------------------------------------------
+       3. AGGIORNA DATI LOCALI
+       -----------------------------------------------------
+    */
+
+    let bike;
 
 
     if(
@@ -1502,54 +2151,175 @@ async function createBike(){
       insertedRows.length
     ){
 
-      const bike =
+      bike =
         normalizeBike(
           insertedRows[0]
         );
 
-      data.unshift(
-        bike
-      );
-
     }else{
 
-      data.unshift(
-        x
-      );
+      bike = {
+
+        id:
+          bikeId,
+
+        brand:
+          brand,
+
+        model:
+          model,
+
+        year:
+          year,
+
+        color:
+          color,
+
+        frame_number:
+          frame,
+
+        stolen:
+          false,
+
+        status:
+          "active",
+
+        photos:
+          uploadedPhotos
+
+      };
 
     }
+
+
+    data.unshift(
+      bike
+    );
 
 
     save();
 
 
+    /*
+       Liberiamo memoria
+       delle anteprime.
+    */
+
+    selectedPhotos.forEach(photo => {
+
+      if(photo.preview){
+
+        URL.revokeObjectURL(
+          photo.preview
+        );
+
+      }
+
+    });
+
+
+    selectedPhotos = [];
+
+
+    /*
+       -----------------------------------------------------
+       4. MOSTRA DETTAGLIO
+       -----------------------------------------------------
+    */
+
     closeM();
 
 
     detail(
-      x.id
+      bike.id
     );
 
 
   }catch(error){
 
     console.error(
-      "Errore:",
+      "Errore immatricolazione:",
       error
     );
 
 
     alert(
-      "Errore di collegamento con Supabase."
+      "Errore durante l'immatricolazione.\n\n" +
+      error.message
     );
 
 
-    button.disabled = false;
+    button.disabled =
+      false;
+
 
     button.textContent =
       "IMMATRICOLA BICI";
 
   }
+
+}
+
+
+/* =========================================================
+   FOTO DETTAGLIO
+========================================================= */
+
+function renderBikePhotos(photos){
+
+  if(
+    !photos ||
+    !photos.length
+  ){
+
+    return "";
+
+  }
+
+
+  return `
+
+    <br>
+
+
+    <div class="muted">
+      FOTOGRAFIE DELLA BICI
+    </div>
+
+
+    <div class="detail-photos">
+
+      ${
+        photos.map(path => {
+
+          const url =
+            getPhotoUrl(
+              path
+            );
+
+
+          return `
+
+            <div
+              class="detail-photo"
+              onclick="openPhotoViewer('${escapeHTML(url)}')"
+            >
+
+              <img
+                src="${escapeHTML(url)}"
+                alt="Foto bicicletta"
+              >
+
+            </div>
+
+          `;
+
+        }).join("")
+      }
+
+    </div>
+
+  `;
 
 }
 
@@ -1652,6 +2422,9 @@ function detail(idValue){
       </div>
 
 
+      ${renderBikePhotos(b.photos)}
+
+
       <div
         class="
           alert
@@ -1735,6 +2508,50 @@ function detail(idValue){
 
 
 /* =========================================================
+   VISUALIZZATORE FOTO
+========================================================= */
+
+function openPhotoViewer(url){
+
+  const viewer =
+    document.getElementById(
+      "photoViewer"
+    );
+
+
+  const image =
+    document.getElementById(
+      "viewerImage"
+    );
+
+
+  image.src =
+    url;
+
+
+  viewer.classList.add(
+    "active"
+  );
+
+}
+
+
+function closePhotoViewer(){
+
+  const viewer =
+    document.getElementById(
+      "photoViewer"
+    );
+
+
+  viewer.classList.remove(
+    "active"
+  );
+
+}
+
+
+/* =========================================================
    SEGNALA FURTO / RECUPERA BICI
 ========================================================= */
 
@@ -1758,31 +2575,7 @@ async function toggle(idValue){
 
 
   const nuovoStato =
-    b.stolen !== true;
-
-
-  const nuovoStatus =
-    nuovoStato
-    ? "stolen"
-    : "active";
-
-
-  const conferma =
-    nuovoStato
-    ? confirm(
-        "Vuoi segnalare questa bici come RUBATA?\n\n" +
-        "Lo stato verrà aggiornato su BIICODE."
-      )
-    : confirm(
-        "Vuoi segnalare questa bici come RECUPERATA?"
-      );
-
-
-  if(!conferma){
-
-    return;
-
-  }
+    !b.stolen;
 
 
   const button =
@@ -1805,11 +2598,6 @@ async function toggle(idValue){
 
   try{
 
-
-    /* ==========================================
-       AGGIORNAMENTO SUPABASE
-    ========================================== */
-
     const {
       data:updatedRows,
       error
@@ -1818,10 +2606,7 @@ async function toggle(idValue){
       .update({
 
         stolen:
-          nuovoStato,
-
-        status:
-          nuovoStatus
+          nuovoStato
 
       })
       .eq(
@@ -1833,75 +2618,24 @@ async function toggle(idValue){
 
     if(error){
 
-      console.error(
-        "Errore aggiornamento Supabase:",
-        error
-      );
-
-
-      alert(
-        "Impossibile aggiornare la bici su Supabase.\n\n" +
+      throw new Error(
         error.message
       );
 
-
-      if(button){
-
-        button.disabled = false;
-
-        button.textContent =
-          b.stolen
-          ? "SEGNALA COME RECUPERATA"
-          : "SEGNALA FURTO";
-
-      }
-
-
-      return;
-
     }
 
-
-    /* ==========================================
-       CONTROLLO RISULTATO UPDATE
-    ========================================== */
 
     if(
       !updatedRows ||
       updatedRows.length === 0
     ){
 
-      console.error(
-        "Nessuna riga aggiornata."
+      throw new Error(
+        "Nessuna bici aggiornata."
       );
-
-
-      alert(
-        "Nessuna bici è stata aggiornata su Supabase.\n\n" +
-        "Controlla le policy RLS UPDATE della tabella bikes."
-      );
-
-
-      if(button){
-
-        button.disabled = false;
-
-        button.textContent =
-          b.stolen
-          ? "SEGNALA COME RECUPERATA"
-          : "SEGNALA FURTO";
-
-      }
-
-
-      return;
 
     }
 
-
-    /* ==========================================
-       AGGIORNA CACHE CON DATO SUPABASE
-    ========================================== */
 
     const updatedBike =
       normalizeBike(
@@ -1926,78 +2660,6 @@ async function toggle(idValue){
     save();
 
 
-    /* ==========================================
-       VERIFICA REALE DAL DATABASE
-    ========================================== */
-
-    const {
-      data:checkRows,
-      error:checkError
-    } = await db
-      .from("bikes")
-      .select("*")
-      .eq(
-        "biicode_id",
-        idValue
-      )
-      .limit(1);
-
-
-    if(checkError){
-
-      console.warn(
-        "Errore verifica Supabase:",
-        checkError
-      );
-
-    }
-
-
-    if(
-      checkRows &&
-      checkRows.length
-    ){
-
-      const checkedBike =
-        normalizeBike(
-          checkRows[0]
-        );
-
-
-      const checkedIndex =
-        data.findIndex(
-          q => q.id === idValue
-        );
-
-
-      if(checkedIndex !== -1){
-
-        data[checkedIndex] =
-          checkedBike;
-
-      }
-
-
-      save();
-
-    }
-
-
-    /* ==========================================
-       MESSAGGIO
-    ========================================== */
-
-    alert(
-      nuovoStato
-      ? "🚨 FURTO SEGNALATO CORRETTAMENTE"
-      : "🟢 BICI SEGNALATA COME RECUPERATA"
-    );
-
-
-    /* ==========================================
-       RICARICA DETTAGLIO
-    ========================================== */
-
     detail(
       idValue
     );
@@ -2006,17 +2668,14 @@ async function toggle(idValue){
   }catch(error){
 
     console.error(
-      "Errore collegamento:",
+      "Errore aggiornamento:",
       error
     );
 
 
     alert(
-      "Errore di collegamento con Supabase.\n\n" +
-      (
-        error.message ||
-        ""
-      )
+      "Impossibile aggiornare lo stato della bici.\n\n" +
+      error.message
     );
 
 
@@ -2053,44 +2712,9 @@ function quick(){
   }
 
 
-  if(data.length === 1){
-
-    detail(
-      data[0].id
-    );
-
-    return;
-
-  }
-
-
-  openForm(`
-
-    <button
-      type="button"
-      class="back"
-      onclick="closeM(); home();"
-    >
-      ‹ Indietro
-    </button>
-
-
-    <h1>
-      Segnala un furto
-    </h1>
-
-
-    <div class="muted">
-      Seleziona la bici da segnalare.
-    </div>
-
-
-    <br>
-
-
-    ${data.map(card).join("")}
-
-  `);
+  detail(
+    data[0].id
+  );
 
 }
 
@@ -2142,11 +2766,9 @@ function activity(){
 
           <div class="muted">
 
-            ${
-              b.stolen
-              ? "🚨 Segnalata come rubata"
-              : "🟢 Bici attiva"
-            }
+            ${b.stolen
+              ? "Segnalata come rubata"
+              : "Bici attiva"}
 
           </div>
 
@@ -2185,8 +2807,24 @@ function profile(){
 
   const stolenCount =
     data.filter(
-      b => b.stolen === true
+      b => b.stolen
     ).length;
+
+
+  const photoCount =
+    data.reduce(
+      (total,b) => {
+
+        return total +
+          (
+            Array.isArray(b.photos)
+            ? b.photos.length
+            : 0
+          );
+
+      },
+      0
+    );
 
 
   app.innerHTML = `
@@ -2215,6 +2853,17 @@ function profile(){
 
         Bici registrate:
         ${data.length}
+
+      </div>
+
+
+      <br>
+
+
+      <div class="muted">
+
+        Fotografie archiviate:
+        ${photoCount}
 
       </div>
 
@@ -2398,11 +3047,6 @@ async function publicBike(){
   }
 
 
-  /*
-     Nascondiamo navigazione
-     e header app.
-  */
-
   navigation.style.display =
     "none";
 
@@ -2428,11 +3072,6 @@ async function publicBike(){
 
   `;
 
-
-  /*
-     La bici viene letta
-     direttamente da Supabase.
-  */
 
   const b =
     await loadPublicBike(
@@ -2472,6 +3111,14 @@ async function publicBike(){
     b.stolen === true;
 
 
+  /*
+     NOTA IMPORTANTE:
+     Qui NON mostriamo:
+     - fotografie
+     - numero telaio
+     - dati proprietario
+  */
+
   app.innerHTML = `
 
     <div class="muted">
@@ -2502,13 +3149,13 @@ async function publicBike(){
 
 
       <div class="muted">
-        NUMERO TELAIO
+        ANNO
       </div>
 
 
       <div class="name">
         ${escapeHTML(
-          b.frame_number || "-"
+          b.year || "-"
         )}
       </div>
 
@@ -2517,22 +3164,14 @@ async function publicBike(){
 
 
       <div class="muted">
-        ANNO / COLORE
+        COLORE
       </div>
 
 
       <div class="name">
-
-        ${escapeHTML(
-          b.year || "-"
-        )}
-
-        •
-
         ${escapeHTML(
           b.color || "-"
         )}
-
       </div>
 
 
@@ -2545,7 +3184,7 @@ async function publicBike(){
 
         ${
           stolen
-          ? "🚨 ATTENZIONE: QUESTA BICI RISULTA RUBATA"
+          ? "🔴 ATTENZIONE: QUESTA BICI RISULTA RUBATA"
           : "🟢 QUESTA BICI RISULTA ATTIVA"
         }
 
