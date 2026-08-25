@@ -123,6 +123,151 @@ main{
 
 
 /* =========================================================
+   LOGIN
+========================================================= */
+
+.login-screen{
+  width:100%;
+  min-height:100vh;
+  min-height:100dvh;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:
+    30px
+    20px
+    calc(30px + env(safe-area-inset-bottom));
+}
+
+.login-box{
+  width:100%;
+  max-width:400px;
+}
+
+.login-logo{
+  width:76px;
+  height:76px;
+
+  margin:0 auto 20px;
+
+  border-radius:20px;
+
+  background:#07101D;
+
+  display:grid;
+  place-items:center;
+
+  font-size:40px;
+  font-weight:900;
+}
+
+.login-logo b{
+  color:#1565FF;
+}
+
+.login-brand{
+  text-align:center;
+
+  font-size:32px;
+  font-weight:900;
+
+  margin-bottom:6px;
+}
+
+.login-tag{
+  text-align:center;
+
+  color:#9AA7B8;
+
+  font-size:10px;
+  font-weight:700;
+
+  letter-spacing:1.5px;
+
+  margin-bottom:35px;
+}
+
+.login-card{
+  background:#111D2D;
+
+  border:1px solid #203149;
+
+  border-radius:22px;
+
+  padding:20px;
+}
+
+.login-title{
+  margin:0 0 8px;
+
+  font-size:24px;
+  font-weight:900;
+}
+
+.login-subtitle{
+  margin-bottom:20px;
+
+  color:#94A1B3;
+
+  font-size:13px;
+}
+
+.login-link{
+  width:100%;
+
+  margin-top:16px;
+
+  padding:8px;
+
+  background:none;
+
+  border:0;
+
+  color:#1565FF;
+
+  font-size:14px;
+  font-weight:800;
+}
+
+.login-divider{
+  height:1px;
+
+  background:#203149;
+
+  margin:20px 0;
+}
+
+.auth-message{
+  display:none;
+
+  margin-bottom:15px;
+
+  padding:13px;
+
+  border-radius:12px;
+
+  font-size:13px;
+  font-weight:700;
+}
+
+.auth-message.show{
+  display:block;
+}
+
+.auth-message.success{
+  background:#10271C;
+  color:#A9EFC4;
+}
+
+.auth-message.error{
+  background:#29151B;
+  color:#FFB4BC;
+}
+
+
+/* =========================================================
    TESTI
 ========================================================= */
 
@@ -973,7 +1118,7 @@ const db =
 
 
 /* =========================================================
-   CONFIGURAZIONE FOTO
+   CONFIGURAZIONE
 ========================================================= */
 
 const PHOTO_BUCKET = "bike-photos";
@@ -982,21 +1127,15 @@ const MAX_PHOTOS = 5;
 
 
 /* =========================================================
-   DATI
+   STATO APP
 ========================================================= */
 
 let data = [];
 
-/*
-  Foto nuove selezionate
-  durante creazione o modifica.
-*/
+let currentUser = null;
+
 let selectedPhotos = [];
 
-/*
-  Foto già esistenti che
-  devono essere eliminate.
-*/
 let photosToDelete = [];
 
 
@@ -1013,6 +1152,12 @@ const modal =
 const navigation =
   document.getElementById("navigation");
 
+const mainElement =
+  document.querySelector("main");
+
+const headElement =
+  document.querySelector(".head");
+
 
 /* =========================================================
    CACHE LOCALE
@@ -1020,8 +1165,12 @@ const navigation =
 
 function save(){
 
+  if(!currentUser){
+    return;
+  }
+
   localStorage.setItem(
-    "biicode",
+    "biicode_" + currentUser.id,
     JSON.stringify(data)
   );
 
@@ -1030,16 +1179,30 @@ function save(){
 
 function loadLocal(){
 
+  if(!currentUser){
+
+    data = [];
+
+    return;
+
+  }
+
   try{
 
     const local =
       JSON.parse(
-        localStorage.getItem("biicode") || "[]"
+        localStorage.getItem(
+          "biicode_" + currentUser.id
+        ) || "[]"
       );
 
     if(Array.isArray(local)){
 
       data = local;
+
+    }else{
+
+      data = [];
 
     }
 
@@ -1131,6 +1294,10 @@ function normalizeBike(row){
       row.id ||
       "",
 
+    user_id:
+      row.user_id ||
+      "",
+
     brand:
       row.brand ||
       "",
@@ -1197,6 +1364,663 @@ function getPhotoUrl(path){
     .getPublicUrl(path);
 
   return publicData.publicUrl;
+
+}
+
+
+/* =========================================================
+   LOGIN SCREEN
+========================================================= */
+
+function showLogin(){
+
+  closeM();
+
+  currentUser = null;
+
+  data = [];
+
+  navigation.style.display = "none";
+
+  headElement.style.display = "none";
+
+  mainElement.style.padding =
+    "0";
+
+  app.innerHTML = `
+
+    <div class="login-screen">
+
+      <div class="login-box">
+
+        <div class="login-logo">
+          b<b>◯</b>
+        </div>
+
+        <div class="login-brand">
+          BIICODE
+        </div>
+
+        <div class="login-tag">
+          LA TUA BICI. UN'IDENTITÀ UNICA.
+        </div>
+
+        <div class="login-card">
+
+          <div
+            id="authMessage"
+            class="auth-message"
+          ></div>
+
+          <div id="loginForm">
+
+            <div class="login-title">
+              Accedi
+            </div>
+
+            <div class="login-subtitle">
+              Accedi al tuo account BIICODE.
+            </div>
+
+            <label for="loginEmail">
+              Email
+            </label>
+
+            <input
+              id="loginEmail"
+              type="email"
+              autocomplete="email"
+              placeholder="La tua email"
+            >
+
+            <label for="loginPassword">
+              Password
+            </label>
+
+            <input
+              id="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              placeholder="La tua password"
+            >
+
+            <button
+              type="button"
+              id="loginButton"
+              class="primary"
+              onclick="loginUser()"
+            >
+              ACCEDI
+            </button>
+
+            <button
+              type="button"
+              class="login-link"
+              onclick="showForgotPassword()"
+            >
+              Password dimenticata?
+            </button>
+
+            <div class="login-divider"></div>
+
+            <button
+              type="button"
+              class="secondary"
+              onclick="showRegister()"
+            >
+              CREA UN ACCOUNT
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   MESSAGGIO AUTH
+========================================================= */
+
+function showAuthMessage(
+  message,
+  type = "error"
+){
+
+  const box =
+    document.getElementById(
+      "authMessage"
+    );
+
+  if(!box){
+
+    return;
+
+  }
+
+  box.textContent =
+    message;
+
+  box.className =
+    "auth-message show " +
+    type;
+
+}
+
+
+/* =========================================================
+   REGISTRAZIONE SCREEN
+========================================================= */
+
+function showRegister(){
+
+  app.innerHTML = `
+
+    <div class="login-screen">
+
+      <div class="login-box">
+
+        <div class="login-logo">
+          b<b>◯</b>
+        </div>
+
+        <div class="login-brand">
+          BIICODE
+        </div>
+
+        <div class="login-tag">
+          CREA IL TUO ACCOUNT
+        </div>
+
+        <div class="login-card">
+
+          <div
+            id="authMessage"
+            class="auth-message"
+          ></div>
+
+          <div class="login-title">
+            Registrati
+          </div>
+
+          <div class="login-subtitle">
+            Crea il tuo account per registrare e proteggere le tue bici.
+          </div>
+
+          <label for="registerEmail">
+            Email
+          </label>
+
+          <input
+            id="registerEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="La tua email"
+          >
+
+          <label for="registerPassword">
+            Password
+          </label>
+
+          <input
+            id="registerPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Minimo 6 caratteri"
+          >
+
+          <label for="registerPasswordConfirm">
+            Conferma password
+          </label>
+
+          <input
+            id="registerPasswordConfirm"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Ripeti la password"
+          >
+
+          <button
+            type="button"
+            id="registerButton"
+            class="primary"
+            onclick="registerUser()"
+          >
+            CREA ACCOUNT
+          </button>
+
+          <button
+            type="button"
+            class="login-link"
+            onclick="showLogin()"
+          >
+            ← Torna al login
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   PASSWORD DIMENTICATA
+========================================================= */
+
+function showForgotPassword(){
+
+  app.innerHTML = `
+
+    <div class="login-screen">
+
+      <div class="login-box">
+
+        <div class="login-logo">
+          b<b>◯</b>
+        </div>
+
+        <div class="login-brand">
+          BIICODE
+        </div>
+
+        <div class="login-tag">
+          RECUPERO PASSWORD
+        </div>
+
+        <div class="login-card">
+
+          <div
+            id="authMessage"
+            class="auth-message"
+          ></div>
+
+          <div class="login-title">
+            Password dimenticata?
+          </div>
+
+          <div class="login-subtitle">
+            Inserisci la tua email e ti invieremo le istruzioni per reimpostare la password.
+          </div>
+
+          <label for="resetEmail">
+            Email
+          </label>
+
+          <input
+            id="resetEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="La tua email"
+          >
+
+          <button
+            type="button"
+            id="resetButton"
+            class="primary"
+            onclick="resetPassword()"
+          >
+            INVIA ISTRUZIONI
+          </button>
+
+          <button
+            type="button"
+            class="login-link"
+            onclick="showLogin()"
+          >
+            ← Torna al login
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+async function loginUser(){
+
+  const email =
+    document.getElementById(
+      "loginEmail"
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      "loginPassword"
+    ).value;
+
+  if(!email || !password){
+
+    showAuthMessage(
+      "Inserisci email e password."
+    );
+
+    return;
+
+  }
+
+  const button =
+    document.getElementById(
+      "loginButton"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "ACCESSO IN CORSO...";
+
+  try{
+
+    const {
+      data:authData,
+      error
+    } = await db
+      .auth
+      .signInWithPassword({
+
+        email:email,
+        password:password
+
+      });
+
+    if(error){
+
+      throw error;
+
+    }
+
+    currentUser =
+      authData.user;
+
+    await startPrivateApp();
+
+  }catch(error){
+
+    console.error(
+      "Errore login:",
+      error
+    );
+
+    showAuthMessage(
+      error.message ||
+      "Impossibile effettuare l'accesso."
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "ACCEDI";
+
+  }
+
+}
+
+
+/* =========================================================
+   REGISTRA UTENTE
+========================================================= */
+
+async function registerUser(){
+
+  const email =
+    document.getElementById(
+      "registerEmail"
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      "registerPassword"
+    ).value;
+
+  const confirmPassword =
+    document.getElementById(
+      "registerPasswordConfirm"
+    ).value;
+
+  if(!email || !password || !confirmPassword){
+
+    showAuthMessage(
+      "Compila tutti i campi."
+    );
+
+    return;
+
+  }
+
+  if(password.length < 6){
+
+    showAuthMessage(
+      "La password deve contenere almeno 6 caratteri."
+    );
+
+    return;
+
+  }
+
+  if(password !== confirmPassword){
+
+    showAuthMessage(
+      "Le password non coincidono."
+    );
+
+    return;
+
+  }
+
+  const button =
+    document.getElementById(
+      "registerButton"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "CREAZIONE ACCOUNT...";
+
+  try{
+
+    const {
+      data:authData,
+      error
+    } = await db
+      .auth
+      .signUp({
+
+        email:email,
+        password:password
+
+      });
+
+    if(error){
+
+      throw error;
+
+    }
+
+    if(
+      authData.user &&
+      !authData.session
+    ){
+
+      showAuthMessage(
+        "Account creato. Controlla la tua email per confermare l'iscrizione.",
+        "success"
+      );
+
+      button.disabled = false;
+
+      button.textContent =
+        "CREA ACCOUNT";
+
+      return;
+
+    }
+
+    currentUser =
+      authData.user;
+
+    await startPrivateApp();
+
+  }catch(error){
+
+    console.error(
+      "Errore registrazione:",
+      error
+    );
+
+    showAuthMessage(
+      error.message ||
+      "Impossibile creare l'account."
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "CREA ACCOUNT";
+
+  }
+
+}
+
+
+/* =========================================================
+   RESET PASSWORD
+========================================================= */
+
+async function resetPassword(){
+
+  const email =
+    document.getElementById(
+      "resetEmail"
+    ).value.trim();
+
+  if(!email){
+
+    showAuthMessage(
+      "Inserisci la tua email."
+    );
+
+    return;
+
+  }
+
+  const button =
+    document.getElementById(
+      "resetButton"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "INVIO IN CORSO...";
+
+  try{
+
+    const {
+      error
+    } = await db
+      .auth
+      .resetPasswordForEmail(
+        email,
+        {
+          redirectTo:
+            window.location.origin +
+            window.location.pathname
+        }
+      );
+
+    if(error){
+
+      throw error;
+
+    }
+
+    showAuthMessage(
+      "Email inviata. Controlla la tua casella di posta.",
+      "success"
+    );
+
+    button.textContent =
+      "EMAIL INVIATA";
+
+  }catch(error){
+
+    console.error(
+      "Errore reset password:",
+      error
+    );
+
+    showAuthMessage(
+      error.message ||
+      "Impossibile inviare l'email."
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "INVIA ISTRUZIONI";
+
+  }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logoutUser(){
+
+  const confirmLogout =
+    confirm(
+      "Vuoi uscire dal tuo account?"
+    );
+
+  if(!confirmLogout){
+
+    return;
+
+  }
+
+  try{
+
+    await db.auth.signOut();
+
+  }catch(error){
+
+    console.error(
+      "Errore logout:",
+      error
+    );
+
+  }
+
+  currentUser = null;
+
+  data = [];
+
+  closeM();
+
+  showLogin();
 
 }
 
@@ -1303,12 +2127,13 @@ function home(){
 
   closeM();
 
-  navigation.style.display = "flex";
+  navigation.style.display =
+    "flex";
 
   app.innerHTML = `
 
     <div class="muted">
-      Ciao Claudio 👋
+      Ciao 👋
     </div>
 
     <h1>
@@ -1426,7 +2251,8 @@ function bikes(){
 
   closeM();
 
-  navigation.style.display = "flex";
+  navigation.style.display =
+    "flex";
 
   app.innerHTML = `
 
@@ -1517,7 +2343,16 @@ function closeM(){
 
 function add(){
 
+  if(!currentUser){
+
+    showLogin();
+
+    return;
+
+  }
+
   selectedPhotos = [];
+
   photosToDelete = [];
 
   openForm(`
@@ -1705,7 +2540,10 @@ function handlePhotoSelection(event){
   }
 
   const filesToAdd =
-    files.slice(0, availableSlots);
+    files.slice(
+      0,
+      availableSlots
+    );
 
   if(files.length > availableSlots){
 
@@ -1743,13 +2581,15 @@ function handlePhotoSelection(event){
 
 
 /* =========================================================
-   CONTA FOTO ESISTENTI NEL FORM
+   CONTA FOTO ESISTENTI
 ========================================================= */
 
 function getCurrentExistingPhotosCount(){
 
   const container =
-    document.getElementById("photoPreview");
+    document.getElementById(
+      "photoPreview"
+    );
 
   if(!container){
 
@@ -1771,7 +2611,9 @@ function getCurrentExistingPhotosCount(){
 function renderPhotoPreview(){
 
   const container =
-    document.getElementById("photoPreview");
+    document.getElementById(
+      "photoPreview"
+    );
 
   if(!container){
 
@@ -1788,7 +2630,8 @@ function renderPhotoPreview(){
 
   existingHtml.forEach(item => {
 
-    existingContent += item.outerHTML;
+    existingContent +=
+      item.outerHTML;
 
   });
 
@@ -1832,7 +2675,10 @@ function removeSelectedPhoto(index){
   const photo =
     selectedPhotos[index];
 
-  if(photo && photo.preview){
+  if(
+    photo &&
+    photo.preview
+  ){
 
     URL.revokeObjectURL(
       photo.preview
@@ -1840,7 +2686,10 @@ function removeSelectedPhoto(index){
 
   }
 
-  selectedPhotos.splice(index, 1);
+  selectedPhotos.splice(
+    index,
+    1
+  );
 
   renderPhotoPreview();
 
@@ -1853,19 +2702,8 @@ function removeSelectedPhoto(index){
 
 function cancelForm(){
 
-  selectedPhotos.forEach(photo => {
+  clearSelectedPhotos();
 
-    if(photo.preview){
-
-      URL.revokeObjectURL(
-        photo.preview
-      );
-
-    }
-
-  });
-
-  selectedPhotos = [];
   photosToDelete = [];
 
   closeM();
@@ -1881,25 +2719,38 @@ function cancelForm(){
 
 async function createBike(){
 
+  if(!currentUser){
+
+    showLogin();
+
+    return;
+
+  }
+
   const brand =
-    document.getElementById("bikeBrand")
-      .value.trim();
+    document.getElementById(
+      "bikeBrand"
+    ).value.trim();
 
   const model =
-    document.getElementById("bikeModel")
-      .value.trim();
+    document.getElementById(
+      "bikeModel"
+    ).value.trim();
 
   const year =
-    document.getElementById("bikeYear")
-      .value.trim();
+    document.getElementById(
+      "bikeYear"
+    ).value.trim();
 
   const color =
-    document.getElementById("bikeColor")
-      .value.trim();
+    document.getElementById(
+      "bikeColor"
+    ).value.trim();
 
   const frame =
-    document.getElementById("bikeFrame")
-      .value.trim();
+    document.getElementById(
+      "bikeFrame"
+    ).value.trim();
 
   if(!brand || !model || !frame){
 
@@ -1947,15 +2798,35 @@ async function createBike(){
       .from("bikes")
       .insert([{
 
-        biicode_id:bikeId,
-        brand:brand,
-        model:model,
-        year:year,
-        color:color,
-        frame_number:frame,
-        stolen:false,
-        status:"active",
-        photos:uploadedPhotos
+        user_id:
+          currentUser.id,
+
+        biicode_id:
+          bikeId,
+
+        brand:
+          brand,
+
+        model:
+          model,
+
+        year:
+          year,
+
+        color:
+          color,
+
+        frame_number:
+          frame,
+
+        stolen:
+          false,
+
+        status:
+          "active",
+
+        photos:
+          uploadedPhotos
 
       }])
       .select();
@@ -1969,21 +2840,48 @@ async function createBike(){
     }
 
     const bike =
-      insertedRows && insertedRows.length
-      ? normalizeBike(insertedRows[0])
+      insertedRows &&
+      insertedRows.length
+      ? normalizeBike(
+          insertedRows[0]
+        )
       : {
-          id:bikeId,
-          brand:brand,
-          model:model,
-          year:year,
-          color:color,
-          frame_number:frame,
-          stolen:false,
-          status:"active",
-          photos:uploadedPhotos
+
+          id:
+            bikeId,
+
+          user_id:
+            currentUser.id,
+
+          brand:
+            brand,
+
+          model:
+            model,
+
+          year:
+            year,
+
+          color:
+            color,
+
+          frame_number:
+            frame,
+
+          stolen:
+            false,
+
+          status:
+            "active",
+
+          photos:
+            uploadedPhotos
+
         };
 
-    data.unshift(bike);
+    data.unshift(
+      bike
+    );
 
     save();
 
@@ -1991,11 +2889,15 @@ async function createBike(){
 
     closeM();
 
-    detail(bike.id);
+    detail(
+      bike.id
+    );
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     alert(
       "Errore durante l'immatricolazione.\n\n" +
@@ -2013,14 +2915,18 @@ async function createBike(){
 
 
 /* =========================================================
-   CARICA FOTO SU SUPABASE
+   CARICA FOTO
 ========================================================= */
 
 async function uploadSelectedPhotos(bikeId){
 
   const uploaded = [];
 
-  for(let i = 0; i < selectedPhotos.length; i++){
+  for(
+    let i = 0;
+    i < selectedPhotos.length;
+    i++
+  ){
 
     const photo =
       selectedPhotos[i];
@@ -2042,7 +2948,7 @@ async function uploadSelectedPhotos(bikeId){
       );
 
     const filePath =
-      `${bikeId}/${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}.${extension}`;
+      `${currentUser.id}/${bikeId}/${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}.${extension}`;
 
     const {
       error:uploadError
@@ -2054,9 +2960,14 @@ async function uploadSelectedPhotos(bikeId){
         file,
         {
 
-          cacheControl:"3600",
-          upsert:false,
-          contentType:file.type
+          cacheControl:
+            "3600",
+
+          upsert:
+            false,
+
+          contentType:
+            file.type
 
         }
       );
@@ -2070,7 +2981,9 @@ async function uploadSelectedPhotos(bikeId){
 
     }
 
-    uploaded.push(filePath);
+    uploaded.push(
+      filePath
+    );
 
   }
 
@@ -2108,7 +3021,10 @@ function clearSelectedPhotos(){
 
 function renderBikePhotos(photos){
 
-  if(!photos || !photos.length){
+  if(
+    !photos ||
+    !photos.length
+  ){
 
     return "";
 
@@ -2169,7 +3085,9 @@ function detail(idValue){
 
   if(!b){
 
-    alert("Bici non trovata.");
+    alert(
+      "Bici non trovata."
+    );
 
     return;
 
@@ -2226,15 +3144,21 @@ function detail(idValue){
 
       <div class="name">
 
-        ${escapeHTML(b.year || "-")}
+        ${escapeHTML(
+          b.year || "-"
+        )}
 
         •
 
-        ${escapeHTML(b.color || "-")}
+        ${escapeHTML(
+          b.color || "-"
+        )}
 
       </div>
 
-      ${renderBikePhotos(b.photos)}
+      ${renderBikePhotos(
+        b.photos
+      )}
 
       <div
         class="
@@ -2251,8 +3175,6 @@ function detail(idValue){
 
       </div>
 
-      <!-- NUOVO PULSANTE MODIFICA -->
-
       <button
         type="button"
         class="primary edit-button"
@@ -2260,8 +3182,6 @@ function detail(idValue){
       >
         ✏️ MODIFICA BICI
       </button>
-
-      <!-- FURTO / RECUPERO -->
 
       <button
         type="button"
@@ -2289,26 +3209,36 @@ function detail(idValue){
   `);
 
   const qrElement =
-    document.getElementById("qr");
+    document.getElementById(
+      "qr"
+    );
 
   if(
     qrElement &&
-    typeof QRCode !== "undefined"
+    typeof QRCode !==
+      "undefined"
   ){
 
     const publicUrl =
       window.location.origin +
       window.location.pathname +
       "?bike=" +
-      encodeURIComponent(b.id);
+      encodeURIComponent(
+        b.id
+      );
 
     new QRCode(
       qrElement,
       {
 
-        text:publicUrl,
-        width:190,
-        height:190
+        text:
+          publicUrl,
+
+        width:
+          190,
+
+        height:
+          190
 
       }
     );
@@ -2331,13 +3261,16 @@ function editBike(idValue){
 
   if(!b){
 
-    alert("Bici non trovata.");
+    alert(
+      "Bici non trovata."
+    );
 
     return;
 
   }
 
   selectedPhotos = [];
+
   photosToDelete = [];
 
   openForm(`
@@ -2371,19 +3304,23 @@ function editBike(idValue){
 
   `);
 
-  renderExistingPhotos(b.photos || []);
+  renderExistingPhotos(
+    b.photos || []
+  );
 
 }
 
 
 /* =========================================================
-   MOSTRA FOTO ESISTENTI IN MODIFICA
+   FOTO ESISTENTI
 ========================================================= */
 
 function renderExistingPhotos(photos){
 
   const container =
-    document.getElementById("photoPreview");
+    document.getElementById(
+      "photoPreview"
+    );
 
   if(!container){
 
@@ -2427,13 +3364,18 @@ function renderExistingPhotos(photos){
 
 
 /* =========================================================
-   RIMUOVI FOTO ESISTENTE DAL FORM
+   ELIMINA FOTO ESISTENTE
 ========================================================= */
 
-function removeExistingPhoto(button, path){
+function removeExistingPhoto(
+  button,
+  path
+){
 
   const item =
-    button.closest(".photo-item");
+    button.closest(
+      ".photo-item"
+    );
 
   if(!item){
 
@@ -2442,10 +3384,14 @@ function removeExistingPhoto(button, path){
   }
 
   if(
-    !photosToDelete.includes(path)
+    !photosToDelete.includes(
+      path
+    )
   ){
 
-    photosToDelete.push(path);
+    photosToDelete.push(
+      path
+    );
 
   }
 
@@ -2455,7 +3401,7 @@ function removeExistingPhoto(button, path){
 
 
 /* =========================================================
-   SALVA MODIFICHE BICI
+   SALVA MODIFICHE
 ========================================================= */
 
 async function saveBikeChanges(idValue){
@@ -2467,31 +3413,38 @@ async function saveBikeChanges(idValue){
 
   if(!b){
 
-    alert("Bici non trovata.");
+    alert(
+      "Bici non trovata."
+    );
 
     return;
 
   }
 
   const brand =
-    document.getElementById("bikeBrand")
-      .value.trim();
+    document.getElementById(
+      "bikeBrand"
+    ).value.trim();
 
   const model =
-    document.getElementById("bikeModel")
-      .value.trim();
+    document.getElementById(
+      "bikeModel"
+    ).value.trim();
 
   const year =
-    document.getElementById("bikeYear")
-      .value.trim();
+    document.getElementById(
+      "bikeYear"
+    ).value.trim();
 
   const color =
-    document.getElementById("bikeColor")
-      .value.trim();
+    document.getElementById(
+      "bikeColor"
+    ).value.trim();
 
   const frame =
-    document.getElementById("bikeFrame")
-      .value.trim();
+    document.getElementById(
+      "bikeFrame"
+    ).value.trim();
 
   if(!brand || !model || !frame){
 
@@ -2512,23 +3465,13 @@ async function saveBikeChanges(idValue){
 
   try{
 
-    button.textContent =
-      "PREPARAZIONE FOTO...";
-
-    /*
-      Foto che restano:
-      tutte le originali meno
-      quelle contrassegnate per eliminazione.
-    */
-
     const remainingPhotos =
       (b.photos || []).filter(
-        path => !photosToDelete.includes(path)
+        path =>
+          !photosToDelete.includes(
+            path
+          )
       );
-
-    /*
-      Carica le nuove foto.
-    */
 
     let newPhotos = [];
 
@@ -2544,17 +3487,16 @@ async function saveBikeChanges(idValue){
 
     }
 
-    /*
-      Unione foto vecchie + nuove.
-    */
-
     const finalPhotos =
       [
         ...remainingPhotos,
         ...newPhotos
       ];
 
-    if(finalPhotos.length > MAX_PHOTOS){
+    if(
+      finalPhotos.length >
+      MAX_PHOTOS
+    ){
 
       throw new Error(
         `Puoi avere al massimo ${MAX_PHOTOS} fotografie.`
@@ -2565,10 +3507,6 @@ async function saveBikeChanges(idValue){
     button.textContent =
       "SALVATAGGIO MODIFICHE...";
 
-    /*
-      Aggiorna prima il record.
-    */
-
     const {
       data:updatedRows,
       error
@@ -2576,17 +3514,32 @@ async function saveBikeChanges(idValue){
       .from("bikes")
       .update({
 
-        brand:brand,
-        model:model,
-        year:year,
-        color:color,
-        frame_number:frame,
-        photos:finalPhotos
+        brand:
+          brand,
+
+        model:
+          model,
+
+        year:
+          year,
+
+        color:
+          color,
+
+        frame_number:
+          frame,
+
+        photos:
+          finalPhotos
 
       })
       .eq(
         "biicode_id",
         idValue
+      )
+      .eq(
+        "user_id",
+        currentUser.id
       )
       .select();
 
@@ -2609,39 +3562,16 @@ async function saveBikeChanges(idValue){
 
     }
 
-    /*
-      Ora eliminiamo fisicamente
-      le foto tolte da Supabase Storage.
-    */
-
     if(photosToDelete.length){
 
-      button.textContent =
-        "ELIMINAZIONE FOTO...";
-
-      const {
-        error:removeError
-      } = await db
+      await db
         .storage
         .from(PHOTO_BUCKET)
         .remove(
           photosToDelete
         );
 
-      if(removeError){
-
-        console.warn(
-          "Errore eliminazione file:",
-          removeError
-        );
-
-      }
-
     }
-
-    /*
-      Aggiorna memoria locale.
-    */
 
     const updatedBike =
       normalizeBike(
@@ -2666,11 +3596,9 @@ async function saveBikeChanges(idValue){
 
     photosToDelete = [];
 
-    /*
-      Torna al dettaglio.
-    */
-
-    detail(idValue);
+    detail(
+      idValue
+    );
 
   }catch(error){
 
@@ -2710,7 +3638,8 @@ function openPhotoViewer(url){
       "viewerImage"
     );
 
-  image.src = url;
+  image.src =
+    url;
 
   viewer.classList.add(
     "active"
@@ -2734,7 +3663,7 @@ function closePhotoViewer(){
 
 
 /* =========================================================
-   SEGNALA FURTO / RECUPERA
+   SEGNALA FURTO
 ========================================================= */
 
 async function toggle(idValue){
@@ -2746,7 +3675,9 @@ async function toggle(idValue){
 
   if(!b){
 
-    alert("Bici non trovata.");
+    alert(
+      "Bici non trovata."
+    );
 
     return;
 
@@ -2762,7 +3693,8 @@ async function toggle(idValue){
 
   if(button){
 
-    button.disabled = true;
+    button.disabled =
+      true;
 
     button.textContent =
       nuovoStato
@@ -2780,12 +3712,17 @@ async function toggle(idValue){
       .from("bikes")
       .update({
 
-        stolen:nuovoStato
+        stolen:
+          nuovoStato
 
       })
       .eq(
         "biicode_id",
         idValue
+      )
+      .eq(
+        "user_id",
+        currentUser.id
       )
       .select();
 
@@ -2827,7 +3764,9 @@ async function toggle(idValue){
 
     save();
 
-    detail(idValue);
+    detail(
+      idValue
+    );
 
   }catch(error){
 
@@ -2841,24 +3780,13 @@ async function toggle(idValue){
       error.message
     );
 
-    if(button){
-
-      button.disabled = false;
-
-      button.textContent =
-        b.stolen
-        ? "SEGNALA COME RECUPERATA"
-        : "SEGNALA FURTO";
-
-    }
-
   }
 
 }
 
 
 /* =========================================================
-   SEGNALA FURTO RAPIDO
+   FURTO RAPIDO
 ========================================================= */
 
 function quick(){
@@ -2901,7 +3829,8 @@ function activity(){
 
   closeM();
 
-  navigation.style.display = "flex";
+  navigation.style.display =
+    "flex";
 
   app.innerHTML = `
 
@@ -2959,7 +3888,8 @@ function profile(){
 
   closeM();
 
-  navigation.style.display = "flex";
+  navigation.style.display =
+    "flex";
 
   const stolenCount =
     data.filter(
@@ -2972,7 +3902,9 @@ function profile(){
 
         return total +
           (
-            Array.isArray(b.photos)
+            Array.isArray(
+              b.photos
+            )
             ? b.photos.length
             : 0
           );
@@ -2980,6 +3912,10 @@ function profile(){
       },
       0
     );
+
+  const email =
+    currentUser?.email ||
+    "";
 
   app.innerHTML = `
 
@@ -2990,7 +3926,7 @@ function profile(){
     <div class="card">
 
       <div class="name">
-        Claudio
+        ${escapeHTML(email)}
       </div>
 
       <div class="muted">
@@ -3026,16 +3962,32 @@ function profile(){
 
     </div>
 
+    <button
+      type="button"
+      class="secondary"
+      onclick="logoutUser()"
+    >
+      ESCI DALL'ACCOUNT
+    </button>
+
   `;
 
 }
 
 
 /* =========================================================
-   CARICA TUTTE LE BICI
+   CARICA BICI UTENTE
 ========================================================= */
 
 async function loadData(){
+
+  if(!currentUser){
+
+    data = [];
+
+    return;
+
+  }
 
   try{
 
@@ -3044,7 +3996,17 @@ async function loadData(){
       error
     } = await db
       .from("bikes")
-      .select("*");
+      .select("*")
+      .eq(
+        "user_id",
+        currentUser.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
 
     if(error){
 
@@ -3061,7 +4023,9 @@ async function loadData(){
 
     data =
       Array.isArray(rows)
-      ? rows.map(normalizeBike)
+      ? rows.map(
+          normalizeBike
+        )
       : [];
 
     save();
@@ -3081,7 +4045,7 @@ async function loadData(){
 
 
 /* =========================================================
-   CARICA BICI PUBBLICA
+   CARICA BICI PUBBLICA QR
 ========================================================= */
 
 async function loadPublicBike(bikeId){
@@ -3150,7 +4114,9 @@ async function publicBike(){
     );
 
   const bikeId =
-    params.get("bike");
+    params.get(
+      "bike"
+    );
 
   if(!bikeId){
 
@@ -3158,10 +4124,11 @@ async function publicBike(){
 
   }
 
-  navigation.style.display = "none";
+  navigation.style.display =
+    "none";
 
-  document.querySelector(".head")
-    .style.display = "none";
+  headElement.style.display =
+    "none";
 
   app.innerHTML = `
 
@@ -3240,7 +4207,9 @@ async function publicBike(){
       </div>
 
       <div class="name">
-        ${escapeHTML(b.year || "-")}
+        ${escapeHTML(
+          b.year || "-"
+        )}
       </div>
 
       <br>
@@ -3250,7 +4219,9 @@ async function publicBike(){
       </div>
 
       <div class="name">
-        ${escapeHTML(b.color || "-")}
+        ${escapeHTML(
+          b.color || "-"
+        )}
       </div>
 
       <div
@@ -3305,7 +4276,29 @@ async function publicBike(){
 
 
 /* =========================================================
-   AVVIO APP
+   AVVIO AREA PRIVATA
+========================================================= */
+
+async function startPrivateApp(){
+
+  mainElement.style.padding =
+    "";
+
+  headElement.style.display =
+    "flex";
+
+  navigation.style.display =
+    "flex";
+
+  await loadData();
+
+  home();
+
+}
+
+
+/* =========================================================
+   CONTROLLO SESSIONE
 ========================================================= */
 
 async function startApp(){
@@ -3316,7 +4309,9 @@ async function startApp(){
     );
 
   const bikeId =
-    params.get("bike");
+    params.get(
+      "bike"
+    );
 
   if(bikeId){
 
@@ -3326,12 +4321,71 @@ async function startApp(){
 
   }
 
-  await loadData();
+  const {
+    data:sessionData
+  } = await db
+    .auth
+    .getSession();
 
-  home();
+  currentUser =
+    sessionData.session
+    ? sessionData.session.user
+    : null;
+
+  if(currentUser){
+
+    await startPrivateApp();
+
+  }else{
+
+    showLogin();
+
+  }
 
 }
 
+
+/* =========================================================
+   CAMBIO STATO AUTH
+========================================================= */
+
+db.auth.onAuthStateChange(
+  async (
+    event,
+    session
+  ) => {
+
+    if(
+      event === "SIGNED_OUT"
+    ){
+
+      currentUser =
+        null;
+
+      data =
+        [];
+
+      showLogin();
+
+    }
+
+    if(
+      event === "SIGNED_IN" &&
+      session?.user
+    ){
+
+      currentUser =
+        session.user;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   AVVIO
+========================================================= */
 
 startApp();
 
