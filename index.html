@@ -322,9 +322,11 @@ button{
 
   width:100%;
 
-  min-height:58px;
+  min-height:54px;
 
-  padding:16px;
+  padding:15px;
+
+  margin-top:10px;
 
   border:1px solid #2A3B52;
 
@@ -338,14 +340,12 @@ button{
   font-weight:800;
 
   text-align:center;
-
-  cursor:pointer;
-
-  margin-top:12px;
 }
 
-.secondary:active{
-  transform:scale(.98);
+.edit-button{
+  margin-bottom:10px;
+
+  background:#1565FF;
 }
 
 
@@ -502,7 +502,7 @@ input:focus{
 
   color:#FFFFFF;
 
-  font-size:19px;
+  font-size:20px;
   font-weight:900;
 
   line-height:30px;
@@ -855,10 +855,6 @@ canvas{
 <body>
 
 
-<!-- =======================================================
-     APP
-======================================================== -->
-
 <main>
 
   <div class="head">
@@ -886,34 +882,19 @@ canvas{
 </main>
 
 
-<!-- =======================================================
-     NAVIGAZIONE
-========================================================= -->
+<div id="navigation" class="nav">
 
-<div
-  id="navigation"
-  class="nav"
->
-
-  <button
-    type="button"
-    onclick="home()"
-  >
+  <button type="button" onclick="home()">
     ⌂
     <br>
     Home
   </button>
 
-
-  <button
-    type="button"
-    onclick="bikes()"
-  >
+  <button type="button" onclick="bikes()">
     🚲
     <br>
     Bici
   </button>
-
 
   <button
     type="button"
@@ -923,21 +904,13 @@ canvas{
     +
   </button>
 
-
-  <button
-    type="button"
-    onclick="activity()"
-  >
+  <button type="button" onclick="activity()">
     ▤
     <br>
     Attività
   </button>
 
-
-  <button
-    type="button"
-    onclick="profile()"
-  >
+  <button type="button" onclick="profile()">
     ○
     <br>
     Profilo
@@ -946,19 +919,8 @@ canvas{
 </div>
 
 
-<!-- =======================================================
-     MODAL
-========================================================= -->
+<div id="modal" class="modal"></div>
 
-<div
-  id="modal"
-  class="modal"
-></div>
-
-
-<!-- =======================================================
-     VISUALIZZATORE FOTO
-========================================================= -->
 
 <div
   id="photoViewer"
@@ -984,39 +946,24 @@ canvas{
 </div>
 
 
-<!-- =======================================================
-     QR CODE
-========================================================= -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-
-<!-- =======================================================
-     SUPABASE
-========================================================= -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
-
 /* =========================================================
    SUPABASE
 ========================================================= */
 
-const {
-  createClient
-} = supabase;
-
+const { createClient } = supabase;
 
 const SUPABASE_URL =
   "https://swzkrwdqfgetwcmaiqty.supabase.co";
 
-
 const SUPABASE_KEY =
   "sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";
-
 
 const db =
   createClient(
@@ -1029,12 +976,9 @@ const db =
    CONFIGURAZIONE FOTO
 ========================================================= */
 
-const PHOTO_BUCKET =
-  "bike-photos";
+const PHOTO_BUCKET = "bike-photos";
 
-
-const MAX_PHOTOS =
-  5;
+const MAX_PHOTOS = 5;
 
 
 /* =========================================================
@@ -1043,13 +987,17 @@ const MAX_PHOTOS =
 
 let data = [];
 
+/*
+  Foto nuove selezionate
+  durante creazione o modifica.
+*/
+let selectedPhotos = [];
 
 /*
-   Nuove foto temporanee
-   selezionate durante creazione/modifica.
+  Foto già esistenti che
+  devono essere eliminate.
 */
-
-let selectedPhotos = [];
+let photosToDelete = [];
 
 
 /* =========================================================
@@ -1059,10 +1007,8 @@ let selectedPhotos = [];
 const app =
   document.getElementById("app");
 
-
 const modal =
   document.getElementById("modal");
-
 
 const navigation =
   document.getElementById("navigation");
@@ -1091,13 +1037,9 @@ function loadLocal(){
         localStorage.getItem("biicode") || "[]"
       );
 
-
     if(Array.isArray(local)){
 
-      data =
-        local.map(
-          normalizeBike
-        );
+      data = local;
 
     }
 
@@ -1126,12 +1068,7 @@ function generateId(){
 
   let result = "IT-";
 
-
-  for(
-    let i = 0;
-    i < 8;
-    i++
-  ){
+  for(let i = 0; i < 8; i++){
 
     result +=
       characters[
@@ -1142,7 +1079,6 @@ function generateId(){
       ];
 
   }
-
 
   return result;
 
@@ -1176,7 +1112,6 @@ function normalizePhotos(value){
     return value.filter(Boolean);
 
   }
-
 
   return [];
 
@@ -1245,7 +1180,6 @@ function getPhotoUrl(path){
 
   }
 
-
   if(
     String(path).startsWith("http://") ||
     String(path).startsWith("https://")
@@ -1255,7 +1189,6 @@ function getPhotoUrl(path){
 
   }
 
-
   const {
     data:publicData
   } = db
@@ -1263,32 +1196,7 @@ function getPhotoUrl(path){
     .from(PHOTO_BUCKET)
     .getPublicUrl(path);
 
-
   return publicData.publicUrl;
-
-}
-
-
-/* =========================================================
-   PULIZIA FOTO TEMPORANEE
-========================================================= */
-
-function clearSelectedPhotos(){
-
-  selectedPhotos.forEach(photo => {
-
-    if(photo.preview){
-
-      URL.revokeObjectURL(
-        photo.preview
-      );
-
-    }
-
-  });
-
-
-  selectedPhotos = [];
 
 }
 
@@ -1309,7 +1217,6 @@ function bikeCover(b){
         b.photos[0]
       );
 
-
     return `
 
       <img
@@ -1320,7 +1227,6 @@ function bikeCover(b){
     `;
 
   }
-
 
   return "🚲";
 
@@ -1336,7 +1242,6 @@ function card(b){
   const stolen =
     b.stolen === true;
 
-
   return `
 
     <div
@@ -1350,7 +1255,6 @@ function card(b){
 
       </div>
 
-
       <div>
 
         <div class="name">
@@ -1360,13 +1264,11 @@ function card(b){
 
         </div>
 
-
         <div class="id">
 
           ${escapeHTML(b.id)}
 
         </div>
-
 
         <span
           class="status"
@@ -1399,14 +1301,9 @@ function card(b){
 
 function home(){
 
-  clearSelectedPhotos();
-
   closeM();
 
-
-  navigation.style.display =
-    "flex";
-
+  navigation.style.display = "flex";
 
   app.innerHTML = `
 
@@ -1414,11 +1311,9 @@ function home(){
       Ciao Claudio 👋
     </div>
 
-
     <h1>
       Le mie bici
     </h1>
-
 
     ${
       data.length
@@ -1442,9 +1337,7 @@ function home(){
       `
     }
 
-
     <div class="grid">
-
 
       <button
         type="button"
@@ -1452,13 +1345,9 @@ function home(){
         onclick="scan()"
       >
 
-        <span class="ico">
-          ⌗
-        </span>
+        <span class="ico">⌗</span>
 
-        <b>
-          Scansiona QR
-        </b>
+        <b>Scansiona QR</b>
 
         <br>
 
@@ -1468,20 +1357,15 @@ function home(){
 
       </button>
 
-
       <button
         type="button"
         class="action"
         onclick="add()"
       >
 
-        <span class="ico">
-          +
-        </span>
+        <span class="ico">+</span>
 
-        <b>
-          Immatricola
-        </b>
+        <b>Immatricola</b>
 
         <br>
 
@@ -1491,20 +1375,15 @@ function home(){
 
       </button>
 
-
       <button
         type="button"
         class="action"
         onclick="quick()"
       >
 
-        <span class="ico">
-          ⚠
-        </span>
+        <span class="ico">⚠</span>
 
-        <b>
-          Segnala furto
-        </b>
+        <b>Segnala furto</b>
 
         <br>
 
@@ -1514,20 +1393,15 @@ function home(){
 
       </button>
 
-
       <button
         type="button"
         class="action"
         onclick="alert('Funzione trasferimento in arrivo')"
       >
 
-        <span class="ico">
-          ↔
-        </span>
+        <span class="ico">↔</span>
 
-        <b>
-          Trasferisci
-        </b>
+        <b>Trasferisci</b>
 
         <br>
 
@@ -1536,7 +1410,6 @@ function home(){
         </span>
 
       </button>
-
 
     </div>
 
@@ -1551,21 +1424,15 @@ function home(){
 
 function bikes(){
 
-  clearSelectedPhotos();
-
   closeM();
 
-
-  navigation.style.display =
-    "flex";
-
+  navigation.style.display = "flex";
 
   app.innerHTML = `
 
     <h1>
       Le mie bici
     </h1>
-
 
     ${
       data.length
@@ -1583,15 +1450,12 @@ function bikes(){
       `
     }
 
-
     <button
       type="button"
       class="primary"
       onclick="add()"
     >
-
       + IMMATRICOLA UNA BICI
-
     </button>
 
   `;
@@ -1609,11 +1473,9 @@ function openForm(content){
     "form-open"
   );
 
-
   modal.classList.add(
     "active"
   );
-
 
   modal.innerHTML = `
 
@@ -1625,43 +1487,87 @@ function openForm(content){
 
   `;
 
-
   modal.scrollTop = 0;
-
-
-  setTimeout(() => {
-
-    modal.scrollTop = 0;
-
-  },50);
 
 }
 
 
 /* =========================================================
-   IMMATRICOLA
+   CHIUDI MODULO
+========================================================= */
+
+function closeM(){
+
+  document.body.classList.remove(
+    "form-open"
+  );
+
+  modal.classList.remove(
+    "active"
+  );
+
+  modal.innerHTML = "";
+
+}
+
+
+/* =========================================================
+   IMMATRICOLA NUOVA BICI
 ========================================================= */
 
 function add(){
 
-  clearSelectedPhotos();
-
+  selectedPhotos = [];
+  photosToDelete = [];
 
   openForm(`
 
     <button
       type="button"
       class="back"
-      onclick="home()"
+      onclick="cancelForm()"
     >
       ‹ Annulla
     </button>
-
 
     <h1>
       Immatricola la tua bici
     </h1>
 
+    ${bikeFormFields({
+      brand:"",
+      model:"",
+      year:"",
+      color:"",
+      frame_number:"",
+      photos:[]
+    })}
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        id="createBikeButton"
+        class="primary"
+        onclick="createBike()"
+      >
+        IMMATRICOLA BICI
+      </button>
+
+    </div>
+
+  `);
+
+}
+
+
+/* =========================================================
+   CAMPI FORM BICI
+========================================================= */
+
+function bikeFormFields(b){
+
+  return `
 
     <label for="bikeBrand">
       Marca
@@ -1672,8 +1578,8 @@ function add(){
       type="text"
       autocomplete="off"
       placeholder="Es. Trek"
+      value="${escapeHTML(b.brand || "")}"
     >
-
 
     <label for="bikeModel">
       Modello
@@ -1684,8 +1590,8 @@ function add(){
       type="text"
       autocomplete="off"
       placeholder="Es. Fuel EX 8"
+      value="${escapeHTML(b.model || "")}"
     >
-
 
     <label for="bikeYear">
       Anno
@@ -1696,8 +1602,8 @@ function add(){
       type="number"
       inputmode="numeric"
       placeholder="Es. 2022"
+      value="${escapeHTML(b.year || "")}"
     >
-
 
     <label for="bikeColor">
       Colore
@@ -1708,8 +1614,8 @@ function add(){
       type="text"
       autocomplete="off"
       placeholder="Es. Nero"
+      value="${escapeHTML(b.color || "")}"
     >
-
 
     <label for="bikeFrame">
       Numero telaio
@@ -1720,25 +1626,18 @@ function add(){
       type="text"
       autocomplete="off"
       placeholder="Numero telaio"
+      value="${escapeHTML(b.frame_number || "")}"
     >
-
 
     <label>
       Fotografie della bici
     </label>
 
-
     <div class="photo-box">
 
-
       <div class="photo-info">
-
-        Puoi aggiungere fino a
-        ${MAX_PHOTOS} fotografie.
-        Le foto rimarranno private.
-
+        Puoi avere fino a ${MAX_PHOTOS} fotografie.
       </div>
-
 
       <input
         id="bikePhotos"
@@ -1750,58 +1649,34 @@ function add(){
         onchange="handlePhotoSelection(event)"
       >
 
-
       <button
         type="button"
         class="photo-add"
         onclick="document.getElementById('bikePhotos').click()"
       >
-
         📷 AGGIUNGI FOTO
-
       </button>
-
 
       <div
         id="photoPreview"
         class="photo-grid"
       ></div>
 
-
     </div>
 
-
-    <div class="form-actions">
-
-      <button
-        type="button"
-        id="createBikeButton"
-        class="primary"
-        onclick="createBike()"
-      >
-
-        IMMATRICOLA BICI
-
-      </button>
-
-    </div>
-
-  `);
+  `;
 
 }
 
 
 /* =========================================================
-   SELEZIONE FOTO NUOVA BICI
+   SELEZIONE NUOVE FOTO
 ========================================================= */
 
 function handlePhotoSelection(event){
 
   const files =
-    Array.from(
-      event.target.files || []
-    );
-
+    Array.from(event.target.files || []);
 
   if(!files.length){
 
@@ -1809,18 +1684,19 @@ function handlePhotoSelection(event){
 
   }
 
+  const existingPhotos =
+    getCurrentExistingPhotosCount();
 
   const availableSlots =
     MAX_PHOTOS -
+    existingPhotos -
     selectedPhotos.length;
-
 
   if(availableSlots <= 0){
 
     alert(
-      `Puoi caricare al massimo ${MAX_PHOTOS} foto.`
+      `Puoi avere al massimo ${MAX_PHOTOS} fotografie.`
     );
-
 
     event.target.value = "";
 
@@ -1828,56 +1704,38 @@ function handlePhotoSelection(event){
 
   }
 
-
   const filesToAdd =
-    files.slice(
-      0,
-      availableSlots
-    );
+    files.slice(0, availableSlots);
 
-
-  if(
-    files.length >
-    availableSlots
-  ){
+  if(files.length > availableSlots){
 
     alert(
-      `Sono state selezionate solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
+      `Puoi aggiungere solo ${availableSlots} fotografie.`
     );
 
   }
 
-
   filesToAdd.forEach(file => {
 
-    if(
-      !file.type.startsWith(
-        "image/"
-      )
-    ){
+    if(!file.type.startsWith("image/")){
 
       return;
 
     }
 
+    const preview =
+      URL.createObjectURL(file);
 
     selectedPhotos.push({
 
-      file:
-        file,
-
-      preview:
-        URL.createObjectURL(
-          file
-        )
+      file:file,
+      preview:preview
 
     });
 
   });
 
-
   event.target.value = "";
-
 
   renderPhotoPreview();
 
@@ -1885,16 +1743,35 @@ function handlePhotoSelection(event){
 
 
 /* =========================================================
-   ANTEPRIMA NUOVE FOTO
+   CONTA FOTO ESISTENTI NEL FORM
+========================================================= */
+
+function getCurrentExistingPhotosCount(){
+
+  const container =
+    document.getElementById("photoPreview");
+
+  if(!container){
+
+    return 0;
+
+  }
+
+  return container.querySelectorAll(
+    "[data-existing-photo]"
+  ).length;
+
+}
+
+
+/* =========================================================
+   RENDER NUOVE FOTO
 ========================================================= */
 
 function renderPhotoPreview(){
 
   const container =
-    document.getElementById(
-      "photoPreview"
-    );
-
+    document.getElementById("photoPreview");
 
   if(!container){
 
@@ -1902,39 +1779,52 @@ function renderPhotoPreview(){
 
   }
 
+  const existingHtml =
+    container.querySelectorAll(
+      "[data-existing-photo]"
+    );
+
+  let existingContent = "";
+
+  existingHtml.forEach(item => {
+
+    existingContent += item.outerHTML;
+
+  });
+
+  const newContent =
+    selectedPhotos.map(
+      (photo,index) => `
+
+        <div class="photo-item">
+
+          <img
+            src="${escapeHTML(photo.preview)}"
+            alt="Nuova foto ${index + 1}"
+          >
+
+          <button
+            type="button"
+            class="remove-photo"
+            onclick="removeSelectedPhoto(${index})"
+          >
+            ×
+          </button>
+
+        </div>
+
+      `
+    ).join("");
 
   container.innerHTML =
-    selectedPhotos
-      .map(
-        (photo,index) => `
-
-          <div class="photo-item">
-
-            <img
-              src="${escapeHTML(photo.preview)}"
-              alt="Anteprima foto ${index + 1}"
-            >
-
-
-            <button
-              type="button"
-              class="remove-photo"
-              onclick="removeSelectedPhoto(${index})"
-            >
-              ×
-            </button>
-
-          </div>
-
-        `
-      )
-      .join("");
+    existingContent +
+    newContent;
 
 }
 
 
 /* =========================================================
-   ELIMINA FOTO NUOVA PRIMA DEL SALVATAGGIO
+   ELIMINA NUOVA FOTO
 ========================================================= */
 
 function removeSelectedPhoto(index){
@@ -1942,11 +1832,7 @@ function removeSelectedPhoto(index){
   const photo =
     selectedPhotos[index];
 
-
-  if(
-    photo &&
-    photo.preview
-  ){
+  if(photo && photo.preview){
 
     URL.revokeObjectURL(
       photo.preview
@@ -1954,14 +1840,37 @@ function removeSelectedPhoto(index){
 
   }
 
-
-  selectedPhotos.splice(
-    index,
-    1
-  );
-
+  selectedPhotos.splice(index, 1);
 
   renderPhotoPreview();
+
+}
+
+
+/* =========================================================
+   ANNULLA FORM
+========================================================= */
+
+function cancelForm(){
+
+  selectedPhotos.forEach(photo => {
+
+    if(photo.preview){
+
+      URL.revokeObjectURL(
+        photo.preview
+      );
+
+    }
+
+  });
+
+  selectedPhotos = [];
+  photosToDelete = [];
+
+  closeM();
+
+  home();
 
 }
 
@@ -1973,45 +1882,26 @@ function removeSelectedPhoto(index){
 async function createBike(){
 
   const brand =
-    document
-      .getElementById("bikeBrand")
-      .value
-      .trim();
-
+    document.getElementById("bikeBrand")
+      .value.trim();
 
   const model =
-    document
-      .getElementById("bikeModel")
-      .value
-      .trim();
-
+    document.getElementById("bikeModel")
+      .value.trim();
 
   const year =
-    document
-      .getElementById("bikeYear")
-      .value
-      .trim();
-
+    document.getElementById("bikeYear")
+      .value.trim();
 
   const color =
-    document
-      .getElementById("bikeColor")
-      .value
-      .trim();
-
+    document.getElementById("bikeColor")
+      .value.trim();
 
   const frame =
-    document
-      .getElementById("bikeFrame")
-      .value
-      .trim();
+    document.getElementById("bikeFrame")
+      .value.trim();
 
-
-  if(
-    !brand ||
-    !model ||
-    !frame
-  ){
+  if(!brand || !model || !frame){
 
     alert(
       "Inserisci marca, modello e numero telaio."
@@ -2021,124 +1911,34 @@ async function createBike(){
 
   }
 
-
   const button =
     document.getElementById(
       "createBikeButton"
     );
 
-
   button.disabled = true;
-
-
-  button.textContent =
-    "CREAZIONE BICI...";
-
 
   const bikeId =
     generateId();
 
-
-  let uploadedPhotos =
-    [];
-
+  let uploadedPhotos = [];
 
   try{
-
-
-    /*
-       1. CARICAMENTO FOTO
-    */
 
     if(selectedPhotos.length){
 
       button.textContent =
         "CARICAMENTO FOTO...";
 
-
-      for(
-        let i = 0;
-        i < selectedPhotos.length;
-        i++
-      ){
-
-        const photo =
-          selectedPhotos[i];
-
-
-        const file =
-          photo.file;
-
-
-        const extension =
-          file.name
-            .split(".")
-            .pop()
-            ?.toLowerCase()
-          ||
-          "jpg";
-
-
-        const safeExtension =
-          extension.replace(
-            /[^a-z0-9]/gi,
-            ""
-          );
-
-
-        const filePath =
-          `${bikeId}/${Date.now()}_${i}.${safeExtension}`;
-
-
-        const {
-          error:uploadError
-        } = await db
-          .storage
-          .from(PHOTO_BUCKET)
-          .upload(
-            filePath,
-            file,
-            {
-
-              cacheControl:
-                "3600",
-
-              upsert:
-                false,
-
-              contentType:
-                file.type
-
-            }
-          );
-
-
-        if(uploadError){
-
-          throw new Error(
-            "Impossibile caricare una fotografia: " +
-            uploadError.message
-          );
-
-        }
-
-
-        uploadedPhotos.push(
-          filePath
+      uploadedPhotos =
+        await uploadSelectedPhotos(
+          bikeId
         );
-
-      }
 
     }
 
-
-    /*
-       2. CREA BICI
-    */
-
     button.textContent =
       "IMMATRICOLAZIONE...";
-
 
     const {
       data:insertedRows,
@@ -2147,36 +1947,18 @@ async function createBike(){
       .from("bikes")
       .insert([{
 
-        biicode_id:
-          bikeId,
-
-        brand:
-          brand,
-
-        model:
-          model,
-
-        year:
-          year,
-
-        color:
-          color,
-
-        frame_number:
-          frame,
-
-        stolen:
-          false,
-
-        status:
-          "active",
-
-        photos:
-          uploadedPhotos
+        biicode_id:bikeId,
+        brand:brand,
+        model:model,
+        year:year,
+        color:color,
+        frame_number:frame,
+        stolen:false,
+        status:"active",
+        photos:uploadedPhotos
 
       }])
       .select();
-
 
     if(error){
 
@@ -2186,92 +1968,41 @@ async function createBike(){
 
     }
 
+    const bike =
+      insertedRows && insertedRows.length
+      ? normalizeBike(insertedRows[0])
+      : {
+          id:bikeId,
+          brand:brand,
+          model:model,
+          year:year,
+          color:color,
+          frame_number:frame,
+          stolen:false,
+          status:"active",
+          photos:uploadedPhotos
+        };
 
-    let bike;
-
-
-    if(
-      insertedRows &&
-      insertedRows.length
-    ){
-
-      bike =
-        normalizeBike(
-          insertedRows[0]
-        );
-
-    }else{
-
-      bike = {
-
-        id:
-          bikeId,
-
-        brand:
-          brand,
-
-        model:
-          model,
-
-        year:
-          year,
-
-        color:
-          color,
-
-        frame_number:
-          frame,
-
-        stolen:
-          false,
-
-        status:
-          "active",
-
-        photos:
-          uploadedPhotos
-
-      };
-
-    }
-
-
-    data.unshift(
-      bike
-    );
-
+    data.unshift(bike);
 
     save();
 
-
     clearSelectedPhotos();
-
 
     closeM();
 
-
-    detail(
-      bike.id
-    );
-
+    detail(bike.id);
 
   }catch(error){
 
-    console.error(
-      "Errore immatricolazione:",
-      error
-    );
-
+    console.error(error);
 
     alert(
       "Errore durante l'immatricolazione.\n\n" +
       error.message
     );
 
-
-    button.disabled =
-      false;
-
+    button.disabled = false;
 
     button.textContent =
       "IMMATRICOLA BICI";
@@ -2282,30 +2013,114 @@ async function createBike(){
 
 
 /* =========================================================
+   CARICA FOTO SU SUPABASE
+========================================================= */
+
+async function uploadSelectedPhotos(bikeId){
+
+  const uploaded = [];
+
+  for(let i = 0; i < selectedPhotos.length; i++){
+
+    const photo =
+      selectedPhotos[i];
+
+    const file =
+      photo.file;
+
+    let extension =
+      file.name
+        .split(".")
+        .pop()
+        ?.toLowerCase()
+      || "jpg";
+
+    extension =
+      extension.replace(
+        /[^a-z0-9]/gi,
+        ""
+      );
+
+    const filePath =
+      `${bikeId}/${Date.now()}_${i}_${Math.random().toString(36).slice(2,8)}.${extension}`;
+
+    const {
+      error:uploadError
+    } = await db
+      .storage
+      .from(PHOTO_BUCKET)
+      .upload(
+        filePath,
+        file,
+        {
+
+          cacheControl:"3600",
+          upsert:false,
+          contentType:file.type
+
+        }
+      );
+
+    if(uploadError){
+
+      throw new Error(
+        "Errore caricamento foto: " +
+        uploadError.message
+      );
+
+    }
+
+    uploaded.push(filePath);
+
+  }
+
+  return uploaded;
+
+}
+
+
+/* =========================================================
+   PULISCI FOTO TEMPORANEE
+========================================================= */
+
+function clearSelectedPhotos(){
+
+  selectedPhotos.forEach(photo => {
+
+    if(photo.preview){
+
+      URL.revokeObjectURL(
+        photo.preview
+      );
+
+    }
+
+  });
+
+  selectedPhotos = [];
+
+}
+
+
+/* =========================================================
    FOTO DETTAGLIO
 ========================================================= */
 
 function renderBikePhotos(photos){
 
-  if(
-    !photos ||
-    !photos.length
-  ){
+  if(!photos || !photos.length){
 
     return "";
 
   }
 
-
   return `
 
     <br>
 
-
     <div class="muted">
       FOTOGRAFIE DELLA BICI
     </div>
-
 
     <div class="detail-photos">
 
@@ -2313,10 +2128,7 @@ function renderBikePhotos(photos){
         photos.map(path => {
 
           const url =
-            getPhotoUrl(
-              path
-            );
-
+            getPhotoUrl(path);
 
           return `
 
@@ -2350,70 +2162,55 @@ function renderBikePhotos(photos){
 
 function detail(idValue){
 
-  clearSelectedPhotos();
-
-
   const b =
     data.find(
       q => q.id === idValue
     );
 
-
   if(!b){
 
-    alert(
-      "Bici non trovata."
-    );
+    alert("Bici non trovata.");
 
     return;
 
   }
 
-
   const stolen =
     b.stolen === true;
-
 
   openForm(`
 
     <button
       type="button"
       class="back"
-      onclick="home()"
+      onclick="closeM(); home();"
     >
       ‹ Indietro
     </button>
-
 
     <h1>
       ${escapeHTML(b.brand)}
       ${escapeHTML(b.model)}
     </h1>
 
-
     <div class="card">
-
 
       <div class="muted">
         BIICODE ID
       </div>
 
-
       <div class="name">
         ${escapeHTML(b.id)}
       </div>
-
 
       <div
         id="qr"
         class="qr"
       ></div>
 
-
       <div class="muted">
         NUMERO TELAIO
       </div>
-
 
       <div class="name">
         ${escapeHTML(
@@ -2421,32 +2218,23 @@ function detail(idValue){
         )}
       </div>
 
-
       <br>
-
 
       <div class="muted">
         ANNO / COLORE
       </div>
 
-
       <div class="name">
 
-        ${escapeHTML(
-          b.year || "-"
-        )}
+        ${escapeHTML(b.year || "-")}
 
         •
 
-        ${escapeHTML(
-          b.color || "-"
-        )}
+        ${escapeHTML(b.color || "-")}
 
       </div>
 
-
       ${renderBikePhotos(b.photos)}
-
 
       <div
         class="
@@ -2463,6 +2251,17 @@ function detail(idValue){
 
       </div>
 
+      <!-- NUOVO PULSANTE MODIFICA -->
+
+      <button
+        type="button"
+        class="primary edit-button"
+        onclick="editBike('${escapeHTML(b.id)}')"
+      >
+        ✏️ MODIFICA BICI
+      </button>
+
+      <!-- FURTO / RECUPERO -->
 
       <button
         type="button"
@@ -2485,26 +2284,12 @@ function detail(idValue){
 
       </button>
 
-
-      <button
-        type="button"
-        class="secondary"
-        onclick="editBike('${escapeHTML(b.id)}')"
-      >
-
-        ✏️ MODIFICA DATI BICI
-
-      </button>
-
-
     </div>
 
   `);
 
-
   const qrElement =
     document.getElementById("qr");
-
 
   if(
     qrElement &&
@@ -2515,23 +2300,15 @@ function detail(idValue){
       window.location.origin +
       window.location.pathname +
       "?bike=" +
-      encodeURIComponent(
-        b.id
-      );
-
+      encodeURIComponent(b.id);
 
     new QRCode(
       qrElement,
       {
 
-        text:
-          publicUrl,
-
-        width:
-          190,
-
-        height:
-          190
+        text:publicUrl,
+        width:190,
+        height:190
 
       }
     );
@@ -2547,501 +2324,132 @@ function detail(idValue){
 
 function editBike(idValue){
 
-  clearSelectedPhotos();
-
-
   const b =
     data.find(
       q => q.id === idValue
     );
 
-
   if(!b){
 
-    alert(
-      "Bici non trovata."
-    );
+    alert("Bici non trovata.");
 
     return;
 
   }
 
-
-  const existingPhotos =
-    normalizePhotos(
-      b.photos
-    );
-
+  selectedPhotos = [];
+  photosToDelete = [];
 
   openForm(`
 
     <button
       type="button"
       class="back"
-      onclick="detail('${escapeHTML(b.id)}')"
+      onclick="detail('${escapeHTML(idValue)}')"
     >
-      ‹ Annulla
+      ‹ Annulla modifiche
     </button>
-
 
     <h1>
       Modifica bici
     </h1>
 
-
-    <label for="bikeBrand">
-      Marca
-    </label>
-
-    <input
-      id="bikeBrand"
-      type="text"
-      autocomplete="off"
-      value="${escapeHTML(b.brand)}"
-    >
-
-
-    <label for="bikeModel">
-      Modello
-    </label>
-
-    <input
-      id="bikeModel"
-      type="text"
-      autocomplete="off"
-      value="${escapeHTML(b.model)}"
-    >
-
-
-    <label for="bikeYear">
-      Anno
-    </label>
-
-    <input
-      id="bikeYear"
-      type="number"
-      inputmode="numeric"
-      value="${escapeHTML(b.year)}"
-    >
-
-
-    <label for="bikeColor">
-      Colore
-    </label>
-
-    <input
-      id="bikeColor"
-      type="text"
-      autocomplete="off"
-      value="${escapeHTML(b.color)}"
-    >
-
-
-    <label for="bikeFrame">
-      Numero telaio
-    </label>
-
-    <input
-      id="bikeFrame"
-      type="text"
-      autocomplete="off"
-      value="${escapeHTML(b.frame_number)}"
-    >
-
-
-    <label>
-      Fotografie della bici
-    </label>
-
-
-    <div class="photo-box">
-
-
-      <div class="photo-info">
-
-        Puoi modificare le foto.
-        Massimo ${MAX_PHOTOS} fotografie in totale.
-
-      </div>
-
-
-      <div
-        id="existingPhotos"
-        class="photo-grid"
-      >
-
-        ${
-          existingPhotos.length
-          ? existingPhotos.map((path,index) => {
-
-              const url =
-                getPhotoUrl(path);
-
-              return `
-
-                <div class="photo-item">
-
-                  <img
-                    src="${escapeHTML(url)}"
-                    alt="Foto bicicletta"
-                  >
-
-                  <button
-                    type="button"
-                    class="remove-photo"
-                    onclick="removeExistingPhoto('${escapeHTML(b.id)}', ${index})"
-                  >
-                    ×
-                  </button>
-
-                </div>
-
-              `;
-
-            }).join("")
-          : ""
-        }
-
-      </div>
-
-
-      <input
-        id="bikePhotos"
-        type="file"
-        accept="image/*"
-        multiple
-        capture="environment"
-        style="display:none"
-        onchange="handleEditPhotoSelection(event, '${escapeHTML(b.id)}')"
-      >
-
-
-      <button
-        type="button"
-        class="photo-add"
-        onclick="document.getElementById('bikePhotos').click()"
-      >
-
-        📷 AGGIUNGI FOTO
-
-      </button>
-
-
-      <div
-        id="photoPreview"
-        class="photo-grid"
-      ></div>
-
-
-    </div>
-
+    ${bikeFormFields(b)}
 
     <div class="form-actions">
 
       <button
         type="button"
-        id="updateBikeButton"
+        id="saveBikeButton"
         class="primary"
-        onclick="updateBike('${escapeHTML(b.id)}')"
+        onclick="saveBikeChanges('${escapeHTML(idValue)}')"
       >
-
         SALVA MODIFICHE
-
       </button>
 
     </div>
 
   `);
 
-}
-
-
-/* =========================================================
-   SELEZIONE FOTO IN MODIFICA
-========================================================= */
-
-function handleEditPhotoSelection(event, bikeId){
-
-  const b =
-    data.find(
-      q => q.id === bikeId
-    );
-
-
-  if(!b){
-
-    return;
-
-  }
-
-
-  const files =
-    Array.from(
-      event.target.files || []
-    );
-
-
-  if(!files.length){
-
-    return;
-
-  }
-
-
-  const existingCount =
-    normalizePhotos(
-      b.photos
-    ).length;
-
-
-  const availableSlots =
-    MAX_PHOTOS -
-    existingCount -
-    selectedPhotos.length;
-
-
-  if(availableSlots <= 0){
-
-    alert(
-      `Puoi avere al massimo ${MAX_PHOTOS} foto.`
-    );
-
-
-    event.target.value = "";
-
-    return;
-
-  }
-
-
-  const filesToAdd =
-    files.slice(
-      0,
-      availableSlots
-    );
-
-
-  if(
-    files.length >
-    availableSlots
-  ){
-
-    alert(
-      `Sono state selezionate solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
-    );
-
-  }
-
-
-  filesToAdd.forEach(file => {
-
-    if(
-      !file.type.startsWith(
-        "image/"
-      )
-    ){
-
-      return;
-
-    }
-
-
-    selectedPhotos.push({
-
-      file:
-        file,
-
-      preview:
-        URL.createObjectURL(
-          file
-        )
-
-    });
-
-  });
-
-
-  event.target.value = "";
-
-
-  renderPhotoPreview();
+  renderExistingPhotos(b.photos || []);
 
 }
 
 
 /* =========================================================
-   ELIMINA FOTO ESISTENTE
+   MOSTRA FOTO ESISTENTI IN MODIFICA
 ========================================================= */
 
-async function removeExistingPhoto(bikeId, index){
+function renderExistingPhotos(photos){
 
-  const b =
-    data.find(
-      q => q.id === bikeId
-    );
+  const container =
+    document.getElementById("photoPreview");
 
-
-  if(!b){
+  if(!container){
 
     return;
 
   }
 
+  container.innerHTML =
+    photos.map(path => {
 
-  const photos =
-    normalizePhotos(
-      b.photos
-    );
+      const url =
+        getPhotoUrl(path);
+
+      return `
+
+        <div
+          class="photo-item"
+          data-existing-photo="${escapeHTML(path)}"
+        >
+
+          <img
+            src="${escapeHTML(url)}"
+            alt="Foto bicicletta"
+          >
+
+          <button
+            type="button"
+            class="remove-photo"
+            onclick="removeExistingPhoto(this, '${escapeHTML(path)}')"
+          >
+            ×
+          </button>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
 
 
-  const photoPath =
-    photos[index];
+/* =========================================================
+   RIMUOVI FOTO ESISTENTE DAL FORM
+========================================================= */
 
+function removeExistingPhoto(button, path){
 
-  if(!photoPath){
+  const item =
+    button.closest(".photo-item");
+
+  if(!item){
 
     return;
 
   }
-
 
   if(
-    !confirm(
-      "Vuoi eliminare questa fotografia?"
-    )
+    !photosToDelete.includes(path)
   ){
 
-    return;
+    photosToDelete.push(path);
 
   }
 
-
-  try{
-
-
-    /*
-       1. ELIMINA FILE DA STORAGE
-    */
-
-    const {
-      error:storageError
-    } = await db
-      .storage
-      .from(PHOTO_BUCKET)
-      .remove([
-        photoPath
-      ]);
-
-
-    if(storageError){
-
-      throw new Error(
-        storageError.message
-      );
-
-    }
-
-
-    /*
-       2. RIMUOVE IL RIFERIMENTO
-    */
-
-    photos.splice(
-      index,
-      1
-    );
-
-
-    /*
-       3. AGGIORNA DATABASE
-    */
-
-    const {
-      data:updatedRows,
-      error
-    } = await db
-      .from("bikes")
-      .update({
-
-        photos:
-          photos
-
-      })
-      .eq(
-        "biicode_id",
-        bikeId
-      )
-      .select();
-
-
-    if(error){
-
-      throw new Error(
-        error.message
-      );
-
-    }
-
-
-    if(
-      !updatedRows ||
-      !updatedRows.length
-    ){
-
-      throw new Error(
-        "Nessuna bici aggiornata."
-      );
-
-    }
-
-
-    const updatedBike =
-      normalizeBike(
-        updatedRows[0]
-      );
-
-
-    const bikeIndex =
-      data.findIndex(
-        q => q.id === bikeId
-      );
-
-
-    if(bikeIndex !== -1){
-
-      data[bikeIndex] =
-        updatedBike;
-
-    }
-
-
-    save();
-
-
-    /*
-       Riapre la modifica
-       con le foto aggiornate.
-    */
-
-    editBike(
-      bikeId
-    );
-
-
-  }catch(error){
-
-    console.error(
-      "Errore eliminazione foto:",
-      error
-    );
-
-
-    alert(
-      "Impossibile eliminare la fotografia.\n\n" +
-      error.message
-    );
-
-  }
+  item.remove();
 
 }
 
@@ -3050,65 +2458,42 @@ async function removeExistingPhoto(bikeId, index){
    SALVA MODIFICHE BICI
 ========================================================= */
 
-async function updateBike(idValue){
+async function saveBikeChanges(idValue){
 
   const b =
     data.find(
       q => q.id === idValue
     );
 
-
   if(!b){
 
-    alert(
-      "Bici non trovata."
-    );
+    alert("Bici non trovata.");
 
     return;
 
   }
 
-
   const brand =
-    document
-      .getElementById("bikeBrand")
-      .value
-      .trim();
-
+    document.getElementById("bikeBrand")
+      .value.trim();
 
   const model =
-    document
-      .getElementById("bikeModel")
-      .value
-      .trim();
-
+    document.getElementById("bikeModel")
+      .value.trim();
 
   const year =
-    document
-      .getElementById("bikeYear")
-      .value
-      .trim();
-
+    document.getElementById("bikeYear")
+      .value.trim();
 
   const color =
-    document
-      .getElementById("bikeColor")
-      .value
-      .trim();
-
+    document.getElementById("bikeColor")
+      .value.trim();
 
   const frame =
-    document
-      .getElementById("bikeFrame")
-      .value
-      .trim();
+    document.getElementById("bikeFrame")
+      .value.trim();
 
-
-  if(
-    !brand ||
-    !model ||
-    !frame
-  ){
+  if(!brand || !model || !frame){
 
     alert(
       "Inserisci marca, modello e numero telaio."
@@ -3118,137 +2503,71 @@ async function updateBike(idValue){
 
   }
 
-
   const button =
     document.getElementById(
-      "updateBikeButton"
+      "saveBikeButton"
     );
 
-
-  if(button){
-
-    button.disabled = true;
-
-    button.textContent =
-      "SALVATAGGIO...";
-
-  }
-
+  button.disabled = true;
 
   try{
 
+    button.textContent =
+      "PREPARAZIONE FOTO...";
 
     /*
-       Copia foto esistenti.
+      Foto che restano:
+      tutte le originali meno
+      quelle contrassegnate per eliminazione.
     */
 
-    let photos =
-      normalizePhotos(
-        b.photos
+    const remainingPhotos =
+      (b.photos || []).filter(
+        path => !photosToDelete.includes(path)
       );
 
-
     /*
-       CARICA NUOVE FOTO
+      Carica le nuove foto.
     */
+
+    let newPhotos = [];
 
     if(selectedPhotos.length){
 
-      if(button){
+      button.textContent =
+        "CARICAMENTO NUOVE FOTO...";
 
-        button.textContent =
-          "CARICAMENTO FOTO...";
-
-      }
-
-
-      for(
-        let i = 0;
-        i < selectedPhotos.length;
-        i++
-      ){
-
-        const photo =
-          selectedPhotos[i];
-
-
-        const file =
-          photo.file;
-
-
-        const extension =
-          file.name
-            .split(".")
-            .pop()
-            ?.toLowerCase()
-          ||
-          "jpg";
-
-
-        const safeExtension =
-          extension.replace(
-            /[^a-z0-9]/gi,
-            ""
-          );
-
-
-        const filePath =
-          `${idValue}/${Date.now()}_${i}.${safeExtension}`;
-
-
-        const {
-          error:uploadError
-        } = await db
-          .storage
-          .from(PHOTO_BUCKET)
-          .upload(
-            filePath,
-            file,
-            {
-
-              cacheControl:
-                "3600",
-
-              upsert:
-                false,
-
-              contentType:
-                file.type
-
-            }
-          );
-
-
-        if(uploadError){
-
-          throw new Error(
-            "Impossibile caricare una fotografia: " +
-            uploadError.message
-          );
-
-        }
-
-
-        photos.push(
-          filePath
+      newPhotos =
+        await uploadSelectedPhotos(
+          idValue
         );
 
-      }
-
     }
-
 
     /*
-       AGGIORNA DATI BICI
+      Unione foto vecchie + nuove.
     */
 
-    if(button){
+    const finalPhotos =
+      [
+        ...remainingPhotos,
+        ...newPhotos
+      ];
 
-      button.textContent =
-        "AGGIORNAMENTO...";
+    if(finalPhotos.length > MAX_PHOTOS){
+
+      throw new Error(
+        `Puoi avere al massimo ${MAX_PHOTOS} fotografie.`
+      );
 
     }
 
+    button.textContent =
+      "SALVATAGGIO MODIFICHE...";
+
+    /*
+      Aggiorna prima il record.
+    */
 
     const {
       data:updatedRows,
@@ -3257,23 +2576,12 @@ async function updateBike(idValue){
       .from("bikes")
       .update({
 
-        brand:
-          brand,
-
-        model:
-          model,
-
-        year:
-          year,
-
-        color:
-          color,
-
-        frame_number:
-          frame,
-
-        photos:
-          photos
+        brand:brand,
+        model:model,
+        year:year,
+        color:color,
+        frame_number:frame,
+        photos:finalPhotos
 
       })
       .eq(
@@ -3281,7 +2589,6 @@ async function updateBike(idValue){
         idValue
       )
       .select();
-
 
     if(error){
 
@@ -3291,30 +2598,60 @@ async function updateBike(idValue){
 
     }
 
-
     if(
       !updatedRows ||
-      !updatedRows.length
+      updatedRows.length === 0
     ){
 
       throw new Error(
-        "Nessuna bici aggiornata."
+        "Nessuna bici è stata aggiornata."
       );
 
     }
 
+    /*
+      Ora eliminiamo fisicamente
+      le foto tolte da Supabase Storage.
+    */
+
+    if(photosToDelete.length){
+
+      button.textContent =
+        "ELIMINAZIONE FOTO...";
+
+      const {
+        error:removeError
+      } = await db
+        .storage
+        .from(PHOTO_BUCKET)
+        .remove(
+          photosToDelete
+        );
+
+      if(removeError){
+
+        console.warn(
+          "Errore eliminazione file:",
+          removeError
+        );
+
+      }
+
+    }
+
+    /*
+      Aggiorna memoria locale.
+    */
 
     const updatedBike =
       normalizeBike(
         updatedRows[0]
       );
 
-
     const index =
       data.findIndex(
         q => q.id === idValue
       );
-
 
     if(index !== -1){
 
@@ -3323,40 +2660,34 @@ async function updateBike(idValue){
 
     }
 
-
     save();
-
 
     clearSelectedPhotos();
 
+    photosToDelete = [];
 
-    detail(
-      idValue
-    );
+    /*
+      Torna al dettaglio.
+    */
 
+    detail(idValue);
 
   }catch(error){
 
     console.error(
-      "Errore aggiornamento bici:",
+      "Errore salvataggio:",
       error
     );
-
 
     alert(
       "Impossibile salvare le modifiche.\n\n" +
       error.message
     );
 
+    button.disabled = false;
 
-    if(button){
-
-      button.disabled = false;
-
-      button.textContent =
-        "SALVA MODIFICHE";
-
-    }
+    button.textContent =
+      "SALVA MODIFICHE";
 
   }
 
@@ -3374,16 +2705,12 @@ function openPhotoViewer(url){
       "photoViewer"
     );
 
-
   const image =
     document.getElementById(
       "viewerImage"
     );
 
-
-  image.src =
-    url;
-
+  image.src = url;
 
   viewer.classList.add(
     "active"
@@ -3399,7 +2726,6 @@ function closePhotoViewer(){
       "photoViewer"
     );
 
-
   viewer.classList.remove(
     "active"
   );
@@ -3408,7 +2734,7 @@ function closePhotoViewer(){
 
 
 /* =========================================================
-   SEGNALA FURTO / RECUPERA BICI
+   SEGNALA FURTO / RECUPERA
 ========================================================= */
 
 async function toggle(idValue){
@@ -3418,27 +2744,21 @@ async function toggle(idValue){
       q => q.id === idValue
     );
 
-
   if(!b){
 
-    alert(
-      "Bici non trovata."
-    );
+    alert("Bici non trovata.");
 
     return;
 
   }
 
-
   const nuovoStato =
     !b.stolen;
-
 
   const button =
     document.getElementById(
       "toggleButton"
     );
-
 
   if(button){
 
@@ -3451,7 +2771,6 @@ async function toggle(idValue){
 
   }
 
-
   try{
 
     const {
@@ -3461,8 +2780,7 @@ async function toggle(idValue){
       .from("bikes")
       .update({
 
-        stolen:
-          nuovoStato
+        stolen:nuovoStato
 
       })
       .eq(
@@ -3471,7 +2789,6 @@ async function toggle(idValue){
       )
       .select();
 
-
     if(error){
 
       throw new Error(
@@ -3479,7 +2796,6 @@ async function toggle(idValue){
       );
 
     }
-
 
     if(
       !updatedRows ||
@@ -3492,18 +2808,15 @@ async function toggle(idValue){
 
     }
 
-
     const updatedBike =
       normalizeBike(
         updatedRows[0]
       );
 
-
     const index =
       data.findIndex(
         q => q.id === idValue
       );
-
 
     if(index !== -1){
 
@@ -3512,14 +2825,9 @@ async function toggle(idValue){
 
     }
 
-
     save();
 
-
-    detail(
-      idValue
-    );
-
+    detail(idValue);
 
   }catch(error){
 
@@ -3528,12 +2836,10 @@ async function toggle(idValue){
       error
     );
 
-
     alert(
       "Impossibile aggiornare lo stato della bici.\n\n" +
       error.message
     );
-
 
     if(button){
 
@@ -3567,7 +2873,6 @@ function quick(){
 
   }
 
-
   detail(
     data[0].id
   );
@@ -3594,21 +2899,15 @@ function scan(){
 
 function activity(){
 
-  clearSelectedPhotos();
-
   closeM();
 
-
-  navigation.style.display =
-    "flex";
-
+  navigation.style.display = "flex";
 
   app.innerHTML = `
 
     <h1>
       Attività
     </h1>
-
 
     ${
       data.length
@@ -3658,34 +2957,29 @@ function activity(){
 
 function profile(){
 
-  clearSelectedPhotos();
-
   closeM();
 
-
-  navigation.style.display =
-    "flex";
-
+  navigation.style.display = "flex";
 
   const stolenCount =
     data.filter(
       b => b.stolen
     ).length;
 
-
   const photoCount =
     data.reduce(
       (total,b) => {
 
         return total +
-          normalizePhotos(
-            b.photos
-          ).length;
+          (
+            Array.isArray(b.photos)
+            ? b.photos.length
+            : 0
+          );
 
       },
       0
     );
-
 
   app.innerHTML = `
 
@@ -3693,21 +2987,17 @@ function profile(){
       Profilo
     </h1>
 
-
     <div class="card">
 
       <div class="name">
         Claudio
       </div>
 
-
       <div class="muted">
         Account BIICODE
       </div>
 
-
       <br>
-
 
       <div class="muted">
 
@@ -3716,9 +3006,7 @@ function profile(){
 
       </div>
 
-
       <br>
-
 
       <div class="muted">
 
@@ -3727,9 +3015,7 @@ function profile(){
 
       </div>
 
-
       <br>
-
 
       <div class="muted">
 
@@ -3746,28 +3032,7 @@ function profile(){
 
 
 /* =========================================================
-   CHIUDI MODULO
-========================================================= */
-
-function closeM(){
-
-  document.body.classList.remove(
-    "form-open"
-  );
-
-
-  modal.classList.remove(
-    "active"
-  );
-
-
-  modal.innerHTML = "";
-
-}
-
-
-/* =========================================================
-   CARICA TUTTE LE BICI DA SUPABASE
+   CARICA TUTTE LE BICI
 ========================================================= */
 
 async function loadData(){
@@ -3781,7 +3046,6 @@ async function loadData(){
       .from("bikes")
       .select("*");
 
-
     if(error){
 
       console.error(
@@ -3789,24 +3053,18 @@ async function loadData(){
         error
       );
 
-
       loadLocal();
 
       return;
 
     }
 
-
     data =
       Array.isArray(rows)
-      ? rows.map(
-          normalizeBike
-        )
+      ? rows.map(normalizeBike)
       : [];
 
-
     save();
-
 
   }catch(error){
 
@@ -3814,7 +3072,6 @@ async function loadData(){
       "Errore collegamento Supabase:",
       error
     );
-
 
     loadLocal();
 
@@ -3824,7 +3081,7 @@ async function loadData(){
 
 
 /* =========================================================
-   CARICA UNA SOLA BICI PUBBLICA
+   CARICA BICI PUBBLICA
 ========================================================= */
 
 async function loadPublicBike(bikeId){
@@ -3843,7 +3100,6 @@ async function loadPublicBike(bikeId){
       )
       .limit(1);
 
-
     if(error){
 
       console.error(
@@ -3851,11 +3107,9 @@ async function loadPublicBike(bikeId){
         error
       );
 
-
       return null;
 
     }
-
 
     if(
       !rows ||
@@ -3866,11 +3120,9 @@ async function loadPublicBike(bikeId){
 
     }
 
-
     return normalizeBike(
       rows[0]
     );
-
 
   }catch(error){
 
@@ -3878,7 +3130,6 @@ async function loadPublicBike(bikeId){
       "Errore:",
       error
     );
-
 
     return null;
 
@@ -3898,10 +3149,8 @@ async function publicBike(){
       window.location.search
     );
 
-
   const bikeId =
     params.get("bike");
-
 
   if(!bikeId){
 
@@ -3909,21 +3158,16 @@ async function publicBike(){
 
   }
 
+  navigation.style.display = "none";
 
-  navigation.style.display =
-    "none";
-
-
-  document.querySelector(".head").style.display =
-    "none";
-
+  document.querySelector(".head")
+    .style.display = "none";
 
   app.innerHTML = `
 
     <h1>
       Verifica BIICODE
     </h1>
-
 
     <div class="card">
 
@@ -3935,12 +3179,10 @@ async function publicBike(){
 
   `;
 
-
   const b =
     await loadPublicBike(
       bikeId
     );
-
 
   if(!b){
 
@@ -3949,7 +3191,6 @@ async function publicBike(){
       <h1>
         Bici non trovata
       </h1>
-
 
       <div class="card">
 
@@ -3964,22 +3205,12 @@ async function publicBike(){
 
     `;
 
-
     return true;
 
   }
 
-
   const stolen =
     b.stolen === true;
-
-
-  /*
-     NON MOSTRIAMO PUBBLICAMENTE:
-     - fotografie
-     - numero telaio
-     - dati proprietario
-  */
 
   app.innerHTML = `
 
@@ -3987,55 +3218,40 @@ async function publicBike(){
       BIICODE
     </div>
 
-
     <h1>
       ${escapeHTML(b.brand)}
       ${escapeHTML(b.model)}
     </h1>
 
-
     <div class="card">
-
 
       <div class="muted">
         BIICODE ID
       </div>
 
-
       <div class="name">
         ${escapeHTML(b.id)}
       </div>
 
-
       <br>
-
 
       <div class="muted">
         ANNO
       </div>
 
-
       <div class="name">
-        ${escapeHTML(
-          b.year || "-"
-        )}
+        ${escapeHTML(b.year || "-")}
       </div>
 
-
       <br>
-
 
       <div class="muted">
         COLORE
       </div>
 
-
       <div class="name">
-        ${escapeHTML(
-          b.color || "-"
-        )}
+        ${escapeHTML(b.color || "-")}
       </div>
-
 
       <div
         class="
@@ -4052,7 +3268,6 @@ async function publicBike(){
 
       </div>
 
-
       ${
         stolen
         ? `
@@ -4063,9 +3278,7 @@ async function publicBike(){
             style="background:#EF4444;"
             onclick="alert('Se ritieni di aver trovato questa bici, contatta le autorità competenti.')"
           >
-
             HO TROVATO QUESTA BICI
-
           </button>
 
         `
@@ -4076,19 +3289,15 @@ async function publicBike(){
             class="primary"
             onclick="alert('Funzione contatto proprietario in arrivo')"
           >
-
             CONTATTA IL PROPRIETARIO
-
           </button>
 
         `
       }
 
-
     </div>
 
   `;
-
 
   return true;
 
@@ -4106,10 +3315,8 @@ async function startApp(){
       window.location.search
     );
 
-
   const bikeId =
     params.get("bike");
-
 
   if(bikeId){
 
@@ -4119,9 +3326,7 @@ async function startApp(){
 
   }
 
-
   await loadData();
-
 
   home();
 
@@ -4129,7 +3334,6 @@ async function startApp(){
 
 
 startApp();
-
 
 </script>
 
