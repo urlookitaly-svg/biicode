@@ -317,6 +317,37 @@ button{
   cursor:not-allowed;
 }
 
+.secondary{
+  display:block;
+
+  width:100%;
+
+  min-height:58px;
+
+  padding:16px;
+
+  border:1px solid #2A3B52;
+
+  border-radius:14px;
+
+  background:#111D2D;
+
+  color:#FFFFFF;
+
+  font-size:15px;
+  font-weight:800;
+
+  text-align:center;
+
+  cursor:pointer;
+
+  margin-top:12px;
+}
+
+.secondary:active{
+  transform:scale(.98);
+}
+
 
 /* =========================================================
    INPUT
@@ -458,8 +489,8 @@ input:focus{
   top:6px;
   right:6px;
 
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
 
   padding:0;
 
@@ -471,10 +502,10 @@ input:focus{
 
   color:#FFFFFF;
 
-  font-size:18px;
+  font-size:19px;
   font-weight:900;
 
-  line-height:28px;
+  line-height:30px;
 
   text-align:center;
 }
@@ -498,10 +529,6 @@ input:focus{
   border-radius:14px;
 
   background:#07101D;
-
-  border:1px solid #203149;
-
-  cursor:pointer;
 }
 
 .detail-photo img{
@@ -511,6 +538,8 @@ input:focus{
   object-fit:cover;
 
   display:block;
+
+  cursor:pointer;
 }
 
 
@@ -1015,7 +1044,10 @@ const MAX_PHOTOS =
 let data = [];
 
 
-/* Foto temporanee durante immatricolazione */
+/*
+   Nuove foto temporanee
+   selezionate durante creazione/modifica.
+*/
 
 let selectedPhotos = [];
 
@@ -1059,6 +1091,7 @@ function loadLocal(){
         localStorage.getItem("biicode") || "[]"
       );
 
+
     if(Array.isArray(local)){
 
       data =
@@ -1093,6 +1126,7 @@ function generateId(){
 
   let result = "IT-";
 
+
   for(
     let i = 0;
     i < 8;
@@ -1108,6 +1142,7 @@ function generateId(){
       ];
 
   }
+
 
   return result;
 
@@ -1141,6 +1176,7 @@ function normalizePhotos(value){
     return value.filter(Boolean);
 
   }
+
 
   return [];
 
@@ -1190,11 +1226,7 @@ function normalizeBike(row){
     photos:
       normalizePhotos(
         row.photos
-      ),
-
-    created_at:
-      row.created_at ||
-      null
+      )
 
   };
 
@@ -1232,54 +1264,31 @@ function getPhotoUrl(path){
     .getPublicUrl(path);
 
 
-  return publicData?.publicUrl || "";
+  return publicData.publicUrl;
 
 }
 
 
 /* =========================================================
-   ELIMINA FILE CARICATI IN CASO DI ERRORE
+   PULIZIA FOTO TEMPORANEE
 ========================================================= */
 
-async function deleteUploadedPhotos(paths){
+function clearSelectedPhotos(){
 
-  if(
-    !Array.isArray(paths) ||
-    !paths.length
-  ){
+  selectedPhotos.forEach(photo => {
 
-    return;
+    if(photo.preview){
 
-  }
-
-
-  try{
-
-    const {
-      error
-    } = await db
-      .storage
-      .from(PHOTO_BUCKET)
-      .remove(paths);
-
-
-    if(error){
-
-      console.warn(
-        "Impossibile eliminare foto temporanee:",
-        error
+      URL.revokeObjectURL(
+        photo.preview
       );
 
     }
 
-  }catch(error){
+  });
 
-    console.warn(
-      "Errore pulizia foto:",
-      error
-    );
 
-  }
+  selectedPhotos = [];
 
 }
 
@@ -1301,19 +1310,14 @@ function bikeCover(b){
       );
 
 
-    if(url){
+    return `
 
-      return `
+      <img
+        src="${escapeHTML(url)}"
+        alt="Foto bicicletta"
+      >
 
-        <img
-          src="${escapeHTML(url)}"
-          alt="Foto bicicletta"
-          loading="lazy"
-        >
-
-      `;
-
-    }
+    `;
 
   }
 
@@ -1395,7 +1399,10 @@ function card(b){
 
 function home(){
 
+  clearSelectedPhotos();
+
   closeM();
+
 
   navigation.style.display =
     "flex";
@@ -1544,7 +1551,10 @@ function home(){
 
 function bikes(){
 
+  clearSelectedPhotos();
+
   closeM();
+
 
   navigation.style.display =
     "flex";
@@ -1599,9 +1609,11 @@ function openForm(content){
     "form-open"
   );
 
+
   modal.classList.add(
     "active"
   );
+
 
   modal.innerHTML = `
 
@@ -1640,7 +1652,7 @@ function add(){
     <button
       type="button"
       class="back"
-      onclick="closeM(); home();"
+      onclick="home()"
     >
       ‹ Annulla
     </button>
@@ -1722,7 +1734,8 @@ function add(){
       <div class="photo-info">
 
         Puoi aggiungere fino a
-        ${MAX_PHOTOS} fotografie della bicicletta.
+        ${MAX_PHOTOS} fotografie.
+        Le foto rimarranno private.
 
       </div>
 
@@ -1779,7 +1792,7 @@ function add(){
 
 
 /* =========================================================
-   SELEZIONE FOTO
+   SELEZIONE FOTO NUOVA BICI
 ========================================================= */
 
 function handlePhotoSelection(event){
@@ -1808,6 +1821,7 @@ function handlePhotoSelection(event){
       `Puoi caricare al massimo ${MAX_PHOTOS} foto.`
     );
 
+
     event.target.value = "";
 
     return;
@@ -1828,7 +1842,7 @@ function handlePhotoSelection(event){
   ){
 
     alert(
-      `Sono state aggiunte solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
+      `Sono state selezionate solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
     );
 
   }
@@ -1837,17 +1851,14 @@ function handlePhotoSelection(event){
   filesToAdd.forEach(file => {
 
     if(
-      !file.type ||
-      !file.type.startsWith("image/")
+      !file.type.startsWith(
+        "image/"
+      )
     ){
 
       return;
 
     }
-
-
-    const preview =
-      URL.createObjectURL(file);
 
 
     selectedPhotos.push({
@@ -1856,7 +1867,9 @@ function handlePhotoSelection(event){
         file,
 
       preview:
-        preview
+        URL.createObjectURL(
+          file
+        )
 
     });
 
@@ -1872,7 +1885,7 @@ function handlePhotoSelection(event){
 
 
 /* =========================================================
-   ANTEPRIMA FOTO
+   ANTEPRIMA NUOVE FOTO
 ========================================================= */
 
 function renderPhotoPreview(){
@@ -1921,7 +1934,7 @@ function renderPhotoPreview(){
 
 
 /* =========================================================
-   ELIMINA FOTO SELEZIONATA
+   ELIMINA FOTO NUOVA PRIMA DEL SALVATAGGIO
 ========================================================= */
 
 function removeSelectedPhoto(index){
@@ -1954,68 +1967,44 @@ function removeSelectedPhoto(index){
 
 
 /* =========================================================
-   PULISCI FOTO TEMPORANEE
-========================================================= */
-
-function clearSelectedPhotos(){
-
-  selectedPhotos.forEach(photo => {
-
-    if(
-      photo &&
-      photo.preview
-    ){
-
-      URL.revokeObjectURL(
-        photo.preview
-      );
-
-    }
-
-  });
-
-
-  selectedPhotos = [];
-
-}
-
-
-/* =========================================================
    CREA BICI
 ========================================================= */
 
 async function createBike(){
 
-  const brandInput =
-    document.getElementById("bikeBrand");
-
-  const modelInput =
-    document.getElementById("bikeModel");
-
-  const yearInput =
-    document.getElementById("bikeYear");
-
-  const colorInput =
-    document.getElementById("bikeColor");
-
-  const frameInput =
-    document.getElementById("bikeFrame");
-
-
   const brand =
-    brandInput.value.trim();
+    document
+      .getElementById("bikeBrand")
+      .value
+      .trim();
+
 
   const model =
-    modelInput.value.trim();
+    document
+      .getElementById("bikeModel")
+      .value
+      .trim();
+
 
   const year =
-    yearInput.value.trim();
+    document
+      .getElementById("bikeYear")
+      .value
+      .trim();
+
 
   const color =
-    colorInput.value.trim();
+    document
+      .getElementById("bikeColor")
+      .value
+      .trim();
+
 
   const frame =
-    frameInput.value.trim();
+    document
+      .getElementById("bikeFrame")
+      .value
+      .trim();
 
 
   if(
@@ -2041,6 +2030,7 @@ async function createBike(){
 
   button.disabled = true;
 
+
   button.textContent =
     "CREAZIONE BICI...";
 
@@ -2049,16 +2039,16 @@ async function createBike(){
     generateId();
 
 
-  const uploadedPhotos =
+  let uploadedPhotos =
     [];
 
 
   try{
 
 
-    /* -----------------------------------------------------
+    /*
        1. CARICAMENTO FOTO
-    ----------------------------------------------------- */
+    */
 
     if(selectedPhotos.length){
 
@@ -2080,32 +2070,24 @@ async function createBike(){
           photo.file;
 
 
-        let extension =
+        const extension =
           file.name
             .split(".")
             .pop()
-            ?.toLowerCase();
+            ?.toLowerCase()
+          ||
+          "jpg";
 
 
-        if(
-          !extension ||
-          extension.length > 10
-        ){
-
-          extension = "jpg";
-
-        }
-
-
-        extension =
+        const safeExtension =
           extension.replace(
             /[^a-z0-9]/gi,
             ""
-          ) || "jpg";
+          );
 
 
         const filePath =
-          `${bikeId}/${Date.now()}_${i}.${extension}`;
+          `${bikeId}/${Date.now()}_${i}.${safeExtension}`;
 
 
         const {
@@ -2150,9 +2132,9 @@ async function createBike(){
     }
 
 
-    /* -----------------------------------------------------
-       2. CREA BICI NEL DATABASE
-    ----------------------------------------------------- */
+    /*
+       2. CREA BICI
+    */
 
     button.textContent =
       "IMMATRICOLAZIONE...";
@@ -2205,10 +2187,6 @@ async function createBike(){
     }
 
 
-    /* -----------------------------------------------------
-       3. AGGIORNA DATI LOCALI
-    ----------------------------------------------------- */
-
     let bike;
 
 
@@ -2251,10 +2229,7 @@ async function createBike(){
           "active",
 
         photos:
-          uploadedPhotos,
-
-        created_at:
-          new Date().toISOString()
+          uploadedPhotos
 
       };
 
@@ -2272,10 +2247,6 @@ async function createBike(){
     clearSelectedPhotos();
 
 
-    /* -----------------------------------------------------
-       4. MOSTRA DETTAGLIO
-    ----------------------------------------------------- */
-
     closeM();
 
 
@@ -2289,14 +2260,6 @@ async function createBike(){
     console.error(
       "Errore immatricolazione:",
       error
-    );
-
-
-    /* Se il database fallisce dopo l'upload,
-       eliminiamo le foto già caricate */
-
-    await deleteUploadedPhotos(
-      uploadedPhotos
     );
 
 
@@ -2350,7 +2313,9 @@ function renderBikePhotos(photos){
         photos.map(path => {
 
           const url =
-            getPhotoUrl(path);
+            getPhotoUrl(
+              path
+            );
 
 
           return `
@@ -2363,7 +2328,6 @@ function renderBikePhotos(photos){
               <img
                 src="${escapeHTML(url)}"
                 alt="Foto bicicletta"
-                loading="lazy"
               >
 
             </div>
@@ -2385,6 +2349,9 @@ function renderBikePhotos(photos){
 ========================================================= */
 
 function detail(idValue){
+
+  clearSelectedPhotos();
+
 
   const b =
     data.find(
@@ -2412,7 +2379,7 @@ function detail(idValue){
     <button
       type="button"
       class="back"
-      onclick="closeM(); home();"
+      onclick="home()"
     >
       ‹ Indietro
     </button>
@@ -2519,6 +2486,17 @@ function detail(idValue){
       </button>
 
 
+      <button
+        type="button"
+        class="secondary"
+        onclick="editBike('${escapeHTML(b.id)}')"
+      >
+
+        ✏️ MODIFICA DATI BICI
+
+      </button>
+
+
     </div>
 
   `);
@@ -2564,17 +2542,832 @@ function detail(idValue){
 
 
 /* =========================================================
-   VISUALIZZATORE FOTO
+   MODIFICA BICI
 ========================================================= */
 
-function openPhotoViewer(url){
+function editBike(idValue){
 
-  if(!url){
+  clearSelectedPhotos();
+
+
+  const b =
+    data.find(
+      q => q.id === idValue
+    );
+
+
+  if(!b){
+
+    alert(
+      "Bici non trovata."
+    );
 
     return;
 
   }
 
+
+  const existingPhotos =
+    normalizePhotos(
+      b.photos
+    );
+
+
+  openForm(`
+
+    <button
+      type="button"
+      class="back"
+      onclick="detail('${escapeHTML(b.id)}')"
+    >
+      ‹ Annulla
+    </button>
+
+
+    <h1>
+      Modifica bici
+    </h1>
+
+
+    <label for="bikeBrand">
+      Marca
+    </label>
+
+    <input
+      id="bikeBrand"
+      type="text"
+      autocomplete="off"
+      value="${escapeHTML(b.brand)}"
+    >
+
+
+    <label for="bikeModel">
+      Modello
+    </label>
+
+    <input
+      id="bikeModel"
+      type="text"
+      autocomplete="off"
+      value="${escapeHTML(b.model)}"
+    >
+
+
+    <label for="bikeYear">
+      Anno
+    </label>
+
+    <input
+      id="bikeYear"
+      type="number"
+      inputmode="numeric"
+      value="${escapeHTML(b.year)}"
+    >
+
+
+    <label for="bikeColor">
+      Colore
+    </label>
+
+    <input
+      id="bikeColor"
+      type="text"
+      autocomplete="off"
+      value="${escapeHTML(b.color)}"
+    >
+
+
+    <label for="bikeFrame">
+      Numero telaio
+    </label>
+
+    <input
+      id="bikeFrame"
+      type="text"
+      autocomplete="off"
+      value="${escapeHTML(b.frame_number)}"
+    >
+
+
+    <label>
+      Fotografie della bici
+    </label>
+
+
+    <div class="photo-box">
+
+
+      <div class="photo-info">
+
+        Puoi modificare le foto.
+        Massimo ${MAX_PHOTOS} fotografie in totale.
+
+      </div>
+
+
+      <div
+        id="existingPhotos"
+        class="photo-grid"
+      >
+
+        ${
+          existingPhotos.length
+          ? existingPhotos.map((path,index) => {
+
+              const url =
+                getPhotoUrl(path);
+
+              return `
+
+                <div class="photo-item">
+
+                  <img
+                    src="${escapeHTML(url)}"
+                    alt="Foto bicicletta"
+                  >
+
+                  <button
+                    type="button"
+                    class="remove-photo"
+                    onclick="removeExistingPhoto('${escapeHTML(b.id)}', ${index})"
+                  >
+                    ×
+                  </button>
+
+                </div>
+
+              `;
+
+            }).join("")
+          : ""
+        }
+
+      </div>
+
+
+      <input
+        id="bikePhotos"
+        type="file"
+        accept="image/*"
+        multiple
+        capture="environment"
+        style="display:none"
+        onchange="handleEditPhotoSelection(event, '${escapeHTML(b.id)}')"
+      >
+
+
+      <button
+        type="button"
+        class="photo-add"
+        onclick="document.getElementById('bikePhotos').click()"
+      >
+
+        📷 AGGIUNGI FOTO
+
+      </button>
+
+
+      <div
+        id="photoPreview"
+        class="photo-grid"
+      ></div>
+
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        id="updateBikeButton"
+        class="primary"
+        onclick="updateBike('${escapeHTML(b.id)}')"
+      >
+
+        SALVA MODIFICHE
+
+      </button>
+
+    </div>
+
+  `);
+
+}
+
+
+/* =========================================================
+   SELEZIONE FOTO IN MODIFICA
+========================================================= */
+
+function handleEditPhotoSelection(event, bikeId){
+
+  const b =
+    data.find(
+      q => q.id === bikeId
+    );
+
+
+  if(!b){
+
+    return;
+
+  }
+
+
+  const files =
+    Array.from(
+      event.target.files || []
+    );
+
+
+  if(!files.length){
+
+    return;
+
+  }
+
+
+  const existingCount =
+    normalizePhotos(
+      b.photos
+    ).length;
+
+
+  const availableSlots =
+    MAX_PHOTOS -
+    existingCount -
+    selectedPhotos.length;
+
+
+  if(availableSlots <= 0){
+
+    alert(
+      `Puoi avere al massimo ${MAX_PHOTOS} foto.`
+    );
+
+
+    event.target.value = "";
+
+    return;
+
+  }
+
+
+  const filesToAdd =
+    files.slice(
+      0,
+      availableSlots
+    );
+
+
+  if(
+    files.length >
+    availableSlots
+  ){
+
+    alert(
+      `Sono state selezionate solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
+    );
+
+  }
+
+
+  filesToAdd.forEach(file => {
+
+    if(
+      !file.type.startsWith(
+        "image/"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    selectedPhotos.push({
+
+      file:
+        file,
+
+      preview:
+        URL.createObjectURL(
+          file
+        )
+
+    });
+
+  });
+
+
+  event.target.value = "";
+
+
+  renderPhotoPreview();
+
+}
+
+
+/* =========================================================
+   ELIMINA FOTO ESISTENTE
+========================================================= */
+
+async function removeExistingPhoto(bikeId, index){
+
+  const b =
+    data.find(
+      q => q.id === bikeId
+    );
+
+
+  if(!b){
+
+    return;
+
+  }
+
+
+  const photos =
+    normalizePhotos(
+      b.photos
+    );
+
+
+  const photoPath =
+    photos[index];
+
+
+  if(!photoPath){
+
+    return;
+
+  }
+
+
+  if(
+    !confirm(
+      "Vuoi eliminare questa fotografia?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+
+    /*
+       1. ELIMINA FILE DA STORAGE
+    */
+
+    const {
+      error:storageError
+    } = await db
+      .storage
+      .from(PHOTO_BUCKET)
+      .remove([
+        photoPath
+      ]);
+
+
+    if(storageError){
+
+      throw new Error(
+        storageError.message
+      );
+
+    }
+
+
+    /*
+       2. RIMUOVE IL RIFERIMENTO
+    */
+
+    photos.splice(
+      index,
+      1
+    );
+
+
+    /*
+       3. AGGIORNA DATABASE
+    */
+
+    const {
+      data:updatedRows,
+      error
+    } = await db
+      .from("bikes")
+      .update({
+
+        photos:
+          photos
+
+      })
+      .eq(
+        "biicode_id",
+        bikeId
+      )
+      .select();
+
+
+    if(error){
+
+      throw new Error(
+        error.message
+      );
+
+    }
+
+
+    if(
+      !updatedRows ||
+      !updatedRows.length
+    ){
+
+      throw new Error(
+        "Nessuna bici aggiornata."
+      );
+
+    }
+
+
+    const updatedBike =
+      normalizeBike(
+        updatedRows[0]
+      );
+
+
+    const bikeIndex =
+      data.findIndex(
+        q => q.id === bikeId
+      );
+
+
+    if(bikeIndex !== -1){
+
+      data[bikeIndex] =
+        updatedBike;
+
+    }
+
+
+    save();
+
+
+    /*
+       Riapre la modifica
+       con le foto aggiornate.
+    */
+
+    editBike(
+      bikeId
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "Errore eliminazione foto:",
+      error
+    );
+
+
+    alert(
+      "Impossibile eliminare la fotografia.\n\n" +
+      error.message
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SALVA MODIFICHE BICI
+========================================================= */
+
+async function updateBike(idValue){
+
+  const b =
+    data.find(
+      q => q.id === idValue
+    );
+
+
+  if(!b){
+
+    alert(
+      "Bici non trovata."
+    );
+
+    return;
+
+  }
+
+
+  const brand =
+    document
+      .getElementById("bikeBrand")
+      .value
+      .trim();
+
+
+  const model =
+    document
+      .getElementById("bikeModel")
+      .value
+      .trim();
+
+
+  const year =
+    document
+      .getElementById("bikeYear")
+      .value
+      .trim();
+
+
+  const color =
+    document
+      .getElementById("bikeColor")
+      .value
+      .trim();
+
+
+  const frame =
+    document
+      .getElementById("bikeFrame")
+      .value
+      .trim();
+
+
+  if(
+    !brand ||
+    !model ||
+    !frame
+  ){
+
+    alert(
+      "Inserisci marca, modello e numero telaio."
+    );
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "updateBikeButton"
+    );
+
+
+  if(button){
+
+    button.disabled = true;
+
+    button.textContent =
+      "SALVATAGGIO...";
+
+  }
+
+
+  try{
+
+
+    /*
+       Copia foto esistenti.
+    */
+
+    let photos =
+      normalizePhotos(
+        b.photos
+      );
+
+
+    /*
+       CARICA NUOVE FOTO
+    */
+
+    if(selectedPhotos.length){
+
+      if(button){
+
+        button.textContent =
+          "CARICAMENTO FOTO...";
+
+      }
+
+
+      for(
+        let i = 0;
+        i < selectedPhotos.length;
+        i++
+      ){
+
+        const photo =
+          selectedPhotos[i];
+
+
+        const file =
+          photo.file;
+
+
+        const extension =
+          file.name
+            .split(".")
+            .pop()
+            ?.toLowerCase()
+          ||
+          "jpg";
+
+
+        const safeExtension =
+          extension.replace(
+            /[^a-z0-9]/gi,
+            ""
+          );
+
+
+        const filePath =
+          `${idValue}/${Date.now()}_${i}.${safeExtension}`;
+
+
+        const {
+          error:uploadError
+        } = await db
+          .storage
+          .from(PHOTO_BUCKET)
+          .upload(
+            filePath,
+            file,
+            {
+
+              cacheControl:
+                "3600",
+
+              upsert:
+                false,
+
+              contentType:
+                file.type
+
+            }
+          );
+
+
+        if(uploadError){
+
+          throw new Error(
+            "Impossibile caricare una fotografia: " +
+            uploadError.message
+          );
+
+        }
+
+
+        photos.push(
+          filePath
+        );
+
+      }
+
+    }
+
+
+    /*
+       AGGIORNA DATI BICI
+    */
+
+    if(button){
+
+      button.textContent =
+        "AGGIORNAMENTO...";
+
+    }
+
+
+    const {
+      data:updatedRows,
+      error
+    } = await db
+      .from("bikes")
+      .update({
+
+        brand:
+          brand,
+
+        model:
+          model,
+
+        year:
+          year,
+
+        color:
+          color,
+
+        frame_number:
+          frame,
+
+        photos:
+          photos
+
+      })
+      .eq(
+        "biicode_id",
+        idValue
+      )
+      .select();
+
+
+    if(error){
+
+      throw new Error(
+        error.message
+      );
+
+    }
+
+
+    if(
+      !updatedRows ||
+      !updatedRows.length
+    ){
+
+      throw new Error(
+        "Nessuna bici aggiornata."
+      );
+
+    }
+
+
+    const updatedBike =
+      normalizeBike(
+        updatedRows[0]
+      );
+
+
+    const index =
+      data.findIndex(
+        q => q.id === idValue
+      );
+
+
+    if(index !== -1){
+
+      data[index] =
+        updatedBike;
+
+    }
+
+
+    save();
+
+
+    clearSelectedPhotos();
+
+
+    detail(
+      idValue
+    );
+
+
+  }catch(error){
+
+    console.error(
+      "Errore aggiornamento bici:",
+      error
+    );
+
+
+    alert(
+      "Impossibile salvare le modifiche.\n\n" +
+      error.message
+    );
+
+
+    if(button){
+
+      button.disabled = false;
+
+      button.textContent =
+        "SALVA MODIFICHE";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   VISUALIZZATORE FOTO
+========================================================= */
+
+function openPhotoViewer(url){
 
   const viewer =
     document.getElementById(
@@ -2607,18 +3400,9 @@ function closePhotoViewer(){
     );
 
 
-  const image =
-    document.getElementById(
-      "viewerImage"
-    );
-
-
   viewer.classList.remove(
     "active"
   );
-
-
-  image.src = "";
 
 }
 
@@ -2810,7 +3594,10 @@ function scan(){
 
 function activity(){
 
+  clearSelectedPhotos();
+
   closeM();
+
 
   navigation.style.display =
     "flex";
@@ -2871,7 +3658,10 @@ function activity(){
 
 function profile(){
 
+  clearSelectedPhotos();
+
   closeM();
+
 
   navigation.style.display =
     "flex";
@@ -2888,11 +3678,9 @@ function profile(){
       (total,b) => {
 
         return total +
-          (
-            Array.isArray(b.photos)
-            ? b.photos.length
-            : 0
-          );
+          normalizePhotos(
+            b.photos
+          ).length;
 
       },
       0
@@ -2967,9 +3755,11 @@ function closeM(){
     "form-open"
   );
 
+
   modal.classList.remove(
     "active"
   );
+
 
   modal.innerHTML = "";
 
@@ -2989,13 +3779,7 @@ async function loadData(){
       error
     } = await db
       .from("bikes")
-      .select("*")
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      );
+      .select("*");
 
 
     if(error){
@@ -3095,6 +3879,7 @@ async function loadPublicBike(bikeId){
       error
     );
 
+
     return null;
 
   }
@@ -3190,7 +3975,7 @@ async function publicBike(){
 
 
   /*
-     Nella pagina pubblica NON mostriamo:
+     NON MOSTRIAMO PUBBLICAMENTE:
      - fotografie
      - numero telaio
      - dati proprietario
