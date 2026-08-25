@@ -498,6 +498,10 @@ input:focus{
   border-radius:14px;
 
   background:#07101D;
+
+  border:1px solid #203149;
+
+  cursor:pointer;
 }
 
 .detail-photo img{
@@ -507,8 +511,6 @@ input:focus{
   object-fit:cover;
 
   display:block;
-
-  cursor:pointer;
 }
 
 
@@ -1013,10 +1015,7 @@ const MAX_PHOTOS =
 let data = [];
 
 
-/*
-   Foto temporanee selezionate
-   durante l'immatricolazione.
-*/
+/* Foto temporanee durante immatricolazione */
 
 let selectedPhotos = [];
 
@@ -1062,7 +1061,10 @@ function loadLocal(){
 
     if(Array.isArray(local)){
 
-      data = local;
+      data =
+        local.map(
+          normalizeBike
+        );
 
     }
 
@@ -1188,7 +1190,11 @@ function normalizeBike(row){
     photos:
       normalizePhotos(
         row.photos
-      )
+      ),
+
+    created_at:
+      row.created_at ||
+      null
 
   };
 
@@ -1208,11 +1214,6 @@ function getPhotoUrl(path){
   }
 
 
-  /*
-     Se per qualche motivo
-     è già un URL completo.
-  */
-
   if(
     String(path).startsWith("http://") ||
     String(path).startsWith("https://")
@@ -1231,7 +1232,54 @@ function getPhotoUrl(path){
     .getPublicUrl(path);
 
 
-  return publicData.publicUrl;
+  return publicData?.publicUrl || "";
+
+}
+
+
+/* =========================================================
+   ELIMINA FILE CARICATI IN CASO DI ERRORE
+========================================================= */
+
+async function deleteUploadedPhotos(paths){
+
+  if(
+    !Array.isArray(paths) ||
+    !paths.length
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const {
+      error
+    } = await db
+      .storage
+      .from(PHOTO_BUCKET)
+      .remove(paths);
+
+
+    if(error){
+
+      console.warn(
+        "Impossibile eliminare foto temporanee:",
+        error
+      );
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "Errore pulizia foto:",
+      error
+    );
+
+  }
 
 }
 
@@ -1253,14 +1301,19 @@ function bikeCover(b){
       );
 
 
-    return `
+    if(url){
 
-      <img
-        src="${escapeHTML(url)}"
-        alt="Foto bicicletta"
-      >
+      return `
 
-    `;
+        <img
+          src="${escapeHTML(url)}"
+          alt="Foto bicicletta"
+          loading="lazy"
+        >
+
+      `;
+
+    }
 
   }
 
@@ -1579,7 +1632,7 @@ function openForm(content){
 
 function add(){
 
-  selectedPhotos = [];
+  clearSelectedPhotos();
 
 
   openForm(`
@@ -1669,8 +1722,7 @@ function add(){
       <div class="photo-info">
 
         Puoi aggiungere fino a
-        ${MAX_PHOTOS} fotografie.
-        Le foto rimarranno private.
+        ${MAX_PHOTOS} fotografie della bicicletta.
 
       </div>
 
@@ -1776,7 +1828,7 @@ function handlePhotoSelection(event){
   ){
 
     alert(
-      `Sono state selezionate solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
+      `Sono state aggiunte solo ${availableSlots} foto perché il limite è ${MAX_PHOTOS}.`
     );
 
   }
@@ -1785,9 +1837,8 @@ function handlePhotoSelection(event){
   filesToAdd.forEach(file => {
 
     if(
-      !file.type.startsWith(
-        "image/"
-      )
+      !file.type ||
+      !file.type.startsWith("image/")
     ){
 
       return;
@@ -1796,9 +1847,7 @@ function handlePhotoSelection(event){
 
 
     const preview =
-      URL.createObjectURL(
-        file
-      );
+      URL.createObjectURL(file);
 
 
     selectedPhotos.push({
@@ -1905,6 +1954,33 @@ function removeSelectedPhoto(index){
 
 
 /* =========================================================
+   PULISCI FOTO TEMPORANEE
+========================================================= */
+
+function clearSelectedPhotos(){
+
+  selectedPhotos.forEach(photo => {
+
+    if(
+      photo &&
+      photo.preview
+    ){
+
+      URL.revokeObjectURL(
+        photo.preview
+      );
+
+    }
+
+  });
+
+
+  selectedPhotos = [];
+
+}
+
+
+/* =========================================================
    CREA BICI
 ========================================================= */
 
@@ -1973,18 +2049,16 @@ async function createBike(){
     generateId();
 
 
-  let uploadedPhotos =
+  const uploadedPhotos =
     [];
 
 
   try{
 
 
-    /*
-       -----------------------------------------------------
+    /* -----------------------------------------------------
        1. CARICAMENTO FOTO
-       -----------------------------------------------------
-    */
+    ----------------------------------------------------- */
 
     if(selectedPhotos.length){
 
@@ -2006,24 +2080,32 @@ async function createBike(){
           photo.file;
 
 
-        const extension =
+        let extension =
           file.name
             .split(".")
             .pop()
-            ?.toLowerCase()
-          ||
-          "jpg";
+            ?.toLowerCase();
 
 
-        const safeExtension =
+        if(
+          !extension ||
+          extension.length > 10
+        ){
+
+          extension = "jpg";
+
+        }
+
+
+        extension =
           extension.replace(
             /[^a-z0-9]/gi,
             ""
-          );
+          ) || "jpg";
 
 
         const filePath =
-          `${bikeId}/${Date.now()}_${i}.${safeExtension}`;
+          `${bikeId}/${Date.now()}_${i}.${extension}`;
 
 
         const {
@@ -2051,12 +2133,6 @@ async function createBike(){
 
         if(uploadError){
 
-          console.error(
-            "Errore upload foto:",
-            uploadError
-          );
-
-
           throw new Error(
             "Impossibile caricare una fotografia: " +
             uploadError.message
@@ -2074,11 +2150,9 @@ async function createBike(){
     }
 
 
-    /*
-       -----------------------------------------------------
-       2. CREA BICI
-       -----------------------------------------------------
-    */
+    /* -----------------------------------------------------
+       2. CREA BICI NEL DATABASE
+    ----------------------------------------------------- */
 
     button.textContent =
       "IMMATRICOLAZIONE...";
@@ -2124,12 +2198,6 @@ async function createBike(){
 
     if(error){
 
-      console.error(
-        "Errore Supabase:",
-        error
-      );
-
-
       throw new Error(
         error.message
       );
@@ -2137,11 +2205,9 @@ async function createBike(){
     }
 
 
-    /*
-       -----------------------------------------------------
+    /* -----------------------------------------------------
        3. AGGIORNA DATI LOCALI
-       -----------------------------------------------------
-    */
+    ----------------------------------------------------- */
 
     let bike;
 
@@ -2185,7 +2251,10 @@ async function createBike(){
           "active",
 
         photos:
-          uploadedPhotos
+          uploadedPhotos,
+
+        created_at:
+          new Date().toISOString()
 
       };
 
@@ -2200,32 +2269,12 @@ async function createBike(){
     save();
 
 
-    /*
-       Liberiamo memoria
-       delle anteprime.
-    */
-
-    selectedPhotos.forEach(photo => {
-
-      if(photo.preview){
-
-        URL.revokeObjectURL(
-          photo.preview
-        );
-
-      }
-
-    });
+    clearSelectedPhotos();
 
 
-    selectedPhotos = [];
-
-
-    /*
-       -----------------------------------------------------
+    /* -----------------------------------------------------
        4. MOSTRA DETTAGLIO
-       -----------------------------------------------------
-    */
+    ----------------------------------------------------- */
 
     closeM();
 
@@ -2240,6 +2289,14 @@ async function createBike(){
     console.error(
       "Errore immatricolazione:",
       error
+    );
+
+
+    /* Se il database fallisce dopo l'upload,
+       eliminiamo le foto già caricate */
+
+    await deleteUploadedPhotos(
+      uploadedPhotos
     );
 
 
@@ -2293,9 +2350,7 @@ function renderBikePhotos(photos){
         photos.map(path => {
 
           const url =
-            getPhotoUrl(
-              path
-            );
+            getPhotoUrl(path);
 
 
           return `
@@ -2308,6 +2363,7 @@ function renderBikePhotos(photos){
               <img
                 src="${escapeHTML(url)}"
                 alt="Foto bicicletta"
+                loading="lazy"
               >
 
             </div>
@@ -2513,6 +2569,13 @@ function detail(idValue){
 
 function openPhotoViewer(url){
 
+  if(!url){
+
+    return;
+
+  }
+
+
   const viewer =
     document.getElementById(
       "photoViewer"
@@ -2544,9 +2607,18 @@ function closePhotoViewer(){
     );
 
 
+  const image =
+    document.getElementById(
+      "viewerImage"
+    );
+
+
   viewer.classList.remove(
     "active"
   );
+
+
+  image.src = "";
 
 }
 
@@ -2917,7 +2989,13 @@ async function loadData(){
       error
     } = await db
       .from("bikes")
-      .select("*");
+      .select("*")
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
 
 
     if(error){
@@ -3112,8 +3190,7 @@ async function publicBike(){
 
 
   /*
-     NOTA IMPORTANTE:
-     Qui NON mostriamo:
+     Nella pagina pubblica NON mostriamo:
      - fotografie
      - numero telaio
      - dati proprietario
