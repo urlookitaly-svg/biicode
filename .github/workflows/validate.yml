@@ -1,0 +1,27 @@
+name: Validate BIICODE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate HTML and JavaScript
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          scripts = re.findall(r'<script>(.*?)</script>', html, re.S)
+          if not scripts:
+              raise SystemExit('Inline application script not found')
+          Path('/tmp/app.js').write_text(scripts[-1], encoding='utf-8')
+          print('index.html OK; extracted', len(scripts[-1]), 'bytes of JS')
+          PY
+          node --check /tmp/app.js
+          test -f manifest.json
+          test -f sw.js
