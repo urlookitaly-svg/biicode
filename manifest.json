@@ -1,0 +1,12 @@
+{
+  "name": "BIICODE",
+  "short_name": "BIICODE",
+  "description": "Identità e verifica della tua bicicletta.",
+  "lang": "it-IT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B1320",
+  "theme_color": "#0B1320",
+  "icons": []
+}
