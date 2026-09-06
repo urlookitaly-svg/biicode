@@ -12,24 +12,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Repair Supabase CDN
+      - name: Repair BIICODE startup
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          old = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
-          new = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+          s = s.replace('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2', 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js')
+          old = '''const {createClient}=supabase;\nconst SUPABASE_URL="https://swzkrwdqfgetwcmaiqty.supabase.co",SUPABASE_KEY="sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";\nconst db=createClient(SUPABASE_URL,SUPABASE_KEY),PHOTO_BUCKET="bike-photos",MAX_PHOTOS=5;'''
+          new = '''const SUPABASE_URL="https://swzkrwdqfgetwcmaiqty.supabase.co",SUPABASE_KEY="sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";\nlet db=null,authBound=false;\nconst PHOTO_BUCKET="bike-photos",MAX_PHOTOS=5;\nfunction initSupabase(){\n  if(db)return true;\n  if(!window.supabase||typeof window.supabase.createClient!=="function")return false;\n  try{db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return true}catch(e){console.error("BIICODE Supabase init:",e);return false}\n}\nfunction bindAuthEvents(){\n  if(!db||authBound)return;\n  authBound=true;\n  db.auth.onAuthStateChange((event,session)=>{\n    if(event==='SIGNED_OUT'){currentUser=null;data=[];showLogin()}\n    else if(event==='PASSWORD_RECOVERY'){showResetPassword()}\n    else if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session?.user&&!booting){currentUser=session.user;startPrivateApp()}\n  });\n}'''
           if old in s:
-              s = s.replace(old, new)
-          p.write_text(s, encoding='utf-8')
-          print('Supabase CDN:', new if new in s else 'NOT FOUND')
+              s=s.replace(old,new)
+          old_listener='''db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;data=[];showLogin()}else if(event==='PASSWORD_RECOVERY'){showResetPassword()}else if(event==='SIGNED_IN'&&session?.user&&!booting){currentUser=session.user;startPrivateApp()}});'''
+          s=s.replace(old_listener,'')
+          old_start='''async function startApp(){const p=new URLSearchParams(location.search),bike=p.get('bike');if(bike){await publicMode(bike);return}const {data:s}=await db.auth.getSession();if(s.session?.user){currentUser=s.session.user;if(location.hash.includes('type=recovery')){showResetPassword();return}await startPrivateApp()}else showLogin()}'''
+          new_start='''async function startApp(){\n  showLogin();\n  if(!initSupabase()){authMsg('Connessione al servizio non disponibile. Riprova tra qualche secondo.');return}\n  bindAuthEvents();\n  const p=new URLSearchParams(location.search),bike=p.get('bike');\n  if(bike){await publicMode(bike);return}\n  try{\n    const {data:s}=await db.auth.getSession();\n    if(s.session?.user){currentUser=s.session.user;if(location.hash.includes('type=recovery')){showResetPassword();return}await startPrivateApp()}\n  }catch(e){console.error('BIICODE startup:',e);showLogin();authMsg('Servizio temporaneamente non disponibile.')}\n}'''
+          if old_start in s:
+              s=s.replace(old_start,new_start)
+          p.write_text(s,encoding='utf-8')
+          print('Startup hardening applied')
           PY
       - name: Commit repair
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add index.html
+          git add index.html .github/workflows/repair-cdn.yml
           git diff --cached --quiet && exit 0
-          git commit -m 'Fix BIICODE Supabase runtime CDN'
+          git commit -m 'Harden BIICODE startup and Supabase initialization'
           git push
