@@ -19,9 +19,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-const {createClient}=supabase;
 const SUPABASE_URL="https://swzkrwdqfgetwcmaiqty.supabase.co",SUPABASE_KEY="sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";
-const db=createClient(SUPABASE_URL,SUPABASE_KEY),PHOTO_BUCKET="bike-photos",MAX_PHOTOS=5;
+let db=null,authBound=false;
+const PHOTO_BUCKET="bike-photos",MAX_PHOTOS=5;
+function initSupabase(){
+  if(db)return true;
+  if(!window.supabase||typeof window.supabase.createClient!=="function")return false;
+  try{db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);return true}catch(e){console.error("BIICODE Supabase init:",e);return false}
+}
+function bindAuthEvents(){
+  if(!db||authBound)return;
+  authBound=true;
+  db.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_OUT'){currentUser=null;data=[];showLogin()}
+    else if(event==='PASSWORD_RECOVERY'){showResetPassword()}
+    else if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session?.user&&!booting){currentUser=session.user;startPrivateApp()}
+  });
+}
 let data=[],currentUser=null,selectedPhotos=[],photosToDelete=[],scannerStream=null,scannerTimer=null,booting=false;
 const app=document.getElementById('app'),modal=document.getElementById('modal'),navigation=document.getElementById('navigation'),header=document.getElementById('header');
 const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');
@@ -85,8 +99,18 @@ function publicHtml(b){const stolen=b.stolen===true;return`<div class="muted">BI
 async function loadData(){if(!currentUser){data=[];return}try{const {data:rows,error}=await db.from('bikes').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});if(error)throw error;data=Array.isArray(rows)?rows.map(normalizeBike):[];saveLocal()}catch(e){console.error(e);loadLocal()}}
 async function startPrivateApp(){if(booting)return;booting=true;try{currentUser=currentUser||((await db.auth.getUser()).data.user);await loadData();home()}finally{booting=false}}
 async function publicMode(id){header.style.display='none';navigation.style.display='none';document.querySelector('main').style.padding='0 20px';app.innerHTML=`<div class="login-screen"><div style="width:100%;max-width:520px"><div class="login-brand">BIICODE</div><div class="login-tag">VERIFICA BICICLETTA</div><div id="publicRoot" class="card">Verifica in corso...</div></div></div>`;const b=await loadPublicBike(id),r=document.getElementById('publicRoot');if(r)r.innerHTML=b?publicHtml(b):'<div class="name">Bici non trovata</div><div class="muted">Questo BIICODE non è associato a una bici registrata.</div>'}
-async function startApp(){const p=new URLSearchParams(location.search),bike=p.get('bike');if(bike){await publicMode(bike);return}const {data:s}=await db.auth.getSession();if(s.session?.user){currentUser=s.session.user;if(location.hash.includes('type=recovery')){showResetPassword();return}await startPrivateApp()}else showLogin()}
-db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){currentUser=null;data=[];showLogin()}else if(event==='PASSWORD_RECOVERY'){showResetPassword()}else if(event==='SIGNED_IN'&&session?.user&&!booting){currentUser=session.user;startPrivateApp()}});
+async function startApp(){
+  showLogin();
+  if(!initSupabase()){authMsg('Connessione al servizio non disponibile. Riprova tra qualche secondo.');return}
+  bindAuthEvents();
+  const p=new URLSearchParams(location.search),bike=p.get('bike');
+  if(bike){await publicMode(bike);return}
+  try{
+    const {data:s}=await db.auth.getSession();
+    if(s.session?.user){currentUser=s.session.user;if(location.hash.includes('type=recovery')){showResetPassword();return}await startPrivateApp()}
+  }catch(e){console.error('BIICODE startup:',e);showLogin();authMsg('Servizio temporaneamente non disponibile.')}
+}
+
 window.addEventListener('beforeunload',stopScanner);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 startApp();
