@@ -1,24 +1,33 @@
-const CACHE="biicode-v7";
+const CACHE="biicode-v8";
 const APP=["./","./index.html","./manifest.json"];
 
 function patchHtml(text){
   let patched=text;
   patched=patched.replace("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2","https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js");
-  patched=patched.replace(/startApp\(\);\s*<\/script>/,`safeBootstrap();</script>`);
-  const helper=`<script>
+  const helper=`
 function safeBootstrap(){
   try{
     const p=new URLSearchParams(location.search),bike=p.get('bike');
     if(bike){publicMode(bike);return}
     if(location.hash.includes('type=recovery')){showResetPassword();return}
     showLogin();
-  }catch(e){console.error('BIICODE bootstrap:',e);try{showLogin()}catch(_){}}
+  }catch(e){
+    console.error('BIICODE bootstrap:',e);
+    try{showLogin()}catch(_){app.innerHTML='<div style="padding:40px;text-align:center;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif"><h2>BIICODE</h2><p>Impossibile avviare l\'app. Ricarica la pagina.</p></div>'}
+  }
 }
-if(window.db&&db.auth){db.auth.onAuthStateChange((event,session)=>{
-  if(event==='INITIAL_SESSION'&&session?.user&&!booting){currentUser=session.user;startPrivateApp()}
-})}
-</script>`;
-  patched=patched.replace('</body>',helper+'</body>');
+if(window.db&&db.auth){
+  db.auth.onAuthStateChange((event,session)=>{
+    if(event==='INITIAL_SESSION'&&session?.user&&!booting){
+      currentUser=session.user;
+      startPrivateApp();
+    }
+  });
+}
+`;
+  if(!patched.includes('function safeBootstrap()')){
+    patched=patched.replace(/startApp\(\);\s*<\/script>/,helper+'safeBootstrap();</script>');
+  }
   return patched;
 }
 
