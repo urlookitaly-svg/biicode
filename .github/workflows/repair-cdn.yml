@@ -1,0 +1,35 @@
+name: Repair BIICODE runtime CDN
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Repair Supabase CDN
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+          new = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'
+          if old in s:
+              s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          print('Supabase CDN:', new if new in s else 'NOT FOUND')
+          PY
+      - name: Commit repair
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix BIICODE Supabase runtime CDN'
+          git push
