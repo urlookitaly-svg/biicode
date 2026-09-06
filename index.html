@@ -17,7 +17,7 @@
 <div id="modal" class="modal"></div>
 <div id="photoViewer" class="photo-viewer" onclick="closePhotoViewer()"><button class="close-viewer" type="button" onclick="event.stopPropagation();closePhotoViewer()">×</button><img id="viewerImage" alt="Foto bicicletta" onclick="event.stopPropagation()"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const {createClient}=supabase;
 const SUPABASE_URL="https://swzkrwdqfgetwcmaiqty.supabase.co",SUPABASE_KEY="sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb";
