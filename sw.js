@@ -1,34 +1,39 @@
-const CACHE='biicode-v6';
-const APP=['./','./index.html','./manifest.json','./fix.js'];
-
-const START_PRIVATE_CURRENT=`async function startPrivateApp(){if(booting)return;booting=true;try{currentUser=currentUser||((await db.auth.getUser()).data.user);await loadData();home()}finally{booting=false}}`;
-const START_PRIVATE_NEW=`async function startPrivateApp(){if(booting)return;if(!currentUser){showLogin();return}booting=true;try{await loadData();home()}catch(e){console.error('BIICODE startup:',e);loadLocal();home()}finally{booting=false}}`;
-const START_APP_CURRENT=`async function startApp(){const p=new URLSearchParams(location.search),bike=p.get('bike');if(bike){await publicMode(bike);return}const {data:s}=await db.auth.getSession();if(s.session?.user){currentUser=s.session.user;if(location.hash.includes('type=recovery')){showResetPassword();return}await startPrivateApp()}else showLogin()}`;
-const START_APP_NEW=`async function startApp(){const p=new URLSearchParams(location.search),bike=p.get('bike');if(bike){await publicMode(bike);return}if(location.hash.includes('type=recovery')){showResetPassword();return}showLogin()}`;
+const CACHE="biicode-v7";
+const APP=["./","./index.html","./manifest.json"];
 
 function patchHtml(text){
   let patched=text;
-  patched=patched.replace('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2','https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js');
-  patched=patched.replace(START_PRIVATE_CURRENT,START_PRIVATE_NEW);
-  patched=patched.replace(START_APP_CURRENT,START_APP_NEW);
-  if(!patched.includes('<script src="./fix.js"></script>')) patched=patched.replace('</head>','<script src="./fix.js"></script></head>');
+  patched=patched.replace("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2","https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js");
+  patched=patched.replace(/startApp\(\);\s*<\/script>/,`safeBootstrap();</script>`);
+  const helper=`<script>
+function safeBootstrap(){
+  try{
+    const p=new URLSearchParams(location.search),bike=p.get('bike');
+    if(bike){publicMode(bike);return}
+    if(location.hash.includes('type=recovery')){showResetPassword();return}
+    showLogin();
+  }catch(e){console.error('BIICODE bootstrap:',e);try{showLogin()}catch(_){}}
+}
+if(window.db&&db.auth){db.auth.onAuthStateChange((event,session)=>{
+  if(event==='INITIAL_SESSION'&&session?.user&&!booting){currentUser=session.user;startPrivateApp()}
+})}
+</script>`;
+  patched=patched.replace('</body>',helper+'</body>');
   return patched;
 }
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(async cache=>{
-    const assets=await Promise.all(APP.map(async url=>{
+    for(const url of APP){
       try{
-        const response=await fetch(url,{cache:'no-store'});
-        if(!response.ok)throw new Error('HTTP '+response.status);
-        if(url.endsWith('.html')||url==='./'){
-          const text=await response.text();
-          return [url,new Response(patchHtml(text),{headers:{'content-type':'text/html; charset=utf-8'}})];
-        }
-        return [url,response];
-      }catch(e){return null}
-    }));
-    for(const item of assets)if(item)await cache.put(item[0],item[1]);
+        const r=await fetch(url,{cache:'no-store'});
+        if(!r.ok)continue;
+        if(url==='./' || url.endsWith('.html')){
+          const t=await r.text();
+          await cache.put(url,new Response(patchHtml(t),{status:r.status,headers:{'content-type':'text/html; charset=utf-8'}}));
+        }else await cache.put(url,r);
+      }catch(e){}
+    }
   }).then(()=>self.skipWaiting()));
 });
 
@@ -40,7 +45,8 @@ self.addEventListener('fetch',event=>{
   const u=new URL(event.request.url);
   if(event.request.method!=='GET'||u.origin!==location.origin)return;
   if(event.request.destination==='document'||u.pathname.endsWith('.html')){
-    event.respondWith(fetch(event.request).then(async r=>{
+    event.respondWith(fetch(event.request,{cache:'no-store'}).then(async r=>{
+      if(!r.ok)return r;
       const text=await r.clone().text();
       const patched=patchHtml(text);
       const headers=new Headers(r.headers);
@@ -52,5 +58,5 @@ self.addEventListener('fetch',event=>{
     }).catch(()=>caches.match(event.request).then(r=>r||caches.match('./index.html'))));
     return;
   }
-  event.respondWith(fetch(event.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(event.request,copy)).catch(()=>{});return r}).catch(()=>caches.match(event.request).then(r=>r||caches.match('./index.html'))));
+  event.respondWith(fetch(event.request).catch(()=>caches.match(event.request).then(r=>r||fetch(event.request))));
 });
