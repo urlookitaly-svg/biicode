@@ -13,10 +13,10 @@
 <script>
 /* BIICODE v3: niente SDK/CDN obbligatorio. L'app parte subito e parla a Supabase via REST. */
 const SUPABASE_URL='https://swzkrwdqfgetwcmaiqty.supabase.co';
-const SUPABASE_KEY='sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb';
+const SUPABASE_KEY='sb_publishable_inpwNp-Uqe-X4BeTl54ui_1ARA1HNb';
 const main=document.getElementById('main'),nav=document.getElementById('nav'),modal=document.getElementById('modal'),mi=document.getElementById('modalin');
 let user=null,bikes=[],session=null,syncing=false;
-const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const esc=x=>String(x??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
 const key=()=>`biicode_v3_${user?.id||'guest'}`;
 const authHeaders=token=>({apikey:SUPABASE_KEY,Authorization:`Bearer ${token||SUPABASE_KEY}`,'Content-Type':'application/json'});
 async function api(path,opts={}){const r=await fetch(SUPABASE_URL+path,{...opts,headers:{...authHeaders(session?.access_token),...(opts.headers||{})}});let data=null;try{data=await r.json()}catch{}if(!r.ok){const e=new Error(data?.msg||data?.message||data?.error_description||data?.error||`HTTP ${r.status}`);e.status=r.status;throw e}return data}
@@ -53,4 +53,5 @@ async function logout(){try{if(session?.access_token)await api('/auth/v1/logout'
 (async()=>{login();const ok=await restoreSession();if(ok)await enter()})();
 </script>
 <script src="./qr.js?v=20260912"></script>
+<script src="./photos-fix.js?v=20260913-2"></script>
 </body></html>
