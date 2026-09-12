@@ -26,7 +26,17 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Inject BIICODE visual refresh
-        run: sed -i 's#</body>#<script src="visual-refresh.js?v=3"></script></body>#' index.html
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          index = Path('index.html').read_text(encoding='utf-8')
+          refresh = Path('visual-refresh.js').read_text(encoding='utf-8')
+          marker = '</body>'
+          if marker not in index:
+              raise SystemExit('index.html: </body> marker not found')
+          index = index.replace(marker, '<script>\n' + refresh + '\n</script>\n' + marker, 1)
+          Path('index.html').write_text(index, encoding='utf-8')
+          PY
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
