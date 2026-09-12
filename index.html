@@ -49,6 +49,7 @@ function detail(enc){const b=bikes.find(x=>x.biicode_id===decodeURIComponent(enc
 async function toggle(enc){const b=bikes.find(x=>x.biicode_id===decodeURIComponent(enc));if(!b)return;b.stolen=!b.stolen;b.status=b.stolen?'stolen':'active';localSave();try{await api(`/rest/v1/bikes?biicode_id=eq.${encodeURIComponent(b.biicode_id)}&user_id=eq.${encodeURIComponent(user.id)}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({stolen:b.stolen,status:b.status})})}catch{}detail(enc)}
 async function deleteBike(enc){const b=bikes.find(x=>x.biicode_id===decodeURIComponent(enc));if(!b||!confirm('Eliminare definitivamente questa bici?'))return;bikes=bikes.filter(x=>x.biicode_id!==b.biicode_id);localSave();try{await api(`/rest/v1/bikes?biicode_id=eq.${encodeURIComponent(b.biicode_id)}&user_id=eq.${encodeURIComponent(user.id)}`,{method:'DELETE',headers:{Prefer:'return=minimal'}})}catch{}closeModal();renderHome()}
 async function logout(){try{if(session?.access_token)await api('/auth/v1/logout',{method:'POST'})}catch{}localStorage.removeItem('biicode_session');session=null;user=null;bikes=[];nav.classList.add('hidden');login()}
-/* Bootstrap non dipende da Supabase JS: la UI viene renderizzata subito. */
-(async()=>{login();const ok=await restoreSession();if(ok)await enter()})();
-</script></body></html>
+/* QR: carica l'estensione direttamente dalla pagina principale. */
+</script>
+<script src="./qr.js?v=20260912"></script>
+</body></html>
