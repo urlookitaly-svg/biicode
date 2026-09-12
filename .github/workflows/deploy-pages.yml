@@ -25,6 +25,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Inject BIICODE visual refresh
+        run: sed -i 's#</body>#<script src="visual-refresh.js?v=2"></script></body>#' index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
