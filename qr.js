@@ -51,15 +51,15 @@
   if(publicId){window.renderHome=function(){showPublic();};window.login=function(){showPublic();};window.renderBikes=function(){showPublic();};window.profile=function(){showPublic();};setTimeout(showPublic,0);setTimeout(showPublic,300);}
   const originalSaveBike=window.saveBike;
   window.saveBike=async function(){
-    const before=new Set((window.bikes||[]).map(x=>x.biicode_id));
+    const before=new Set((bikes||[]).map(x=>x.biicode_id));
     await originalSaveBike();
-    const created=(window.bikes||[]).find(x=>!before.has(x.biicode_id));
-    if(!created||!window.session?.access_token||!window.user?.email)return;
+    const created=(bikes||[]).find(x=>!before.has(x.biicode_id));
+    if(!created||!session?.access_token||!user?.email)return;
     try{
-      const check=await fetch(SUPABASE_URL+'/rest/v1/bikes?select=biicode_id&biicode_id=eq.'+encodeURIComponent(created.biicode_id)+'&user_id=eq.'+encodeURIComponent(window.user.id)+'&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+window.session.access_token}});
+      const check=await fetch(SUPABASE_URL+'/rest/v1/bikes?select=biicode_id&biicode_id=eq.'+encodeURIComponent(created.biicode_id)+'&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token}});
       const rows=await check.json().catch(()=>[]);
       if(!check.ok||!rows.length){setStatus('Offline · bici salvata localmente');return;}
-      const r=await fetch(SUPABASE_URL+'/functions/v1/send-biicode-registration',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+window.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({biicode_id:created.biicode_id,brand:created.brand,model:created.model,year:created.year,color:created.color,frame_number:created.frame_number,customer_email:window.user.email})});
+      const r=await fetch(SUPABASE_URL+'/functions/v1/send-biicode-registration',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({biicode_id:created.biicode_id,brand:created.brand,model:created.model,year:created.year,color:created.color,frame_number:created.frame_number,customer_email:user.email})});
       const data=await r.json().catch(()=>({}));
       if(!r.ok)throw new Error(data.error||`HTTP ${r.status}`);
       setStatus('Online · bici sincronizzata · email inviata');
