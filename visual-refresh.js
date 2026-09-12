@@ -157,21 +157,24 @@
     else window.location.href=publicBikeUrl(id);
   };
 
+  function appBikes(){try{return typeof bikes!=='undefined'&&Array.isArray(bikes)?bikes:[];}catch(e){return [];}}
+
   window.biicodeReportTheft=function(){
     if(typeof window.openModal!=='function')return;
-    if(!Array.isArray(window.bikes)||!window.bikes.length){window.openModal(`<button type="button" class="back" onclick="closeModal()">‹ Indietro</button><h1>Segnala furto</h1><div class="card"><strong>Nessuna bici registrata</strong><div class="muted">Registra prima una bici per poterla segnalare.</div></div>`);return;}
-    const rows=window.bikes.map(b=>`<button class="action" style="width:100%;margin-top:10px;text-align:left" type="button" onclick="biicodeChooseTheft('${encodeURIComponent(b.biicode_id)}')"><strong>${String(b.brand||'')} ${String(b.model||'')}</strong><span class="muted">${String(b.biicode_id||'')}</span></button>`).join('');
+    const list=appBikes();
+    if(!list.length){window.openModal(`<button type="button" class="back" onclick="closeModal()">‹ Indietro</button><h1>Segnala furto</h1><div class="card"><strong>Nessuna bici registrata</strong><div class="muted">Registra prima una bici per poterla segnalare.</div></div>`);return;}
+    const rows=list.map(b=>`<button class="action" style="width:100%;margin-top:10px;text-align:left" type="button" onclick="biicodeChooseTheft('${encodeURIComponent(b.biicode_id)}')"><strong>${String(b.brand||'')} ${String(b.model||'')}</strong><span class="muted">${String(b.biicode_id||'')}</span></button>`).join('');
     window.openModal(`<button type="button" class="back" onclick="closeModal()">‹ Indietro</button><h1>Segnala furto</h1><div class="muted">Seleziona la bici che vuoi segnalare come rubata.</div>${rows}`);
   };
 
   window.biicodeChooseTheft=function(enc){
     const id=decodeURIComponent(enc||'');
-    const b=Array.isArray(window.bikes)?window.bikes.find(x=>x&&x.biicode_id===id):null;
+    const list=appBikes();
+    const b=list.find(x=>x&&x.biicode_id===id);
     if(!b)return alert('Bici non trovata.');
     if(b.stolen){alert('Questa bici risulta già segnalata come rubata.');return;}
     if(!confirm('Vuoi segnalare '+(b.brand||'')+' '+(b.model||'')+' come rubata?'))return;
     if(typeof window.toggle==='function'){
-      closeScanner();
       window.closeModal();
       window.toggle(encodeURIComponent(id));
     }else if(typeof window.detail==='function'){
