@@ -1,6 +1,6 @@
-const CACHE='biicode-v13';
-const APP=['./','./index.html','./manifest.json','./qr.js','./verify.html'];
-const QR_INJECT='<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="./qr.js?v=20260912-photos"></script>';
+const CACHE='biicode-v14';
+const APP=['./','./index.html','./manifest.json','./qr.js','./photos-fix.js','./verify.html'];
+const QR_INJECT='<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="./qr.js?v=20260912-photos"></script><script src="./photos-fix.js?v=20260912-1"></script>';
 function injectQR(response){return response.text().then(html=>{const headers=new Headers(response.headers);headers.delete('content-length');const out=html.replace(/<\/body>/i,QR_INJECT+'</body>');return new Response(out,{status:response.status,statusText:response.statusText,headers});});}
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(async cache=>{for(const url of APP){try{const r=await fetch(url,{cache:'no-store'});if(r.ok)await cache.put(url,r)}catch(e){}}}).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
