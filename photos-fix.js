@@ -5,27 +5,41 @@
   const SUPABASE_KEY='sb_publishable_inpwNp-Uqe-X4BeTl54ui_1ARA1HNb';
   const LEGACY_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3emtyd2RxZmdldHdjbWFpcXR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjM1MjQsImV4cCI6MjEwMjQ5OTUyNH0.u1UzWB8PAHlvQ_yDFrxI46beycyiXhc2yytrPAxkrQg';
 
-  /* If an older gateway/cache rejects the publishable key, retry the same
-     Supabase request with the project's still-active legacy anon key. */
+  /* The app's old authHeaders() puts the publishable key in Authorization.
+     New Supabase keys are not JWTs: they belong in apikey only. */
   const nativeFetch=window.fetch.bind(window);
   window.fetch=async function(input,init){
     const url=typeof input==='string'?input:(input&&input.url)||'';
     if(!url.startsWith(SUPABASE_URL))return nativeFetch(input,init);
+
+    let h=new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));
+    const auth=h.get('Authorization')||'';
+    const publishableBearer=/^Bearer\s+sb_publishable_/i.test(auth);
+
+    /* Permanent compatibility fix: never send sb_publishable_* as Bearer. */
+    if(publishableBearer){
+      h.delete('Authorization');
+      h.set('apikey',SUPABASE_KEY);
+      const next={...(init||{}),headers:h};
+      input=input instanceof Request ? new Request(input,{headers:h}) : input;
+      init=next;
+    }
+
     let r=await nativeFetch(input,init);
     if(r.status!==401&&r.status!==403)return r;
     const probe=r.clone();
     let text='';try{text=await probe.text()}catch(e){}
-    if(!/invalid api key|invalid_api_key/i.test(text))return r;
+    if(!/invalid api key|invalid_api_key|invalid jwt|invalid_jwt/i.test(text))return r;
+
+    /* Fallback for an older cached gateway/client: use the still-active
+       legacy anon key correctly in BOTH apikey and Authorization. */
     try{
-      const h=new Headers(init?.headers|| (input instanceof Request?input.headers:undefined));
-      h.set('apikey',LEGACY_KEY);
-      const auth=h.get('Authorization');
-      if(!auth||/^Bearer\s+(sb_publishable_|eyJ)/.test(auth))h.set('Authorization','Bearer '+LEGACY_KEY);
-      const next={...(init||{}),headers:h};
-      if(input instanceof Request){
-        return nativeFetch(new Request(input,{headers:h}),next);
-      }
-      return nativeFetch(input,next);
+      const retryHeaders=new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));
+      retryHeaders.set('apikey',LEGACY_KEY);
+      retryHeaders.set('Authorization','Bearer '+LEGACY_KEY);
+      const retryInit={...(init||{}),headers:retryHeaders};
+      if(input instanceof Request)return nativeFetch(new Request(input,{headers:retryHeaders}),retryInit);
+      return nativeFetch(input,retryInit);
     }catch(e){return r}
   };
 
