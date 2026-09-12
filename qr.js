@@ -35,15 +35,32 @@
     return null;
   }
 
-  async function getBike(id){
-    const local=localBike(id);
-    if(local)return local;
+  async function getRemoteBike(id){
     try{
       const r=await fetch(SUPABASE_URL+'/rest/v1/bikes?select=*&biicode_id=eq.'+encodeURIComponent(id)+'&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
       if(!r.ok)return null;
       const rows=await r.json();
       return rows&&rows[0]?rows[0]:null;
     }catch(e){return null;}
+  }
+
+  async function ensureRemoteBike(b){
+    const remote=await getRemoteBike(b.biicode_id);
+    if(remote)return remote;
+    if(!b.user_id)return b;
+    try{
+      const payload={biicode_id:b.biicode_id,user_id:b.user_id,brand:b.brand||'',model:b.model||'',year:b.year?Number(b.year):null,color:b.color||'',frame_number:b.frame_number||'',stolen:b.stolen===true,status:b.status||'active',photos:Array.isArray(b.photos)?b.photos:[]};
+      const r=await fetch(SUPABASE_URL+'/rest/v1/bikes',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(payload)});
+      if(!r.ok)return b;
+      const rows=await r.json();
+      return rows&&rows[0]?rows[0]:b;
+    }catch(e){return b;}
+  }
+
+  async function getBike(id){
+    const local=localBike(id);
+    if(local)return local;
+    return getRemoteBike(id);
   }
 
   window.biicodeShare=async function(encoded){
@@ -93,6 +110,7 @@
     const q=document.getElementById('biicodeQr');
     if(q&&window.QRCode)new QRCode(q,{text:publicUrl(b.biicode_id),width:190,height:190});
     else if(q){q.innerHTML='<div style="color:#111;font-weight:800;text-align:center;padding:20px">QR in caricamento…</div>';setTimeout(function(){const x=document.getElementById('biicodeQr');if(x&&window.QRCode)new QRCode(x,{text:publicUrl(b.biicode_id),width:190,height:190});},500);}
+    ensureRemoteBike(b);
   };
 
   async function showPublic(){
@@ -101,7 +119,7 @@
     const nav=document.getElementById('nav');if(nav)nav.classList.add('hidden');
     const root=document.getElementById('main');if(!root)return;
     root.innerHTML='<div class="biicode-public"><div class="logo">b<b>◯</b></div><div class="tag">BIICODE · VERIFICA BICICLETTA</div><div id="publicCard" class="card"><div class="muted">VERIFICA IN CORSO…</div></div></div>';
-    const b=await getBike(id),box=document.getElementById('publicCard');if(!box)return;
+    const b=await getRemoteBike(id),box=document.getElementById('publicCard');if(!box)return;
     if(!b){box.innerHTML='<div style="font-size:22px;font-weight:900">Bici non trovata</div><div class="muted" style="margin-top:8px">Questo BIICODE non è associato a una bicicletta registrata.</div>';return;}
     const stolen=b.stolen===true;
     box.innerHTML=`<div class="muted">BIICODE</div><div style="font-size:24px;font-weight:900;margin-top:5px">${esc(b.biicode_id)}</div><h1>${esc(b.brand)} ${esc(b.model)}</h1><div class="muted">ANNO</div><div style="font-size:19px;font-weight:800;margin:5px 0 16px">${esc(b.year||'-')}</div><div class="muted">COLORE</div><div style="font-size:19px;font-weight:800;margin:5px 0 18px">${esc(b.color||'-')}</div><div class="msg ${stolen?'error':'ok'}">${stolen?'🔴 ATTENZIONE: QUESTA BICI RISULTA RUBATA':'🟢 QUESTA BICI RISULTA ATTIVA'}</div><div class="small" style="text-align:center;margin-top:14px">Il numero di telaio e i dati personali del proprietario non vengono mostrati.</div>`;
