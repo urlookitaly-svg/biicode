@@ -50,7 +50,10 @@
   function authHeaders(token,contentType){const h={apikey:SUPABASE_KEY,Authorization:'Bearer '+(token||SUPABASE_KEY)};if(contentType)h['Content-Type']=contentType;return h;}
   function updateLocalBike(id,photos){try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(!k.startsWith('biicode_v3_'))continue;const rows=JSON.parse(localStorage.getItem(k)||'[]');if(!Array.isArray(rows))continue;let changed=false;for(const row of rows){if(row&&row.biicode_id===id){row.photos=photos;changed=true;}}if(changed)localStorage.setItem(k,JSON.stringify(rows));}}catch(e){}}
   async function updateBikePhotos(id,photos){
-    const r=await fetch(SUPABASE_URL+'/rest/v1/bikes?biicode_id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{...authHeaders(window.session?.access_token||null),'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({photos})});
+    const userId=typeof user!=='undefined'&&user?.id?user.id:null;
+    const filter='biicode_id=eq.'+encodeURIComponent(id)+(userId?'&user_id=eq.'+encodeURIComponent(userId):'');
+    const token=typeof session!=='undefined'&&session?.access_token?session.access_token:null;
+    const r=await fetch(SUPABASE_URL+'/rest/v1/bikes?'+filter,{method:'PATCH',headers:{...authHeaders(token),'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({photos})});
     if(!r.ok){const t=await r.text().catch(()=>r.statusText);throw new Error(t||('HTTP '+r.status));}
     updateLocalBike(id,photos);
   }
@@ -64,9 +67,11 @@
   }
   async function uploadPhoto(id,file,index){
     const blob=await compressPhoto(file);
+    const userId=typeof user!=='undefined'&&user?.id?user.id:'user';
+    const token=typeof session!=='undefined'&&session?.access_token?session.access_token:null;
     const safe=Date.now()+'-'+Math.random().toString(36).slice(2,9)+'-'+index+'.jpg';
-    const path=(window.user?.id||'user')+'/'+id+'/'+safe;
-    const r=await fetch(SUPABASE_URL+'/storage/v1/object/'+PHOTO_BUCKET+'/'+path,{method:'POST',headers:{...authHeaders(window.session?.access_token||null,'image/jpeg'),'x-upsert':'false'},body:blob});
+    const path=userId+'/'+id+'/'+safe;
+    const r=await fetch(SUPABASE_URL+'/storage/v1/object/'+PHOTO_BUCKET+'/'+path,{method:'POST',headers:{...authHeaders(token,'image/jpeg'),'x-upsert':'false'},body:blob});
     if(!r.ok){const t=await r.text().catch(()=>r.statusText);throw new Error(t||('Upload foto fallito: HTTP '+r.status));}
     return photoUrl(path);
   }
@@ -82,14 +87,14 @@
     const current=Array.isArray(b.photos)?b.photos.filter(Boolean).slice(0,MAX_PHOTOS):[];
     const selected=Array.from(files||[]).slice(0,MAX_PHOTOS-current.length);
     if(!selected.length)return alert('Puoi caricare fino a 5 foto per bici.');
-    const bad=Array.from(files||[]).length>selected.length;
+    const tooMany=Array.from(files||[]).length>selected.length;
     const btn=document.querySelector('.biicode-add-photo');if(btn){btn.disabled=true;btn.textContent='CARICAMENTO FOTO…';}
     try{
       const added=[];
       for(let i=0;i<selected.length;i++)added.push(await uploadPhoto(id,selected[i],i));
       const photos=current.concat(added).slice(0,MAX_PHOTOS);
       await updateBikePhotos(id,photos);
-      alert(bad?'Ho caricato le foto disponibili fino al limite di 5.':'Foto caricate correttamente.');
+      alert(tooMany?'Ho caricato le foto disponibili fino al limite di 5.':'Foto caricate correttamente.');
       window.detail(encodeURIComponent(id));
     }catch(e){console.error(e);alert('Non sono riuscito a caricare le foto. Riprova.');}
   };
@@ -101,7 +106,8 @@
     const removed=photos[index];
     try{
       const path=photoPathFromUrl(removed);
-      if(path){const r=await fetch(SUPABASE_URL+'/storage/v1/object/'+PHOTO_BUCKET+'/'+path,{method:'DELETE',headers:authHeaders(window.session?.access_token||null)});if(!r.ok)console.warn('Eliminazione file foto non riuscita',await r.text().catch(()=>''));}
+      const token=typeof session!=='undefined'&&session?.access_token?session.access_token:null;
+      if(path){const r=await fetch(SUPABASE_URL+'/storage/v1/object/'+PHOTO_BUCKET+'/'+path,{method:'DELETE',headers:authHeaders(token)});if(!r.ok)console.warn('Eliminazione file foto non riuscita',await r.text().catch(()=>''));}
       photos.splice(index,1);await updateBikePhotos(id,photos);window.detail(encodeURIComponent(id));
     }catch(e){console.error(e);alert('Non sono riuscito a eliminare la foto.');}
   };
