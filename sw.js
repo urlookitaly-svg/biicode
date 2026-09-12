@@ -1,4 +1,4 @@
-const CACHE='biicode-v17';
+const CACHE='biicode-v18';
 const APP=['./','./index.html','./manifest.json','./qr.js','./photos-fix.js','./visual-refresh.js','./assets/biicode-logo.svg','./verify.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(async cache=>{for(const url of APP){try{const r=await fetch(url,{cache:'no-store'});if(r.ok)await cache.put(url,r)}catch(e){}}}).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
