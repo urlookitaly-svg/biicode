@@ -1,8 +1,34 @@
-/* BIICODE photo upload fix: loaded after qr.js. */
+/* BIICODE photo upload fix + Supabase API compatibility. */
 (function(){
   'use strict';
   const SUPABASE_URL='https://swzkrwdqfgetwcmaiqty.supabase.co';
   const SUPABASE_KEY='sb_publishable_inpwNp-Uqe-X4BeTl54ui_1ARA1HNb';
+  const LEGACY_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3emtyd2RxZmdldHdjbWFpcXR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjM1MjQsImV4cCI6MjEwMjQ5OTUyNH0.u1UzWB8PAHlvQ_yDFrxI46beycyiXhc2yytrPAxkrQg';
+
+  /* If an older gateway/cache rejects the publishable key, retry the same
+     Supabase request with the project's still-active legacy anon key. */
+  const nativeFetch=window.fetch.bind(window);
+  window.fetch=async function(input,init){
+    const url=typeof input==='string'?input:(input&&input.url)||'';
+    if(!url.startsWith(SUPABASE_URL))return nativeFetch(input,init);
+    let r=await nativeFetch(input,init);
+    if(r.status!==401&&r.status!==403)return r;
+    const probe=r.clone();
+    let text='';try{text=await probe.text()}catch(e){}
+    if(!/invalid api key|invalid_api_key/i.test(text))return r;
+    try{
+      const h=new Headers(init?.headers|| (input instanceof Request?input.headers:undefined));
+      h.set('apikey',LEGACY_KEY);
+      const auth=h.get('Authorization');
+      if(!auth||/^Bearer\s+(sb_publishable_|eyJ)/.test(auth))h.set('Authorization','Bearer '+LEGACY_KEY);
+      const next={...(init||{}),headers:h};
+      if(input instanceof Request){
+        return nativeFetch(new Request(input,{headers:h}),next);
+      }
+      return nativeFetch(input,next);
+    }catch(e){return r}
+  };
+
   const PHOTO_BUCKET='bike-photos';
   const MAX_PHOTOS=5;
   const token=()=>typeof session!=='undefined'&&session?.access_token?session.access_token:null;
