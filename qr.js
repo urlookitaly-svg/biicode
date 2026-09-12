@@ -3,7 +3,7 @@
   'use strict';
   const SUPABASE_URL='https://swzkrwdqfgetwcmaiqty.supabase.co';
   const SUPABASE_KEY='sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb';
-  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const esc=x=>String(x??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
   const css=document.createElement('style');
   css.textContent=`
     .biicode-qr{width:max-content;margin:18px auto 12px;padding:12px;background:#fff;border-radius:14px;min-width:214px;min-height:214px;display:grid;place-items:center}
@@ -49,4 +49,20 @@
   async function showPublic(){const id=new URLSearchParams(location.search).get('bike');if(!id)return;const nav=document.getElementById('nav');if(nav)nav.classList.add('hidden');const root=document.getElementById('main');if(!root)return;root.innerHTML='<div class="biicode-public"><div class="logo">b<b>◯</b></div><div class="tag">BIICODE · VERIFICA BICICLETTA</div><div id="publicCard" class="card"><div class="muted">VERIFICA IN CORSO…</div></div></div>';const b=await getRemoteBike(id),box=document.getElementById('publicCard');if(!box)return;if(!b){box.innerHTML='<div style="font-size:22px;font-weight:900">Bici non trovata</div><div class="muted" style="margin-top:8px">Questo BIICODE non è associato a una bicicletta registrata.</div>';return;}const stolen=b.stolen===true;box.innerHTML=`<div class="muted">BIICODE</div><div style="font-size:24px;font-weight:900;margin-top:5px">${esc(b.biicode_id)}</div><h1>${esc(b.brand)} ${esc(b.model)}</h1><div class="muted">ANNO</div><div style="font-size:19px;font-weight:800;margin:5px 0 16px">${esc(b.year||'-')}</div><div class="muted">COLORE</div><div style="font-size:19px;font-weight:800;margin:5px 0 18px">${esc(b.color||'-')}</div><div class="msg ${stolen?'error':'ok'}">${stolen?'🔴 ATTENZIONE: QUESTA BICI RISULTA RUBATA':'🟢 QUESTA BICI RISULTA ATTIVA'}</div><div class="small" style="text-align:center;margin-top:14px">Il numero di telaio e i dati personali del proprietario non vengono mostrati.</div>`;}
   const publicId=new URLSearchParams(location.search).get('bike');
   if(publicId){window.renderHome=function(){showPublic();};window.login=function(){showPublic();};window.renderBikes=function(){showPublic();};window.profile=function(){showPublic();};setTimeout(showPublic,0);setTimeout(showPublic,300);}
+  const originalSaveBike=window.saveBike;
+  window.saveBike=async function(){
+    const before=new Set((window.bikes||[]).map(x=>x.biicode_id));
+    await originalSaveBike();
+    const created=(window.bikes||[]).find(x=>!before.has(x.biicode_id));
+    if(!created||!window.session?.access_token||!window.user?.email)return;
+    try{
+      const check=await fetch(SUPABASE_URL+'/rest/v1/bikes?select=biicode_id&biicode_id=eq.'+encodeURIComponent(created.biicode_id)+'&user_id=eq.'+encodeURIComponent(window.user.id)+'&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+window.session.access_token}});
+      const rows=await check.json().catch(()=>[]);
+      if(!check.ok||!rows.length){setStatus('Offline · bici salvata localmente');return;}
+      const r=await fetch(SUPABASE_URL+'/functions/v1/send-biicode-registration',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+window.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({biicode_id:created.biicode_id,brand:created.brand,model:created.model,year:created.year,color:created.color,frame_number:created.frame_number,customer_email:window.user.email})});
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(data.error||`HTTP ${r.status}`);
+      setStatus('Online · bici sincronizzata · email inviata');
+    }catch(e){console.warn('BIICODE registration email:',e);setStatus('Online · bici sincronizzata · email da completare');}
+  };
 })();
