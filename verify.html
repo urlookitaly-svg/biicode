@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1320">
+<title>Verifica BIICODE</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#0b1320;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:520px;margin:auto;padding:28px 20px 50px;min-height:100vh}.logo{width:58px;height:58px;margin:0 auto 14px;border-radius:16px;background:#07101d;display:grid;place-items:center;font-size:28px;font-weight:950}.logo b{color:#1565ff}.tag{text-align:center;color:#94a1b3;font-size:10px;letter-spacing:1.4px;margin-bottom:24px}.card{background:#111d2d;border:1px solid #203149;border-radius:20px;padding:20px}.muted{color:#94a1b3;font-size:13px}.id{font-size:24px;font-weight:900;margin-top:5px}h1{font-size:30px;line-height:1.1;margin:22px 0 18px}.msg{padding:14px;border-radius:13px;margin-top:18px;font-size:14px;font-weight:800}.ok{background:#10271c;color:#a9efc4}.error{background:#29151b;color:#ffb4bc}.small{text-align:center;color:#7f8b9a;font-size:11px;line-height:1.5;margin-top:14px}.loading{text-align:center;color:#94a1b3;padding:15px 0}.back{display:block;margin:18px auto 0;color:#5790ff;text-decoration:none;font-weight:800;text-align:center}
+</style>
+</head>
+<body><main><div class="logo">b<b>◯</b></div><div class="tag">BIICODE · VERIFICA BICICLETTA</div><div id="card" class="card"><div class="loading">Verifica in corso…</div></div></main>
+<script>
+const SUPABASE_URL='https://swzkrwdqfgetwcmaiqty.supabase.co';
+const SUPABASE_KEY='sb_publishable_inpwNp-Uqe-X4BeTl54uiQ_1ARA1HNb';
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+async function run(){
+  const id=new URLSearchParams(location.search).get('bike')||'';
+  const box=document.getElementById('card');
+  if(!id){box.innerHTML='<div class="id">Codice mancante</div><div class="muted" style="margin-top:8px">Il QR non contiene un BIICODE valido.</div>';return}
+  try{
+    const r=await fetch(SUPABASE_URL+'/rest/v1/bikes?select=biicode_id,brand,model,year,color,stolen,status&biicode_id=eq.'+encodeURIComponent(id)+'&limit=1',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const rows=await r.json();
+    const b=rows&&rows[0];
+    if(!b){box.innerHTML='<div class="id">Bici non trovata</div><div class="muted" style="margin-top:8px">Questo BIICODE non è associato a una bicicletta registrata.</div>';return}
+    const stolen=b.stolen===true;
+    box.innerHTML='<div class="muted">BIICODE</div><div class="id">'+esc(b.biicode_id)+'</div><h1>'+esc(b.brand)+' '+esc(b.model)+'</h1><div class="muted">ANNO</div><div style="font-size:19px;font-weight:800;margin:5px 0 16px">'+esc(b.year||'-')+'</div><div class="muted">COLORE</div><div style="font-size:19px;font-weight:800;margin:5px 0 18px">'+esc(b.color||'-')+'</div><div class="msg '+(stolen?'error':'ok')+'">'+(stolen?'🔴 ATTENZIONE: QUESTA BICI RISULTA RUBATA':'🟢 QUESTA BICI RISULTA ATTIVA')+'</div><div class="small">Il numero di telaio e i dati personali del proprietario non vengono mostrati nella verifica pubblica.</div>';
+  }catch(e){box.innerHTML='<div class="id">Verifica non disponibile</div><div class="muted" style="margin-top:8px">Riprova tra qualche secondo.</div>'}
+}
+run();
+</script></body></html>
