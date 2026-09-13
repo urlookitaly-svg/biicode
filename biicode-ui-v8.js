@@ -1,4 +1,4 @@
-/* BIICODE HOME V10 — reference-style mountain bike + top actions */
+/* BIICODE HOME V11 — reference-style mountain bike + top actions */
 (function(){
 'use strict';
 const style=document.createElement('style');
@@ -12,7 +12,7 @@ style.textContent=`
 @media(max-width:380px){.bio-home-bike{height:128px!important;margin-top:-2px!important}.bio-home-bike svg{height:132px!important;width:110%!important}.quick-action{min-height:90px!important;padding:12px!important}.quick-action strong{font-size:14px!important}}
 `;
 document.head.appendChild(style);
-const BIKE='<svg viewBox="0 0 520 180" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#1565ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".55"><circle cx="104" cy="132" r="40"/><circle cx="414" cy="132" r="40"/><path d="M104 132 172 67 246 132H104Zm68-65h56l51 65h-79m-28-65 24-31m83 96 55-88 55 88m-55-88h45m-45 0 12-18m-12 18 25 12"/><path d="M224 98 275 98"/><path d="M326 132 348 84"/></g><g stroke="#f5f8ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".9"><path d="M160 67h30l13 12"/><path d="M348 84h29"/><path d="M354 75l12-11"/></g><path d="M171 67 195 67" stroke="#f5f8ff" stroke-width="5" stroke-linecap="round" opacity=".8"/></svg>';
+const BIKE='<svg viewBox="0 0 520 180" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="#1565ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".62"><circle cx="100" cy="135" r="40"/><circle cx="420" cy="135" r="40"/><path d="M100 135 188 72 315 82 245 135H100Z"/><path d="M188 72 245 135 315 82"/><path d="M245 135 207 88"/><path d="M315 82 420 135"/><path d="M315 82 348 135"/><path d="M348 135 420 135"/><path d="M315 82 344 35"/><path d="M344 35 380 35"/><path d="M344 35 357 22"/><path d="M188 72 177 48"/><path d="M168 48 191 48"/><path d="M207 88 229 88"/></g><g stroke="#f5f8ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".9"><path d="M174 47h27"/><path d="M355 48h28"/><path d="M365 39l12-11"/></g><path d="M188 72 315 82" stroke="#0d56d7" stroke-width="7" stroke-linecap="round" opacity=".75"/></svg>';
 function arrange(){
  const main=document.querySelector('#main');if(!main)return;
  const title=main.querySelector('h1');const head=main.querySelector('.head');if(title)title.classList.add('bio-home-title');
