@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" role="img" aria-label="BIICODE"><defs><linearGradient id="blue" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#008fe8"/><stop offset="1" stop-color="#1765ff"/></linearGradient></defs>
+<g transform="translate(18 18) scale(.62)">
+<path d="M75 22c0-15 12-27 27-27h28v92h24c44 0 79 35 79 79s-35 79-79 79h-25c-15 0-27-12-27-27s12-27 27-27h25c14 0 25-11 25-25s-11-25-25-25h-52c-15 0-27-12-27-27z" fill="#f8fbff"/>
+<path d="M206 65c47 14 81 58 81 110 0 63-51 114-114 114h-25c-15 0-27-12-27-27s12-27 27-27h25c33 0 60-27 60-60 0-26-17-49-41-57z" fill="url(#blue)"/>
+<circle cx="177" cy="174" r="51" fill="#07152a" stroke="#fff" stroke-width="3"/>
+<g fill="#fff"><rect x="145" y="142" width="25" height="25" rx="2"/><rect x="184" y="142" width="25" height="25" rx="2"/><rect x="145" y="181" width="25" height="25" rx="2"/><rect x="177" y="177" width="8" height="8"/><rect x="193" y="178" width="8" height="8"/><rect x="178" y="193" width="8" height="8"/><rect x="195" y="194" width="8" height="8"/><rect x="184" y="186" width="8" height="8"/></g>
+<g fill="#07152a"><rect x="151" y="148" width="13" height="13"/><rect x="190" y="148" width="13" height="13"/><rect x="151" y="187" width="13" height="13"/></g></g>
+<text x="205" y="122" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-size="82" font-weight="900" letter-spacing="-4" fill="#f8fbff">BII<tspan fill="url(#blue)">CODE</tspan></text>
+<text x="208" y="163" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="3.8" fill="#9aa9bc">LA TUA BICI. UN’IDENTITÀ UNICA.</text>
+<rect x="350" y="184" width="150" height="5" rx="2.5" fill="#1565ff"/>
+</svg>
