@@ -27,28 +27,30 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Prepare BIICODE V10
+      - name: Prepare BIICODE V11
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('biicode-ui-v8.js?v=8','biicode-ui-v8.js?v=10')
-          s=s.replace("const V='biicode-v7'","const V='biicode-v10'")
+          s=s.replace('biicode-ui-v8.js?v=8','biicode-ui-v8.js?v=11')
+          s=s.replace('biicode-ui-v8.js?v=10','biicode-ui-v8.js?v=11')
+          s=s.replace("const V='biicode-v7'","const V='biicode-v11'")
+          s=s.replace("const V='biicode-v10'","const V='biicode-v11'")
           quick='<div class="quick-actions"><button class="quick-action" type="button" onclick="biicodeScanQR()"><span class="qa-icon">⌾</span><strong>Inquadra QR</strong><span>Verifica una bici</span></button><button class="quick-action" type="button" onclick="biicodeReportTheft()"><span class="qa-icon">🛡️</span><strong>Segnala furto</strong><span>Proteggi la tua bici</span></button></div>'
           grid='<div class="grid"><button class="action" onclick="addBike()"><strong>＋ Immatricola</strong><span class="muted">Registra una bici</span></button><button class="action" onclick="syncFromServer()"><strong>↻ Sincronizza</strong><span class="muted">Aggiorna i dati</span></button></div>'
           if quick in s and grid in s:
               s=s.replace(grid+quick,quick+grid)
           p.write_text(s,encoding='utf-8')
-          print('BIICODE V10 prepared')
+          print('BIICODE V11 prepared')
           PY
 
       - name: Validate
         run: |
           grep -q 'Inquadra QR' index.html
           grep -q 'Segnala furto' index.html
-          grep -q 'biicode-ui-v8.js?v=10' index.html
-          grep -q 'biicode-v10' index.html
+          grep -q 'biicode-ui-v8.js?v=11' index.html
+          grep -q 'biicode-v11' index.html
           node --check biicode-ui-v8.js
 
       - name: Upload artifact
