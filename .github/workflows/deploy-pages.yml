@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -78,9 +78,23 @@ jobs:
 
           html = html.replace('<div class="logo">b<b>◯</b></div>', '<img class="login-logo" src="./assets/biicode-logo-v2.svg?v=direct6" alt="BIICODE">')
 
+          # Cache/PWA reset: once a newer build is opened, clear stale caches and old SW registrations.
+          cache_boot = '''<script id="biicode-cache-v7">(async()=>{const V='biicode-v7';try{if(localStorage.getItem('biicode_cache_version')!==V){if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}localStorage.setItem('biicode_cache_version',V);location.reload()}}catch(e){}})();</script>'''
+          if 'biicode-cache-v7' not in html:
+              html = html.replace('</head>', cache_boot + '\n</head>', 1)
+
           p.write_text(html, encoding='utf-8')
           print('BIICODE direct UI build complete')
           PY
+
+          # Persist the exact transformed source so the repository itself is no longer the old UI.
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'Persist BIICODE visual UI in source index'
+            git push origin HEAD:main
+          fi
 
       - name: Validate generated HTML and JavaScript
         run: |
@@ -88,7 +102,7 @@ jobs:
           from pathlib import Path
           import re
           html=Path('index.html').read_text(encoding='utf-8')
-          if 'head-logo' not in html or 'Inquadra QR' not in html or 'Segnala furto' not in html or 'biicode-logo-v2.svg?v=direct6' not in html:
+          if 'head-logo' not in html or 'Inquadra QR' not in html or 'Segnala furto' not in html or 'biicode-logo-v2.svg?v=direct6' not in html or 'biicode-cache-v7' not in html:
               raise SystemExit('BIICODE direct UI markers missing')
           scripts=re.findall(r'<script>(.*?)</script>',html,re.S)
           if not scripts:
