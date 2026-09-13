@@ -32,7 +32,6 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           p = Path('index.html')
           html = p.read_text(encoding='utf-8')
 
@@ -59,7 +58,6 @@ jobs:
           @media(max-width:380px){main{padding-left:14px!important;padding-right:14px!important}.head-logo{width:100%!important;max-height:108px!important}.nav{height:104px!important;padding-left:5px!important;padding-right:5px!important}.nav button .nav-icon{font-size:24px!important;line-height:25px!important;height:26px!important}.nav button .nav-label{font-size:12px!important;line-height:15px!important}.plus{width:66px!important;height:66px!important;min-width:66px!important;max-width:66px!important}}
           </style>
           '''
-
           if 'biicode-direct-v6' not in html:
               html = html.replace('</head>', css + '\n</head>', 1)
 
@@ -78,21 +76,24 @@ jobs:
 
           html = html.replace('<div class="logo">b<b>◯</b></div>', '<img class="login-logo" src="./assets/biicode-logo-v2.svg?v=direct6" alt="BIICODE">')
 
-          # Cache/PWA reset: once a newer build is opened, clear stale caches and old SW registrations.
           cache_boot = '''<script id="biicode-cache-v7">(async()=>{const V='biicode-v7';try{if(localStorage.getItem('biicode_cache_version')!==V){if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}localStorage.setItem('biicode_cache_version',V);location.reload()}}catch(e){}})();</script>'''
           if 'biicode-cache-v7' not in html:
               html = html.replace('</head>', cache_boot + '\n</head>', 1)
+
+          # Load the approved V8 home composition after the core app.
+          ui_script = '<script src="./biicode-ui-v8.js?v=8"></script>'
+          if 'biicode-ui-v8.js?v=8' not in html:
+              html = html.replace('</body>', ui_script + '\n</body>', 1)
 
           p.write_text(html, encoding='utf-8')
           print('BIICODE direct UI build complete')
           PY
 
-          # Persist the exact transformed source so the repository itself is no longer the old UI.
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           if ! git diff --cached --quiet; then
-            git commit -m 'Persist BIICODE visual UI in source index'
+            git commit -m 'Apply BIICODE V8 home composition'
             git push origin HEAD:main
           fi
 
@@ -102,14 +103,14 @@ jobs:
           from pathlib import Path
           import re
           html=Path('index.html').read_text(encoding='utf-8')
-          if 'head-logo' not in html or 'Inquadra QR' not in html or 'Segnala furto' not in html or 'biicode-logo-v2.svg?v=direct6' not in html or 'biicode-cache-v7' not in html:
-              raise SystemExit('BIICODE direct UI markers missing')
+          for marker in ['head-logo','Inquadra QR','Segnala furto','biicode-logo-v2.svg?v=direct6','biicode-cache-v7','biicode-ui-v8.js?v=8']:
+              if marker not in html: raise SystemExit('BIICODE marker missing: '+marker)
           scripts=re.findall(r'<script>(.*?)</script>',html,re.S)
-          if not scripts:
-              raise SystemExit('Inline application script not found')
+          if not scripts: raise SystemExit('Inline application script not found')
           Path('/tmp/app.js').write_text(scripts[-1],encoding='utf-8')
           PY
           node --check /tmp/app.js
+          node --check biicode-ui-v8.js
           test -f manifest.json
           test -f sw.js
 
