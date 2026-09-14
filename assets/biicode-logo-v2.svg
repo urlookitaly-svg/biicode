@@ -1,10 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" role="img" aria-label="BIICODE"><defs><linearGradient id="blue" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#008fe8"/><stop offset="1" stop-color="#1765ff"/></linearGradient></defs>
-<g transform="translate(18 18) scale(.62)">
-<path d="M75 22c0-15 12-27 27-27h28v92h24c44 0 79 35 79 79s-35 79-79 79h-25c-15 0-27-12-27-27s12-27 27-27h25c14 0 25-11 25-25s-11-25-25-25h-52c-15 0-27-12-27-27z" fill="#f8fbff"/>
-<path d="M206 65c47 14 81 58 81 110 0 63-51 114-114 114h-25c-15 0-27-12-27-27s12-27 27-27h25c33 0 60-27 60-60 0-26-17-49-41-57z" fill="url(#blue)"/>
-<circle cx="177" cy="174" r="51" fill="#07152a" stroke="#fff" stroke-width="3"/>
-<g fill="#fff"><rect x="145" y="142" width="25" height="25" rx="2"/><rect x="184" y="142" width="25" height="25" rx="2"/><rect x="145" y="181" width="25" height="25" rx="2"/><rect x="177" y="177" width="8" height="8"/><rect x="193" y="178" width="8" height="8"/><rect x="178" y="193" width="8" height="8"/><rect x="195" y="194" width="8" height="8"/><rect x="184" y="186" width="8" height="8"/></g>
-<g fill="#07152a"><rect x="151" y="148" width="13" height="13"/><rect x="190" y="148" width="13" height="13"/><rect x="151" y="187" width="13" height="13"/></g></g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" role="img" aria-label="BIICODE">
+<defs>
+ <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#35b8ff"/><stop offset=".48" stop-color="#008fe8"/><stop offset="1" stop-color="#1765ff"/></linearGradient>
+ <radialGradient id="wheel" cx="42%" cy="38%" r="72%"><stop offset="0" stop-color="#102c4c"/><stop offset="1" stop-color="#07152a"/></radialGradient>
+</defs>
+<!-- rounded b + integrated wheel/QR -->
+<path d="M78 25V151" fill="none" stroke="#f8fbff" stroke-width="46" stroke-linecap="round"/>
+<path d="M92 126C116 102 142 91 171 91C222 91 263 132 263 183C263 198 259 213 253 226" fill="none" stroke="#f8fbff" stroke-width="45" stroke-linecap="round"/>
+<circle cx="177" cy="174" r="67" fill="url(#blue)"/>
+<circle cx="177" cy="174" r="55" fill="url(#wheel)" stroke="#0d79e8" stroke-width="5"/>
+<g stroke="#1688ee" stroke-width="3" stroke-linecap="round">
+ <path d="M177 122V151"/><path d="M177 197V226"/><path d="M125 174H154"/><path d="M200 174H229"/>
+ <path d="M140 137L160 157"/><path d="M194 191L214 211"/><path d="M214 137L194 157"/><path d="M160 191L140 211"/>
+</g>
+<g fill="#f8fbff">
+ <rect x="148" y="145" width="24" height="24" rx="2"/><rect x="182" y="145" width="24" height="24" rx="2"/><rect x="148" y="179" width="24" height="24" rx="2"/>
+ <rect x="154" y="151" width="12" height="12" fill="#07152a"/><rect x="188" y="151" width="12" height="12" fill="#07152a"/><rect x="154" y="185" width="12" height="12" fill="#07152a"/>
+ <rect x="180" y="178" width="8" height="8"/><rect x="193" y="178" width="8" height="8"/><rect x="180" y="191" width="8" height="8"/><rect x="193" y="191" width="8" height="8"/>
+</g>
 <text x="205" y="122" font-family="Arial Rounded MT Bold,Arial,sans-serif" font-size="82" font-weight="900" letter-spacing="-4" fill="#f8fbff">BII<tspan fill="url(#blue)">CODE</tspan></text>
 <text x="208" y="163" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="3.8" fill="#9aa9bc">LA TUA BICI. UN’IDENTITÀ UNICA.</text>
 <rect x="350" y="184" width="150" height="5" rx="2.5" fill="#1565ff"/>
