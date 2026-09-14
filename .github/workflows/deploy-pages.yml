@@ -19,20 +19,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - name: Prepare BIICODE V18
+      - name: Prepare BIICODE V19
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
           p=Path('index.html'); s=p.read_text(encoding='utf-8')
-          s=re.sub(r'biicode-ui-v8\.js\?v=[0-9]+','biicode-ui-v8.js?v=18',s)
-          s=re.sub(r"const V='biicode-v[0-9]+'", "const V='biicode-v18'", s)
+          s=re.sub(r'biicode-ui-v8\.js\?v=[0-9]+','biicode-ui-v8.js?v=19',s)
+          s=re.sub(r"const V='biicode-v[0-9]+'", "const V='biicode-v19'", s)
+          s=s.replace('./assets/biicode-logo-v2.svg?v=direct6','./assets/biicode-logo-v3.svg?v=direct19')
           p.write_text(s,encoding='utf-8')
           PY
       - name: Validate
         run: |
-          grep -q 'biicode-ui-v8.js?v=18' index.html
-          grep -q 'biicode-v18' index.html
+          grep -q 'biicode-ui-v8.js?v=19' index.html
+          grep -q 'biicode-v19' index.html
+          grep -q 'biicode-logo-v3.svg?v=direct19' index.html
           node --check biicode-ui-v8.js
       - uses: actions/upload-pages-artifact@v3
         with:
