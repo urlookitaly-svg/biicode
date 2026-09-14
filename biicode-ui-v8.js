@@ -1,8 +1,15 @@
-/* BIICODE HOME V17 — approved order: actions first, bikes below. */
+/* BIICODE HOME V18 — approved final composition. */
 (function(){
 'use strict';
+/* On iPhone/PWA keep the BIICODE background continuous through the safe area. */
+function meta(name,content){let m=document.querySelector('meta[name="'+name+'"]');if(!m){m=document.createElement('meta');m.name=name;document.head.appendChild(m)}m.content=content}
+meta('theme-color','#0b1320');
+meta('apple-mobile-web-app-capable','yes');
+meta('apple-mobile-web-app-status-bar-style','black-translucent');
 const style=document.createElement('style');
 style.textContent=`
+html,body{margin:0!important;min-height:100%!important;background:#07101b!important;background-color:#07101b!important}
+body{padding-top:env(safe-area-inset-top)!important;padding-bottom:env(safe-area-inset-bottom)!important}
 .statusbar{display:none!important}.bio-home-bike{display:none!important}.bio-home-title{margin-top:18px!important;margin-bottom:14px!important}
 .quick-actions,.grid{position:relative!important;z-index:5!important}.quick-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:11px!important;margin:0 0 11px!important}
 .quick-action,.action{border:1.5px solid #1677ff!important;background:linear-gradient(145deg,#112b48,#0b1b2e)!important;box-shadow:0 0 16px rgba(21,101,255,.12),0 8px 24px rgba(0,0,0,.18)!important}.quick-action:nth-child(2){border-color:#ff5870!important;box-shadow:0 0 16px rgba(255,88,112,.12),0 8px 24px rgba(0,0,0,.18)!important}
@@ -19,7 +26,7 @@ function moveHome(){
  const head=main.querySelector('.head'), title=main.querySelector('h1'), q=main.querySelector('.quick-actions'), g=main.querySelector('.grid');
  if(!head||!title||!q||!g)return;
  title.classList.add('bio-home-title');
- /* Render order: logo → QR/Furto → Immatricola/Sincronizza → Le mie bici → bike cards. */
+ /* Final order: logo → actions → Le mie bici → bike cards. */
  head.insertAdjacentElement('afterend',q);q.insertAdjacentElement('afterend',g);g.insertAdjacentElement('afterend',title);
 }
 window.biicodeScanQR=window.biicodeScanQR||function(){alert('Scanner QR non disponibile.');};
