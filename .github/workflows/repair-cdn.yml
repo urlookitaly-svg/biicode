@@ -24,17 +24,15 @@ jobs:
           grid='<div class="grid"><button class="action" onclick="addBike()"><strong>＋ Immatricola</strong><span class="muted">Registra una bici</span></button><button class="action" onclick="syncFromServer()"><strong>↻ Sincronizza</strong><span class="muted">Aggiorna i dati</span></button></div>'
           if quick in s and grid in s:
               s=s.replace(grid+quick,quick+grid)
-          marker='biicode-landing-v1'
+          marker='biicode-landing-v2'
           if marker not in s:
-              landing=r'''<script id="biicode-landing-v1">
+              landing=r'''<script id="biicode-landing-v2">
           (function(){
             'use strict';
-            if(localStorage.getItem('biicode_session'))return;
             const main=document.getElementById('main'),nav=document.getElementById('nav');
             if(!main)return;
-            const originalLogin=window.login, originalRegister=window.register;
             const style=document.createElement('style');
-            style.id='biicode-landing-style-v1';
+            style.id='biicode-landing-style-v2';
             style.textContent=`
               .bio-landing{min-height:100dvh;padding:18px 16px 38px;display:flex;justify-content:center;background:radial-gradient(circle at 50% 0,#15325a 0,#0b1320 38%,#060b12 100%)}
               .bio-land-inner{width:100%;max-width:520px}
@@ -62,10 +60,11 @@ jobs:
             `;
             document.head.appendChild(style);
             function showLanding(){
+              if(localStorage.getItem('biicode_session'))return;
               if(nav)nav.classList.add('hidden');
               main.innerHTML=`<div class="bio-landing"><div class="bio-land-inner">
-                <div class="bio-land-top"><img class="bio-land-logo" src="./assets/biicode-logo.svg?v=landing1" alt="BIICODE"><div class="bio-land-eyebrow">IDENTITÀ DIGITALE PER LA TUA BICI</div></div>
-                <section class="bio-land-hero"><h1>La tua bici.<br><span>La sua identità.</span></h1><p class="bio-land-lead">Con BIICODE dai alla tua bicicletta un’identità unica, la registri e puoi verificarne lo stato in qualsiasi momento.</p><button class="bio-land-cta" type="button" onclick="biicodeStartRegistration()">PROTEGGI LA MIA BICI</button><button class="bio-land-login" type="button" onclick="biicodeStartLogin()">Ho già un account · Accedi</button><div class="bio-land-trust"><span>Registrazione semplice</span><span>Dati personali protetti</span></div></section>
+                <div class="bio-land-top"><img class="bio-land-logo" src="./assets/biicode-logo.svg?v=landing2" alt="BIICODE"><div class="bio-land-eyebrow">IDENTITÀ DIGITALE PER LA TUA BICI</div></div>
+                <section class="bio-land-hero"><h1>La tua bici.<br><span>La sua identità.</span></h1><p class="bio-land-lead">Con BIICODE dai alla tua bicicletta un’identità unica, la registri e puoi verificarne lo stato in qualsiasi momento.</p><button class="bio-land-cta" type="button" onclick="window.register()">PROTEGGI LA MIA BICI</button><button class="bio-land-login" type="button" onclick="window.login()">Ho già un account · Accedi</button><div class="bio-land-trust"><span>Registrazione semplice</span><span>Dati personali protetti</span></div></section>
                 <section><h2 class="bio-land-section-title">Perché BIICODE?</h2><div class="bio-land-features">
                   <article class="bio-land-feature"><div class="bio-land-icon">◉</div><div><strong>Un’identità unica</strong><p>La tua bici viene associata a un BIICODE e ai suoi dati identificativi.</p></div></article>
                   <article class="bio-land-feature"><div class="bio-land-icon">🛡</div><div><strong>Più tutela, quando serve</strong><p>Se la bici viene rubata, puoi segnalarla e renderne visibile lo stato.</p></div></article>
@@ -75,14 +74,12 @@ jobs:
                 <div class="bio-land-bottom">Il numero di telaio e i dati personali del proprietario non vengono mostrati nella verifica pubblica.</div>
               </div></div>`;
             }
-            window.biicodeStartLogin=function(){if(typeof originalLogin==='function')originalLogin();};
-            window.biicodeStartRegistration=function(){if(typeof originalRegister==='function')originalRegister();else if(typeof originalLogin==='function')originalLogin();};
             showLanding();
           })();
           </script>'''
               s=s.replace('</body>',landing+'\n</body>')
           p.write_text(s,encoding='utf-8')
-          print('BIICODE landing v1 applied')
+          print('BIICODE landing v2 applied')
           PY
       - name: Commit source fixes
         run: |
@@ -90,5 +87,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'BIICODE: add persuasive landing before login'
+          git commit -m 'BIICODE: fix landing login navigation'
           git push
