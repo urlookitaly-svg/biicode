@@ -20,7 +20,8 @@ jobs:
           s=p.read_text(encoding='utf-8')
           s=s.replace('biicode-ui-v8.js?v=8','biicode-ui-v8.js?v=10')
           s=s.replace("const V='biicode-v7'","const V='biicode-v11'")
-          tag='<script src="./auth-fix.js?v=20260916"></script>'
+          s=s.replace('auth-fix.js?v=20260916','auth-fix.js?v=20260916-2')
+          tag='<script src="./auth-fix.js?v=20260916-2"></script>'
           if tag not in s:
               s=s.replace('</body>',tag+'\n</body>')
           quick='<div class="quick-actions"><button class="quick-action" type="button" onclick="biicodeScanQR()"><span class="qa-icon">⌾</span><strong>Inquadra QR</strong><span>Verifica una bici</span></button><button class="quick-action" type="button" onclick="biicodeReportTheft()"><span class="qa-icon">🛡️</span><strong>Segnala furto</strong><span>Proteggi la tua bici</span></button></div>'
