@@ -19,6 +19,60 @@ body{padding-top:env(safe-area-inset-top)!important;padding-bottom:env(safe-area
 @media(max-width:380px){.nav .plus{width:74px!important;height:74px!important;min-width:74px!important;max-width:74px!important;flex-basis:74px!important}.nav .plus::before{font-size:38px!important;line-height:68px!important}.action,.quick-action{min-height:92px!important}}
 `;
 document.head.appendChild(style);
+
+let qrStream=null,qrTimer=null,qrActive=false;
+function qrIdFromValue(value){
+ try{const u=new URL(String(value).trim(),location.href);const id=u.searchParams.get('bike');if(id)return decodeURIComponent(id)}catch(e){}
+ const m=String(value||'').trim().match(/\bIT-[A-Z0-9]{8}\b/i);return m?m[0].toUpperCase():null;
+}
+function stopQrScanner(){
+ qrActive=false;if(qrTimer){cancelAnimationFrame(qrTimer);qrTimer=null}
+ if(qrStream){qrStream.getTracks().forEach(t=>t.stop());qrStream=null}
+}
+function loadJsQR(){
+ if(window.jsQR)return Promise.resolve(true);
+ return new Promise(resolve=>{
+  const urls=['https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js','https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'];let i=0;
+  const next=()=>{if(window.jsQR)return resolve(true);if(i>=urls.length)return resolve(false);const s=document.createElement('script');s.src=urls[i++];s.async=true;s.onload=()=>resolve(!!window.jsQR);s.onerror=next;document.head.appendChild(s)};next();
+ });
+}
+function handleQrValue(value){
+ const id=qrIdFromValue(value);if(!id)return false;
+ stopQrScanner();
+ const url=new URL('verify.html?bike='+encodeURIComponent(id),location.href).href;
+ location.href=url;return true;
+}
+async function scanImageFile(file){
+ const ok=await loadJsQR();if(!ok)return alert('Lettore QR non disponibile. Controlla la connessione e riprova.');
+ const img=await new Promise((resolve,reject)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);resolve(im)};im.onerror=()=>{URL.revokeObjectURL(u);reject(new Error('Immagine non leggibile.'))};im.src=u});
+ const max=1400,s=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));const w=Math.max(1,Math.round((img.naturalWidth||img.width)*s)),h=Math.max(1,Math.round((img.naturalHeight||img.height)*s));
+ const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,w,h);const d=ctx.getImageData(0,0,w,h);const r=window.jsQR(d.data,w,h,{inversionAttempts:'attemptBoth'});
+ if(r&&handleQrValue(r.data))return;alert('Non ho trovato un QR BIICODE nell’immagine.');
+}
+window.biicodeScanQR=async function(){
+ openModal(`<button type="button" class="back" onclick="closeModal()">‹ Annulla</button><h1>Inquadra QR</h1><div class="qr-scan-wrap"><div class="qr-video-box"><video id="qrVideo" playsinline autoplay muted></video><div class="qr-frame"></div></div><div id="qrStatus" class="qr-hint">Avvio fotocamera…</div><div class="qr-manual"><input id="qrManual" placeholder="Oppure inserisci BIICODE (IT-…)" autocapitalize="characters" autocomplete="off"><button type="button" onclick="biicodeManualQR()">VERIFICA</button></div><input id="qrFile" type="file" accept="image/*" capture="environment" style="display:none" onchange="biicodeScanQRFile(this.files[0])"><button type="button" class="btn secondary" style="margin-top:10px" onclick="document.getElementById('qrFile').click()">📷 SCANSIONA UNA FOTO</button></div>`);
+ qrActive=true;const status=document.getElementById('qrStatus'),video=document.getElementById('qrVideo');
+ const ok=await loadJsQR();
+ if(!qrActive)return;
+ if(!ok){if(status)status.textContent='Lettore QR non disponibile. Puoi usare una foto o inserire il codice.';return}
+ if(!navigator.mediaDevices?.getUserMedia){if(status)status.textContent='Fotocamera non disponibile. Usa una foto oppure inserisci il codice.';return}
+ try{qrStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});video.srcObject=qrStream;await video.play();if(status)status.textContent='Inquadra il QR della bicicletta';
+  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
+  const loop=()=>{if(!qrActive)return;if(video.readyState>=2&&video.videoWidth){canvas.width=video.videoWidth;canvas.height=video.videoHeight;ctx.drawImage(video,0,0,canvas.width,canvas.height);const d=ctx.getImageData(0,0,canvas.width,canvas.height),r=window.jsQR(d.data,d.width,d.height,{inversionAttempts:'dontInvert'});if(r&&handleQrValue(r.data))return}qrTimer=requestAnimationFrame(loop)};qrTimer=requestAnimationFrame(loop);
+ }catch(e){if(status)status.textContent='Fotocamera non disponibile o permesso negato. Usa una foto oppure inserisci il codice.';}
+};
+window.biicodeManualQR=function(){const v=document.getElementById('qrManual')?.value?.trim();if(!v)return alert('Inserisci un BIICODE.');if(!handleQrValue(v))alert('Codice BIICODE non valido. Usa un codice come IT-XXXXXXXX.');};
+window.biicodeScanQRFile=async function(file){if(!file)return;try{await scanImageFile(file)}catch(e){console.error(e);alert('Non sono riuscito a leggere l’immagine.')}};
+
+window.biicodeReportTheft=function(){
+ const rows=Array.isArray(window.bikes)?window.bikes:(typeof bikes!=='undefined'?bikes:[]);
+ if(!rows.length)return alert('Non hai ancora bici registrate.');
+ openModal(`<button type="button" class="back" onclick="closeModal()">‹ Annulla</button><h1>Segnala furto</h1><div class="muted">Seleziona la bici da segnalare come rubata.</div><div class="theft-list">${rows.map(b=>`<button class="theft-item" type="button" onclick="biicodeConfirmTheft('${encodeURIComponent(b.biicode_id)}')"><strong>${esc(b.brand)} ${esc(b.model)}</strong><span>${esc(b.biicode_id)} · ${b.stolen?'GIÀ SEGNALATA':'ATTIVA'}</span></button>`).join('')}</div>`);
+};
+window.biicodeConfirmTheft=function(enc){const id=decodeURIComponent(enc||'');const b=(typeof bikes!=='undefined'?bikes:[]).find(x=>x.biicode_id===id);if(!b)return;if(b.stolen)return alert('Questa bici risulta già segnalata come rubata.');if(!confirm('Confermi di voler segnalare come rubata questa bici?'))return;closeModal();toggle(enc)};
+const originalCloseModal=window.closeModal;
+window.closeModal=function(){stopQrScanner();if(typeof originalCloseModal==='function')originalCloseModal();};
+
 function moveHome(){
  const main=document.querySelector('#main');if(!main)return;
  const status=main.querySelector('.statusbar');if(status)status.remove();
@@ -29,7 +83,5 @@ function moveHome(){
  /* Final order: logo → actions → Le mie bici → bike cards. */
  head.insertAdjacentElement('afterend',q);q.insertAdjacentElement('afterend',g);g.insertAdjacentElement('afterend',title);
 }
-window.biicodeScanQR=window.biicodeScanQR||function(){alert('Scanner QR non disponibile.');};
-window.biicodeReportTheft=window.biicodeReportTheft||function(){alert('Segnalazione furto non disponibile.');};
 moveHome();new MutationObserver(()=>requestAnimationFrame(moveHome)).observe(document.body,{childList:true,subtree:true});
 })();
