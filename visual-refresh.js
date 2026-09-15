@@ -1,20 +1,33 @@
-/* BIICODE visual identity v4 */
+/* BIICODE visual identity v5 */
 (function(){
   'use strict';
   const LOGO='assets/biicode-logo.svg';
 
   function installStyles(){
-    if(document.getElementById('biicode-visual-v4'))return;
+    if(document.getElementById('biicode-visual-v5'))return;
     const s=document.createElement('style');
-    s.id='biicode-visual-v4';
+    s.id='biicode-visual-v5';
     s.textContent=`
       html,body{background:radial-gradient(circle at 50% -10%,#10284a 0,#0b1320 42%,#070d16 100%)!important}
       main{max-width:540px!important;padding:18px 18px 150px!important}
       .head{display:block!important;margin:0 0 18px!important;padding:0!important}
       .head .bio-logo-img{display:block!important;width:min(390px,100%)!important;height:auto!important;max-height:118px!important;object-fit:contain!important;object-position:left center!important;margin:0 auto 4px 0!important}
-      .login .logo{font-size:0!important;line-height:0!important;margin:0 auto 14px!important;height:auto!important;background:none!important}
-      .login .logo .bio-logo-img{display:block!important;width:min(350px,100%)!important;margin:auto!important}
+
+      /* Welcome / login: no more vertical centering that pushes the card down on tall iPhones. */
+      .login{min-height:100dvh!important;display:flex!important;align-items:flex-start!important;justify-content:center!important;padding:clamp(30px,7vh,82px) 16px 34px!important;overflow-y:auto!important}
+      .login .box{width:100%!important;max-width:430px!important;padding:24px 22px 22px!important;background:linear-gradient(155deg,rgba(18,31,49,.98),rgba(10,20,33,.98))!important;border:1px solid #29415f!important;border-radius:26px!important;box-shadow:0 20px 55px rgba(0,0,0,.30),0 0 45px rgba(21,101,255,.06)!important}
+      .login .logo{font-size:0!important;line-height:0!important;margin:0 auto 10px!important;height:auto!important;background:none!important}
+      .login .logo .bio-logo-img{display:block!important;width:min(285px,86%)!important;max-height:96px!important;object-fit:contain!important;margin:auto!important}
+      .login .login-logo{display:block!important;width:min(285px,86%)!important;max-height:96px!important;object-fit:contain!important;margin:0 auto 10px!important}
       .login .tag{display:none!important}
+      .login .title{font-size:29px!important;line-height:1.05!important;letter-spacing:-.045em!important;margin:14px 0 7px!important;text-align:left!important}
+      .login .muted{font-size:13px!important;line-height:1.45!important;color:#8292a8!important;margin-bottom:3px!important}
+      .login label{margin:13px 0 6px!important;font-size:13px!important}
+      .login input{min-height:52px!important;height:52px!important;border-radius:14px!important;background:#081320!important}
+      .login .btn{min-height:54px!important;height:54px!important;border-radius:15px!important;margin-top:15px!important;box-shadow:0 9px 24px rgba(21,101,255,.22)!important}
+      .login .link{margin-top:11px!important;font-size:13px!important;min-height:22px!important}
+      .login .msg{margin-bottom:10px!important}
+
       h1{font-size:28px!important;letter-spacing:-.04em!important;margin:10px 0 14px!important}
       .statusbar{font-size:11px!important;margin:0 0 12px!important;color:#8292a8!important}
       .card{background:linear-gradient(145deg,rgba(18,31,49,.96),rgba(12,23,37,.96))!important;border:1px solid #263c59!important;border-radius:22px!important;padding:18px!important;box-shadow:0 10px 28px rgba(0,0,0,.18)!important;margin-bottom:11px!important}
@@ -47,11 +60,16 @@
       @media(max-width:380px){
         main{padding-left:14px!important;padding-right:14px!important}
         .head .bio-logo-img{width:100%!important;max-height:108px!important}
+        .login{padding-left:12px!important;padding-right:12px!important;padding-top:24px!important}
+        .login .box{padding:21px 18px 20px!important;border-radius:23px!important}
+        .login .login-logo,.login .logo .bio-logo-img{width:min(265px,84%)!important;max-height:88px!important}
+        .login .title{font-size:27px!important}
         .nav{height:104px!important;padding-left:5px!important;padding-right:5px!important}
         .nav button .nav-icon{font-size:24px!important;line-height:25px!important;height:26px!important}
         .nav button .nav-label{font-size:12px!important;line-height:15px!important}
         .plus{width:66px!important;height:66px!important;min-width:66px!important;max-width:66px!important}
       }
+      @media(max-height:720px){.login{padding-top:18px!important}.login .box{padding-top:17px!important;padding-bottom:16px!important}.login .login-logo,.login .logo .bio-logo-img{max-height:72px!important}.login .title{margin-top:8px!important}.login label{margin-top:9px!important}.login .btn{margin-top:10px!important}}
     `;
     document.head.appendChild(s);
   }
@@ -61,7 +79,7 @@
       if(h.querySelector('.bio-logo-img'))return;
       const img=document.createElement('img');
       img.className='bio-logo-img';
-      img.src=LOGO+'?v=4';
+      img.src=LOGO+'?v=5';
       img.alt='BIICODE — La tua bici. Un’identità unica.';
       h.replaceChildren(img);
     });
@@ -69,15 +87,28 @@
       if(l.querySelector('.bio-logo-img'))return;
       const img=document.createElement('img');
       img.className='bio-logo-img';
-      img.src=LOGO+'?v=4';
+      img.src=LOGO+'?v=5';
       img.alt='BIICODE';
       l.replaceChildren(img);
     });
   }
 
+  function enhanceLogin(){
+    document.querySelectorAll('.login .box').forEach(box=>{
+      const title=box.querySelector('.title');
+      const muted=box.querySelector('.muted');
+      const email=box.querySelector('#email');
+      const pass=box.querySelector('#pass');
+      if(title && email && pass && title.textContent.trim()==='Accedi'){
+        title.textContent='Benvenuto in BIICODE';
+        if(muted)muted.textContent='Identifica la tua bici, proteggila e tieni sempre sotto controllo la sua identità.';
+      }
+    });
+  }
+
   function decorateNav(){
     document.querySelectorAll('.nav button').forEach((b,i)=>{
-      if(b.classList.contains('plus')||b.dataset.bioNavV4==='1')return;
+      if(b.classList.contains('plus')||b.dataset.bioNavV5==='1')return;
       const labels=['Home','Bici','Profilo'];
       const icons=['⌂','🚲','○'];
       const label=labels[i===3?2:i]||'';
@@ -86,7 +117,7 @@
       const ic=document.createElement('span');ic.className='nav-icon';ic.textContent=icon;
       const lb=document.createElement('span');lb.className='nav-label';lb.textContent=label;
       b.append(ic,lb);
-      b.dataset.bioNavV4='1';
+      b.dataset.bioNavV5='1';
     });
   }
 
@@ -182,7 +213,7 @@
     }
   };
 
-  function apply(){installStyles();mountLogos();decorateNav();addQuickActions();}
+  function apply(){installStyles();mountLogos();enhanceLogin();decorateNav();addQuickActions();}
   apply();
   new MutationObserver(()=>requestAnimationFrame(apply)).observe(document.body,{childList:true,subtree:true});
 })();
