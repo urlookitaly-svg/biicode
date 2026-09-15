@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" role="img" aria-labelledby="title desc">
+<title id="title">La rete BIICODE</title>
+<desc id="desc">Fumetto in quattro scene: registrazione, furto, avvistamento e segnalazione al proprietario.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7fbff"/><stop offset="1" stop-color="#eaf3ff"/></linearGradient>
+ <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1565ff"/><stop offset="1" stop-color="#00a8ff"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0b1320" flood-opacity=".12"/></filter>
+</defs>
+<rect width="1200" height="1500" rx="48" fill="url(#bg)"/>
+<text x="600" y="88" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="900" fill="#0b2545">LA RETE BIICODE</text>
+<text x="600" y="132" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" fill="#4c6b8e">Una piccola azione può aiutare una bici a tornare a casa.</text>
+
+<!-- panel 1 -->
+<g filter="url(#shadow)"><rect x="55" y="180" width="1090" height="270" rx="34" fill="#fff"/></g>
+<circle cx="105" cy="230" r="35" fill="#1565ff"/><text x="105" y="242" text-anchor="middle" font-family="Arial" font-size="34" font-weight="900" fill="#fff">1</text>
+<text x="165" y="230" font-family="Arial" font-size="30" font-weight="900" fill="#0b2545">REGISTRI LA TUA BICI</text>
+<text x="165" y="267" font-family="Arial" font-size="22" fill="#55708f">Applichi il QR BIICODE e la registri nell'app.</text>
+<!-- bike -->
+<g transform="translate(115 315)" stroke="#0b2545" stroke-width="9" fill="none"><circle cx="75" cy="55" r="42"/><circle cx="245" cy="55" r="42"/><path d="M75 55 L125 55 L160 5 L205 55 L125 55 L160 5 L205 55 L245 55"/><path d="M160 5 L145 -20 M145 -20 L122 -20"/></g>
+<g transform="translate(560 305)"><rect width="260" height="110" rx="20" fill="#0b2545"/><rect x="12" y="12" width="236" height="86" rx="14" fill="#fff"/><text x="130" y="48" text-anchor="middle" font-family="Arial" font-size="18" font-weight="900" fill="#0b2545">BIICODE</text><rect x="95" y="58" width="70" height="28" fill="#0b2545"/><path d="M100 62h15v10h-15zm25 0h10v10h-10zm20 0h15v10h-15zm-45 16h10v6h-10zm20 0h15v6h-15zm25 0h15v6h-15z" fill="#fff"/></g>
+<text x="965" y="350" text-anchor="middle" font-family="Arial" font-size="23" font-weight="800" fill="#1565ff">LA TUA BICI</text>
+<text x="965" y="382" text-anchor="middle" font-family="Arial" font-size="20" fill="#55708f">ha un'identità</text>
+
+<!-- panel 2 -->
+<g filter="url(#shadow)"><rect x="55" y="480" width="1090" height="270" rx="34" fill="#fff"/></g>
+<circle cx="105" cy="530" r="35" fill="#ef4444"/><text x="105" y="542" text-anchor="middle" font-family="Arial" font-size="34" font-weight="900" fill="#fff">2</text>
+<text x="165" y="530" font-family="Arial" font-size="30" font-weight="900" fill="#0b2545">SE LA BICI VIENE RUBATA</text>
+<text x="165" y="567" font-family="Arial" font-size="22" fill="#55708f">La segnali come rubata con un semplice gesto.</text>
+<!-- thief -->
+<g transform="translate(120 605)"><circle cx="55" cy="20" r="28" fill="#172235"/><path d="M25 18 Q55 -15 85 18 L82 35 L28 35Z" fill="#0b1320"/><path d="M55 48 L38 105 L92 105 L72 48Z" fill="#172235"/><path d="M38 72 L10 112 M80 70 L120 105" stroke="#172235" stroke-width="18" stroke-linecap="round"/></g>
+<g transform="translate(350 610)" stroke="#0b2545" stroke-width="7" fill="none"><circle cx="55" cy="75" r="40"/><circle cx="205" cy="75" r="40"/><path d="M55 75 L100 75 L130 30 L170 75 L100 75 L130 30 L170 75 L205 75"/><path d="M130 30 L118 5 M118 5h-22"/></g>
+<rect x="620" y="610" width="370" height="82" rx="20" fill="#fff0f1" stroke="#ef4444" stroke-width="3"/><text x="805" y="661" text-anchor="middle" font-family="Arial" font-size="25" font-weight="900" fill="#dc2626">🔴 BICICLETTA RUBATA</text>
+<text x="805" y="718" text-anchor="middle" font-family="Arial" font-size="19" fill="#55708f">La bici resta identificabile nella rete.</text>
+
+<!-- panel 3 -->
+<g filter="url(#shadow)"><rect x="55" y="780" width="1090" height="270" rx="34" fill="#fff"/></g>
+<circle cx="105" cy="830" r="35" fill="#1565ff"/><text x="105" y="842" text-anchor="middle" font-family="Arial" font-size="34" font-weight="900" fill="#fff">3</text>
+<text x="165" y="830" font-family="Arial" font-size="30" font-weight="900" fill="#0b2545">QUALCUNO LA RICONOSCE</text>
+<text x="165" y="867" font-family="Arial" font-size="22" fill="#55708f">Un ciclista scansiona il QR e vede che è segnalata.</text>
+<!-- cyclist -->
+<g transform="translate(120 905)"><circle cx="45" cy="10" r="24" fill="#1f2937"/><path d="M25 5 Q45 -20 65 5" stroke="#1565ff" stroke-width="10" fill="none"/><path d="M45 35 L30 82 L82 82" stroke="#0b2545" stroke-width="13" fill="none"/></g>
+<g transform="translate(300 900)" stroke="#0b2545" stroke-width="7" fill="none"><circle cx="55" cy="85" r="42"/><circle cx="215" cy="85" r="42"/><path d="M55 85 L105 85 L135 35 L180 85 L105 85 L135 35 L180 85 L215 85"/><path d="M135 35 L125 8 M125 8h-22"/></g>
+<g transform="translate(620 850)"><rect width="220" height="170" rx="28" fill="#0b2545"/><rect x="12" y="14" width="196" height="140" rx="20" fill="#fff"/><text x="110" y="50" text-anchor="middle" font-family="Arial" font-size="18" font-weight="900" fill="#1565ff">BIICODE</text><circle cx="110" cy="90" r="24" fill="#ef4444"/><text x="110" y="99" text-anchor="middle" font-family="Arial" font-size="27" font-weight="900" fill="#fff">!</text><text x="110" y="133" text-anchor="middle" font-family="Arial" font-size="16" font-weight="800" fill="#dc2626">BICI RUBATA</text></g>
+<text x="985" y="930" text-anchor="middle" font-family="Arial" font-size="22" font-weight="800" fill="#1565ff">LA RICONOSCE</text>
+<text x="985" y="962" text-anchor="middle" font-family="Arial" font-size="19" fill="#55708f">e può aiutare.</text>
+
+<!-- panel 4 -->
+<g filter="url(#shadow)"><rect x="55" y="1080" width="1090" height="270" rx="34" fill="#fff"/></g>
+<circle cx="105" cy="1130" r="35" fill="#16a05d"/><text x="105" y="1142" text-anchor="middle" font-family="Arial" font-size="34" font-weight="900" fill="#fff">4</text>
+<text x="165" y="1130" font-family="Arial" font-size="30" font-weight="900" fill="#0b2545">INVIA L'AVVISTAMENTO</text>
+<text x="165" y="1167" font-family="Arial" font-size="22" fill="#55708f">Indica dove e quando l'hai vista. Il proprietario riceve l'avviso.</text>
+<g transform="translate(115 1210)"><rect width="300" height="105" rx="22" fill="#eaf3ff"/><text x="25" y="40" font-family="Arial" font-size="18" font-weight="800" fill="#0b2545">📍 Via Roma, Pavia</text><text x="25" y="70" font-family="Arial" font-size="17" fill="#55708f">Oggi · 16:30</text><rect x="190" y="18" width="85" height="68" rx="14" fill="url(#blue)"/><text x="232" y="60" text-anchor="middle" font-family="Arial" font-size="16" font-weight="900" fill="#fff">INVIA</text></g>
+<path d="M455 1260 C535 1195 595 1195 660 1260" stroke="#1565ff" stroke-width="8" fill="none" stroke-linecap="round"/>
+<g transform="translate(700 1200)"><circle cx="55" cy="45" r="35" fill="#dcecff"/><path d="M42 45 l10 10 l20 -23" stroke="#16a05d" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="110" y="0" width="250" height="100" rx="20" fill="#0b2545"/><text x="235" y="39" text-anchor="middle" font-family="Arial" font-size="17" font-weight="800" fill="#fff">NUOVA SEGNALAZIONE</text><text x="235" y="68" text-anchor="middle" font-family="Arial" font-size="16" fill="#bcd4ee">La tua bici è stata vista</text></g>
+
+<text x="600" y="1420" text-anchor="middle" font-family="Arial" font-size="31" font-weight="900" fill="#0b2545">LA BICI PUÒ ESSERE RUBATA. LA SUA IDENTITÀ NO.</text>
+<text x="600" y="1462" text-anchor="middle" font-family="Arial" font-size="22" fill="#1565ff">La community BIICODE può aiutare a farla tornare dal suo proprietario.</text>
+</svg>
