@@ -1,32 +1,118 @@
-/* BIICODE auth bridge + community explainer — final visual. */
+/* BIICODE final welcome + auth bridge + how-it-works. */
 (function(){
   'use strict';
-  function originalLogin(){const fn=window.__biicodeOriginalLogin;if(typeof fn==='function'){fn();return true}return false}
-  function injectNetworkStyles(){
-    if(document.getElementById('biicode-network-styles'))return;
-    const s=document.createElement('style');s.id='biicode-network-styles';s.textContent=`
-      .biicode-how{width:100%!important;min-height:76px!important;margin:16px 0 18px!important;padding:12px 16px!important;border:1px solid #43a6ff!important;border-radius:22px!important;background:linear-gradient(145deg,#0c2340,#071525)!important;color:#fff!important;text-align:left!important;display:flex!important;align-items:center!important;gap:13px!important;box-shadow:0 0 5px rgba(41,151,255,.9),0 0 18px rgba(21,101,255,.72),0 0 38px rgba(21,101,255,.38),inset 0 0 16px rgba(21,101,255,.12)!important;position:relative!important;overflow:hidden!important;animation:biicodeNeonPulse 2.2s ease-in-out infinite!important}
-      .biicode-how:before{content:'';position:absolute;inset:0;border-radius:22px;border:1px solid rgba(255,255,255,.18);pointer-events:none}.biicode-how-icon{width:47px!important;height:47px!important;min-width:47px!important;border-radius:15px!important;background:#1565ff!important;display:grid!important;place-items:center!important;font-size:24px!important;box-shadow:0 0 12px rgba(48,157,255,.9),0 0 25px rgba(21,101,255,.55)!important}.biicode-how strong{display:block!important;font-size:18px!important;line-height:1.05!important;letter-spacing:.02em!important}.biicode-how span{display:block!important;margin-top:5px!important;color:#a9c7e8!important;font-size:11px!important;line-height:1.25!important}.biicode-how-arrow{margin-left:auto!important;font-size:31px!important;color:#55aaff!important;text-shadow:0 0 12px #1677ff!important}
-      @keyframes biicodeNeonPulse{0%,100%{box-shadow:0 0 5px rgba(41,151,255,.9),0 0 18px rgba(21,101,255,.72),0 0 38px rgba(21,101,255,.38),inset 0 0 16px rgba(21,101,255,.12)}50%{box-shadow:0 0 8px rgba(72,174,255,1),0 0 26px rgba(21,101,255,.9),0 0 52px rgba(21,101,255,.48),inset 0 0 20px rgba(21,101,255,.16)}}
-      .biicode-network-page{min-height:100%;padding:4px 0 34px;color:#fff}.biicode-network-top{display:flex;align-items:center;margin-bottom:6px}.biicode-network-back{border:0;background:none;color:#69adff;font-weight:900;font-size:14px;padding:8px 0;cursor:pointer}.biicode-network-logo{display:block;width:150px;max-width:62%;height:auto;margin:4px auto 14px}.biicode-network-title{font-size:31px!important;line-height:1.02!important;letter-spacing:-.045em;margin:0 0 8px!important;text-align:center}.biicode-network-title span{color:#2f8cff}.biicode-network-sub{margin:0 auto 16px;text-align:center;color:#a8b9cd;font-size:14px;line-height:1.45;max-width:400px}.biicode-comic{display:block;width:100%;height:auto;border-radius:24px;border:1px solid #315273;background:#f5f9ff;box-shadow:0 0 24px rgba(21,101,255,.13),0 16px 38px rgba(0,0,0,.24);margin:0 auto 15px}.biicode-network-message{background:linear-gradient(145deg,#12283f,#0b1726);border:1px solid #294766;border-radius:22px;padding:19px 17px;text-align:center;box-shadow:0 10px 26px rgba(0,0,0,.16)}.biicode-network-message strong{display:block;font-size:20px;line-height:1.15}.biicode-network-message p{margin:8px 0 0;color:#9eb1c6;font-size:12px;line-height:1.48}.biicode-network-cta{width:100%;min-height:53px;border:0;border-radius:16px;background:linear-gradient(135deg,#2384ff,#0758e8);color:#fff;font-weight:950;font-size:14px;margin-top:12px;box-shadow:0 0 16px rgba(21,101,255,.35)}.biicode-network-privacy{font-size:10px;color:#70849b;text-align:center;margin:12px 17px 0;line-height:1.45}
-      .biicode-welcome-community{display:block;width:100%;height:auto;border-radius:24px;border:1px solid #24496f;margin:8px 0 17px;box-shadow:0 12px 32px rgba(0,0,0,.24),0 0 24px rgba(21,101,255,.12)}.biicode-welcome-community-copy{text-align:center;color:#a8b9cd;font-size:14px;line-height:1.45;margin:-5px 8px 17px}.biicode-welcome-community-copy strong{color:#fff}
-      @media(max-width:380px){.biicode-how{min-height:72px!important;margin-top:14px!important;padding:11px 13px!important}.biicode-how strong{font-size:16px!important}.biicode-how span{font-size:10px!important}.biicode-how-icon{width:43px!important;height:43px!important;min-width:43px!important}.biicode-network-title{font-size:28px!important}}
-    `;document.head.appendChild(s)
+
+  function originalLogin(){
+    const fn=window.__biicodeOriginalLogin;
+    if(typeof fn==='function'){fn();return true}
+    return false;
   }
+
+  function styles(){
+    if(document.getElementById('biicode-final-auth-styles'))return;
+    const s=document.createElement('style');
+    s.id='biicode-final-auth-styles';
+    s.textContent=`
+      /* FINAL WELCOME */
+      .biicode-welcome{position:fixed!important;inset:0!important;z-index:9999!important;background:#050d17!important;overflow-y:auto!important;padding:0!important}
+      .biicode-welcome-inner{width:100%!important;max-width:540px!important;min-height:100dvh!important;margin:0 auto!important;padding:0!important;position:relative!important;background:#050d17!important;overflow:hidden!important}
+      .biicode-welcome-logo{position:absolute!important;z-index:4!important;top:28px!important;left:50%!important;transform:translateX(-50%)!important;width:min(300px,72%)!important;height:auto!important;filter:drop-shadow(0 8px 18px rgba(0,0,0,.3))!important}
+      .biicode-welcome-photo{position:relative!important;width:100%!important;height:min(100dvh,860px)!important;min-height:720px!important;overflow:hidden!important;background:#102d4d!important}
+      .biicode-welcome-photo img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important}
+      .biicode-welcome-photo:after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(3,10,18,.08) 0%,rgba(3,10,18,0) 46%,rgba(3,10,18,.45) 70%,rgba(3,10,18,.97) 100%);pointer-events:none}
+      .biicode-welcome-overlay{position:absolute!important;z-index:3!important;left:20px!important;right:20px!important;bottom:22px!important;text-align:center!important}
+      .biicode-welcome-overlay h1{margin:0 0 7px!important;font-size:34px!important;line-height:.98!important;letter-spacing:-.05em!important;color:#fff!important;text-shadow:0 4px 20px rgba(0,0,0,.35)!important}
+      .biicode-welcome-overlay h1 span{color:#2991ff!important}
+      .biicode-welcome-overlay p{margin:0 0 15px!important;color:#d9e6f5!important;font-size:14px!important;font-weight:700!important}
+      .biicode-welcome-actions{display:grid!important;gap:9px!important}
+      .biicode-welcome-actions button{width:100%!important;min-height:55px!important;border-radius:17px!important;font-size:15px!important;font-weight:950!important;letter-spacing:.01em!important}
+      .biicode-welcome-register{border:0!important;background:linear-gradient(135deg,#2b83ff,#095bea)!important;color:#fff!important;box-shadow:0 10px 28px rgba(21,101,255,.38)!important}
+      .biicode-welcome-login{border:1.5px solid #55aaff!important;background:rgba(5,16,29,.72)!important;color:#fff!important;backdrop-filter:blur(10px)!important}
+      .biicode-welcome-foot{display:none!important}
+
+      /* HOW IT WORKS: only the previously built illustration. */
+      .biicode-how{width:100%!important;min-height:68px!important;margin:12px 0 18px!important;padding:12px 16px!important;border:1px solid #43a6ff!important;border-radius:21px!important;background:linear-gradient(145deg,#0c2340,#071525)!important;color:#fff!important;text-align:left!important;display:flex!important;align-items:center!important;gap:12px!important;box-shadow:0 0 6px rgba(41,151,255,.95),0 0 20px rgba(21,101,255,.62),0 0 34px rgba(21,101,255,.28)!important;position:relative!important;overflow:hidden!important;animation:biicodeNeonPulse 2.2s ease-in-out infinite!important}
+      .biicode-how strong{display:block!important;font-size:17px!important;line-height:1.05!important;letter-spacing:.01em!important}
+      .biicode-how small{display:block!important;margin-top:4px!important;color:#a9c7e8!important;font-size:11px!important;line-height:1.2!important}
+      .biicode-how-icon{display:none!important}
+      .biicode-how-arrow{margin-left:auto!important;font-size:28px!important;color:#55aaff!important;text-shadow:0 0 12px #1677ff!important}
+      @keyframes biicodeNeonPulse{0%,100%{box-shadow:0 0 6px rgba(41,151,255,.95),0 0 20px rgba(21,101,255,.62),0 0 34px rgba(21,101,255,.28)}50%{box-shadow:0 0 9px rgba(72,174,255,1),0 0 28px rgba(21,101,255,.85),0 0 48px rgba(21,101,255,.4)}}
+
+      /* The explainer is the image, nothing else. */
+      .biicode-network-page{position:relative!important;min-height:100dvh!important;padding:0!important;background:#07101b!important;display:flex!important;align-items:center!important;justify-content:center!important}
+      .biicode-network-image{display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;object-fit:contain!important}
+      .biicode-network-close{position:absolute!important;z-index:2!important;top:calc(12px + env(safe-area-inset-top))!important;left:14px!important;width:38px!important;height:38px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:50%!important;background:rgba(4,12,21,.7)!important;color:#fff!important;font-size:24px!important;line-height:1!important;backdrop-filter:blur(10px)!important}
+
+      @media(max-width:380px){
+        .biicode-welcome-logo{top:23px!important;width:min(270px,70%)!important}
+        .biicode-welcome-photo{min-height:680px!important}
+        .biicode-welcome-overlay{left:15px!important;right:15px!important;bottom:16px!important}
+        .biicode-welcome-overlay h1{font-size:30px!important}
+        .biicode-welcome-actions button{min-height:52px!important}
+      }
+      @media(max-height:720px){
+        .biicode-welcome-photo{height:100dvh!important;min-height:620px!important}
+        .biicode-welcome-logo{top:16px!important;width:min(245px,66%)!important}
+        .biicode-welcome-overlay{bottom:12px!important}
+        .biicode-welcome-overlay h1{font-size:27px!important}
+        .biicode-welcome-overlay p{margin-bottom:9px!important;font-size:12px!important}
+        .biicode-welcome-actions{gap:7px!important}
+        .biicode-welcome-actions button{min-height:46px!important}
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
   function openNetworkPage(){
-    injectNetworkStyles();const modal=document.getElementById('modal'),mi=document.getElementById('modalin');if(!modal||!mi)return false;
-    mi.innerHTML=`<div class="biicode-network-page"><div class="biicode-network-top"><button class="biicode-network-back" type="button" data-network-back>‹ INDIETRO</button></div><img class="biicode-network-logo" src="./assets/biicode-logo-v2.svg?v=network3" alt="BIICODE"><h1 class="biicode-network-title">Insieme per bici <span>più sicure.</span></h1><p class="biicode-network-sub">Una rete di ciclisti e cittadini che può aiutare a riconoscere e segnalare una bici rubata.</p><img class="biicode-comic" src="./assets/biicode-rete-comic.svg?v=final3" alt="Fumetto della rete BIICODE"><div class="biicode-network-message"><strong>La bici può essere rubata.<br>La sua identità no.</strong><p>Se qualcuno la vede, può segnalare dove l'ha trovata. Il proprietario riceve l'avviso e può attivarsi insieme alle autorità competenti.</p></div><button class="biicode-network-cta" type="button" data-network-back>TORNA ALL'APP</button><div class="biicode-network-privacy">La segnalazione non richiede i dati personali di chi avvista la bici. BIICODE non sostituisce la denuncia né le autorità competenti.</div></div>`;
-    modal.classList.add('open');mi.querySelectorAll('[data-network-back]').forEach(b=>b.addEventListener('click',()=>modal.classList.remove('open')));return true
+    styles();
+    const modal=document.getElementById('modal'),mi=document.getElementById('modalin');
+    if(!modal||!mi)return false;
+    mi.innerHTML=`<div class="biicode-network-page"><button class="biicode-network-close" type="button" aria-label="Chiudi">×</button><img class="biicode-network-image" src="./assets/biicode-rete-comic.svg?v=final4" alt="Come funziona BIICODE"></div>`;
+    modal.classList.add('open');
+    mi.querySelector('.biicode-network-close').addEventListener('click',()=>modal.classList.remove('open'));
+    return true;
   }
+
   function addHowItWorks(){
-    const grid=document.querySelector('.grid');if(!grid||document.querySelector('[data-biicode-how]'))return;const btn=document.createElement('button');btn.type='button';btn.className='biicode-how';btn.dataset.biicodeHow='1';btn.innerHTML='<span class="biicode-how-icon">▣</span><span><strong>COME FUNZIONA?</strong><span>Scopri la rete BIICODE in 1 minuto.</span></span><span class="biicode-how-arrow">›</span>';btn.addEventListener('click',openNetworkPage);grid.insertAdjacentElement('afterend',btn)
+    if(document.querySelector('[data-biicode-how]'))return;
+    const grid=document.querySelector('.grid');
+    if(!grid)return;
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='biicode-how';btn.dataset.biicodeHow='1';
+    btn.innerHTML='<span><strong>COME FUNZIONA?</strong><small>Scopri la rete BIICODE in 1 minuto.</small></span><span class="biicode-how-arrow">›</span>';
+    btn.addEventListener('click',openNetworkPage);
+    const headings=[...document.querySelectorAll('h1,h2,h3,.title')];
+    const target=headings.find(el=>/le\s+mie\s+bici/i.test((el.textContent||'').trim()));
+    if(target)target.parentNode.insertBefore(btn,target);
+    else grid.insertAdjacentElement('afterend',btn);
   }
+
   function simplifyWelcome(){
-    const root=document.querySelector('.biicode-welcome');if(!root||root.dataset.authFix==='1')return;root.dataset.authFix='1';const inner=root.querySelector('.biicode-welcome-inner')||root;
-    inner.innerHTML=`<img class="biicode-welcome-logo" src="./assets/biicode-logo-v2.svg?v=welcome21" alt="BIICODE"><img class="biicode-welcome-community" src="./assets/biicode-community.svg?v=1" alt="La community BIICODE"><div class="biicode-welcome-community-copy"><strong>Più ciclisti. Più sicurezza. Più community.</strong><br>Insieme per proteggere ciò che amiamo.</div><div class="biicode-welcome-hero"><h1>La tua bici.<br><span>La sua identità.</span></h1><p>Registrala. Identificala. Proteggila.</p></div><div class="biicode-welcome-cta"><button class="btn" type="button" data-biicode-register>REGISTRA LA MIA BICI</button><button class="biicode-welcome-secondary" type="button" data-biicode-login>HO GIÀ UN ACCOUNT · ACCEDI</button></div><div class="biicode-welcome-benefits"><article class="biicode-benefit"><div class="biicode-benefit-icon">🪪</div><div><h2>Identità</h2><p>Un codice unico per la tua bici.</p></div></article><article class="biicode-benefit"><div class="biicode-benefit-icon">🛡️</div><div><h2>Protezione</h2><p>Segnala subito un eventuale furto.</p></div></article><article class="biicode-benefit"><div class="biicode-benefit-icon">⌾</div><div><h2>Verifica</h2><p>Controlla il BIICODE tramite QR.</p></div></article></div><div class="biicode-trust">I tuoi dati personali restano protetti.</div><div class="footer-note">BIICODE · La tua bici. Un’identità unica.</div>`;
-    const r=inner.querySelector('[data-biicode-register]'),l=inner.querySelector('[data-biicode-login]');if(r)r.addEventListener('click',()=>{if(typeof window.register==='function')window.register()});if(l)l.addEventListener('click',()=>{if(!originalLogin())alert('Schermata di accesso non disponibile. Ricarica la pagina.')})
+    const root=document.querySelector('.biicode-welcome');
+    if(!root)return;
+    const inner=root.querySelector('.biicode-welcome-inner')||root;
+    if(inner.dataset.authFixFinal==='1')return;
+    inner.dataset.authFixFinal='1';
+    inner.innerHTML=`<div class="biicode-welcome-photo"><img src="./assets/biicode-welcome.svg?v=final1" alt="Ciclisti BIICODE"><img class="biicode-welcome-logo" src="./assets/biicode-logo-v2.svg?v=welcome22" alt="BIICODE"><div class="biicode-welcome-overlay"><h1>La tua bici.<br><span>La sua identità.</span></h1><p>Registrala. Identificala. Proteggila.</p><div class="biicode-welcome-actions"><button class="biicode-welcome-register" type="button" data-biicode-register>REGISTRA LA MIA BICI</button><button class="biicode-welcome-login" type="button" data-biicode-login>HO GIÀ UN ACCOUNT · ACCEDI</button></div></div></div>`;
+    const r=inner.querySelector('[data-biicode-register]'),l=inner.querySelector('[data-biicode-login]');
+    if(r)r.addEventListener('click',()=>{if(typeof window.register==='function')window.register()});
+    if(l)l.addEventListener('click',()=>{if(!originalLogin())alert('Schermata di accesso non disponibile. Ricarica la pagina.')});
   }
-  function patchLoginButtons(){document.querySelectorAll('button').forEach(btn=>{const text=(btn.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();if(text.includes('HO GIÀ UN ACCOUNT')||text==='ACCEDI SENZA REGISTRARTI'){btn.onclick=null;if(btn.dataset.authFixBound==='1')return;btn.dataset.authFixBound='1';btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopImmediatePropagation();originalLogin()},true)}})}
-  function run(){injectNetworkStyles();simplifyWelcome();addHowItWorks();patchLoginButtons()}
-  const observer=new MutationObserver(()=>requestAnimationFrame(run));observer.observe(document.body,{childList:true,subtree:true});setTimeout(run,0);setTimeout(run,250);setTimeout(run,1000)
+
+  function patchLoginButtons(){
+    document.querySelectorAll('button').forEach(btn=>{
+      const text=(btn.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
+      if(text.includes('HO GIÀ UN ACCOUNT')||text==='ACCEDI SENZA REGISTRARTI'){
+        if(btn.dataset.authFixBound==='1')return;
+        btn.dataset.authFixBound='1';
+        btn.onclick=null;
+        btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopImmediatePropagation();originalLogin()},true);
+      }
+    });
+  }
+
+  function run(){styles();simplifyWelcome();addHowItWorks();patchLoginButtons()}
+  const observer=new MutationObserver(()=>requestAnimationFrame(run));
+  observer.observe(document.body,{childList:true,subtree:true});
+  setTimeout(run,0);setTimeout(run,250);setTimeout(run,900);
 })();
