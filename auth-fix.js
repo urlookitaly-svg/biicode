@@ -13,7 +13,6 @@
     const s=document.createElement('style');
     s.id='biicode-final-auth-styles';
     s.textContent=`
-      /* FINAL WELCOME — one image, auth buttons over the image. */
       .biicode-welcome{position:fixed!important;inset:0!important;z-index:9999!important;background:#050d17!important;overflow-y:auto!important;padding:0!important}
       .biicode-welcome-inner{width:100%!important;max-width:540px!important;min-height:100dvh!important;margin:0 auto!important;padding:0 14px 24px!important;position:relative!important;background:#050d17!important;overflow:hidden!important}
       .biicode-welcome-photo{position:relative!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;overflow:hidden!important;border-radius:0 0 26px 26px!important;background:#102d4d!important}
@@ -27,26 +26,16 @@
       .biicode-welcome-register{border:0!important;background:linear-gradient(135deg,#2b83ff,#095bea)!important;color:#fff!important;box-shadow:0 10px 28px rgba(21,101,255,.42)!important}
       .biicode-welcome-login{border:1.5px solid #55aaff!important;background:rgba(5,16,29,.86)!important;color:#fff!important;backdrop-filter:blur(10px)!important}
       .biicode-welcome-foot{display:none!important}
-
-      /* HOW IT WORKS — only the illustration already created. */
       .biicode-how{width:100%!important;min-height:68px!important;margin:12px 0 18px!important;padding:12px 16px!important;border:1px solid #43a6ff!important;border-radius:21px!important;background:linear-gradient(145deg,#0c2340,#071525)!important;color:#fff!important;text-align:left!important;display:flex!important;align-items:center!important;gap:12px!important;box-shadow:0 0 6px rgba(41,151,255,.95),0 0 20px rgba(21,101,255,.62),0 0 34px rgba(21,101,255,.28)!important;position:relative!important;overflow:hidden!important;animation:biicodeNeonPulse 2.2s ease-in-out infinite!important}
       .biicode-how strong{display:block!important;font-size:17px!important;line-height:1.05!important;letter-spacing:.01em!important}
       .biicode-how small{display:block!important;margin-top:4px!important;color:#a9c7e8!important;font-size:11px!important;line-height:1.2!important}
       .biicode-how-icon{display:none!important}
       .biicode-how-arrow{margin-left:auto!important;font-size:28px!important;color:#55aaff!important;text-shadow:0 0 12px #1677ff!important}
       @keyframes biicodeNeonPulse{0%,100%{box-shadow:0 0 6px rgba(41,151,255,.95),0 0 20px rgba(21,101,255,.62),0 0 34px rgba(21,101,255,.28)}50%{box-shadow:0 0 9px rgba(72,174,255,1),0 0 28px rgba(21,101,255,.85),0 0 48px rgba(21,101,255,.4)}}
-
-      /* The explainer is only the exact user-selected image. */
       .biicode-network-page{position:relative!important;min-height:100dvh!important;padding:0!important;background:#07101b!important;display:flex!important;align-items:center!important;justify-content:center!important}
       .biicode-network-image{display:block!important;width:100%!important;height:auto!important;max-height:100dvh!important;object-fit:contain!important}
       .biicode-network-close{position:absolute!important;z-index:2!important;top:calc(12px + env(safe-area-inset-top))!important;left:14px!important;width:38px!important;height:38px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:50%!important;background:rgba(4,12,21,.7)!important;color:#fff!important;font-size:24px!important;line-height:1!important;backdrop-filter:blur(10px)!important}
-
-      @media(max-width:380px){
-        .biicode-welcome-inner{padding-left:10px!important;padding-right:10px!important}
-        .biicode-welcome-logo{top:20px!important;width:min(270px,74%)!important}
-        .biicode-welcome-overlay{left:14px!important;right:14px!important;bottom:14px!important}
-        .biicode-welcome-actions button{min-height:52px!important}
-      }
+      @media(max-width:380px){.biicode-welcome-inner{padding-left:10px!important;padding-right:10px!important}.biicode-welcome-logo{top:20px!important;width:min(270px,74%)!important}.biicode-welcome-overlay{left:14px!important;right:14px!important;bottom:14px!important}.biicode-welcome-actions button{min-height:52px!important}}
     `;
     document.head.appendChild(s);
   }
@@ -63,23 +52,18 @@
 
   function addHowItWorks(){
     if(document.querySelector('[data-biicode-how]'))return;
-    const grid=document.querySelector('.grid');
-    if(!grid)return;
-    const btn=document.createElement('button');
-    btn.type='button';btn.className='biicode-how';btn.dataset.biicodeHow='1';
+    const grid=document.querySelector('.grid');if(!grid)return;
+    const btn=document.createElement('button');btn.type='button';btn.className='biicode-how';btn.dataset.biicodeHow='1';
     btn.innerHTML='<span><strong>COME FUNZIONA?</strong><small>Scopri la rete BIICODE in 1 minuto.</small></span><span class="biicode-how-arrow">›</span>';
     btn.addEventListener('click',openNetworkPage);
     const headings=[...document.querySelectorAll('h1,h2,h3,.title')];
     const target=headings.find(el=>/le\s+mie\s+bici/i.test((el.textContent||'').trim()));
-    if(target)target.parentNode.insertBefore(btn,target);
-    else grid.insertAdjacentElement('afterend',btn);
+    if(target)target.parentNode.insertBefore(btn,target);else grid.insertAdjacentElement('afterend',btn);
   }
 
   function simplifyWelcome(){
-    const root=document.querySelector('.biicode-welcome');
-    if(!root)return;
-    const inner=root.querySelector('.biicode-welcome-inner')||root;
-    if(inner.dataset.authFixFinal==='1')return;
+    const root=document.querySelector('.biicode-welcome');if(!root)return;
+    const inner=root.querySelector('.biicode-welcome-inner')||root;if(inner.dataset.authFixFinal==='1')return;
     inner.dataset.authFixFinal='1';
     inner.innerHTML=`<div class="biicode-welcome-photo"><img src="./assets/biicode-welcome.svg?v=final2" alt="Ciclisti BIICODE"><img class="biicode-welcome-logo" src="./assets/biicode-logo-v2.svg?v=welcome23" alt="BIICODE"><div class="biicode-welcome-overlay"><div class="biicode-welcome-actions"><button class="biicode-welcome-register" type="button" data-biicode-register>REGISTRA LA MIA BICI</button><button class="biicode-welcome-login" type="button" data-biicode-login>HO GIÀ UN ACCOUNT · ACCEDI</button></div></div></div>`;
     const r=inner.querySelector('[data-biicode-register]'),l=inner.querySelector('[data-biicode-login]');
@@ -87,20 +71,7 @@
     if(l)l.addEventListener('click',()=>{if(!originalLogin())alert('Schermata di accesso non disponibile. Ricarica la pagina.')});
   }
 
-  function patchLoginButtons(){
-    document.querySelectorAll('button').forEach(btn=>{
-      const text=(btn.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
-      if(text.includes('HO GIÀ UN ACCOUNT')||text==='ACCEDI SENZA REGISTRARTI'){
-        if(btn.dataset.authFixBound==='1')return;
-        btn.dataset.authFixBound='1';
-        btn.onclick=null;
-        btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopImmediatePropagation();originalLogin()},true);
-      }
-    });
-  }
-
+  function patchLoginButtons(){document.querySelectorAll('button').forEach(btn=>{const text=(btn.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();if(text.includes('HO GIÀ UN ACCOUNT')||text==='ACCEDI SENZA REGISTRARTI'){if(btn.dataset.authFixBound==='1')return;btn.dataset.authFixBound='1';btn.onclick=null;btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopImmediatePropagation();originalLogin()},true)}})}
   function run(){styles();simplifyWelcome();addHowItWorks();patchLoginButtons()}
-  const observer=new MutationObserver(()=>requestAnimationFrame(run));
-  observer.observe(document.body,{childList:true,subtree:true});
-  setTimeout(run,0);setTimeout(run,250);setTimeout(run,900);
+  const observer=new MutationObserver(()=>requestAnimationFrame(run));observer.observe(document.body,{childList:true,subtree:true});setTimeout(run,0);setTimeout(run,250);setTimeout(run,900);
 })();
