@@ -105,48 +105,7 @@ window.biicodeConfirmTheft=function(enc){const id=decodeURIComponent(enc||'');co
 const originalCloseModal=window.closeModal;
 window.closeModal=function(){stopQrScanner();if(typeof originalCloseModal==='function')originalCloseModal();};
 
-function showWelcome(){
- const main=document.querySelector('#main');const nav=document.querySelector('#nav');if(!main)return;
- if(typeof stopQrScanner==='function')stopQrScanner();
- if(nav)nav.classList.add('hidden');
- main.innerHTML=`<div class="biicode-welcome"><div class="biicode-welcome-inner">
-   <img class="biicode-welcome-logo" src="./assets/biicode-logo-v2.svg?v=welcome19" alt="BIICODE">
-   <div class="biicode-welcome-kicker">IDENTITÀ DIGITALE PER LA TUA BICI</div>
-   <section class="biicode-welcome-hero">
-     <h1>La tua bici.<br>Riconoscibile. Protetta.</h1>
-     <p>Con <strong>BIICODE</strong> dai alla tua bicicletta un’identità unica: la registri, la associ al suo codice e puoi dimostrare in modo semplice a chi appartiene.</p>
-   </section>
-   <div class="biicode-welcome-cta">
-     <button class="btn" type="button" onclick="register()">REGISTRA LA TUA BICI</button>
-     <button class="biicode-welcome-secondary" type="button" onclick="showLogin()">HO GIÀ UN ACCOUNT · ACCEDI</button>
-   </div>
-   <div class="biicode-section-title">Perché registrarla con BIICODE?</div>
-   <div class="biicode-welcome-benefits">
-     <article class="biicode-benefit"><div class="biicode-benefit-icon">🪪</div><div><h2>Un’identità unica</h2><p>Ogni bicicletta registrata ha un BIICODE associato ai suoi dati. Il numero di telaio resta il riferimento della tua bici.</p></div></article>
-     <article class="biicode-benefit"><div class="biicode-benefit-icon">🛡️</div><div><h2>Più tutela</h2><p>Se la bici viene rubata puoi segnalarla e far comparire pubblicamente lo stato di bici rubata.</p></div></article>
-     <article class="biicode-benefit"><div class="biicode-benefit-icon">⌾</div><div><h2>Verificabile con un QR</h2><p>Chi trova o controlla la bici può scansionare il QR e verificare se quel BIICODE è associato a una bicicletta attiva o segnalata.</p></div></article>
-   </div>
-   <div class="biicode-section-title">Come funziona</div>
-   <div class="biicode-steps">
-     <div class="biicode-step"><div class="biicode-step-num">1</div><strong>Registrati</strong><span>Crea il tuo account BIICODE.</span></div>
-     <div class="biicode-step"><div class="biicode-step-num">2</div><strong>Immatricola</strong><span>Inserisci marca, modello e telaio.</span></div>
-     <div class="biicode-step"><div class="biicode-step-num">3</div><strong>Proteggi</strong><span>Conserva e usa il tuo BIICODE.</span></div>
-   </div>
-   <div class="biicode-trust"><b>Privacy:</b> nella verifica pubblica non vengono mostrati il numero di telaio né i dati personali del proprietario.</div>
-   <button class="biicode-login-link" type="button" onclick="showLogin()">Accedi senza registrarti</button>
-   <div class="footer-note">BIICODE · La tua bici. Un’identità unica.</div>
- </div></div>`;
-}
-
-function showLogin(){
- const original=window.__biicodeOriginalLogin;
- if(typeof original==='function')original();
- else if(typeof window.login==='function' && window.login!==showLogin)window.login();
-}
-window.__biicodeOriginalLogin=window.login;
-window.login=function(){showWelcome()};
-window.biicodeWelcome=showWelcome;
-
+/* Welcome/auth ownership moved to auth-fix.js. Keep this file focused on authenticated UI. */
 function moveHome(){
  const main=document.querySelector('#main');if(!main)return;
  const status=main.querySelector('.statusbar');if(status)status.remove();
@@ -162,5 +121,5 @@ new MutationObserver(()=>requestAnimationFrame(moveHome)).observe(document.body,
 
 /* The main script calls login() before this enhancement file is loaded. If there is no session,
    replace that initial technical login with the public landing page. */
-setTimeout(()=>{try{if(!window.user&&!window.session&&!localStorage.getItem('biicode_session'))showWelcome()}catch(e){showWelcome()}},0);
+
 })();
