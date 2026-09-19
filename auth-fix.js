@@ -4,7 +4,7 @@ const q=s=>document.querySelector(s);
 function style(){if(q('#biicode-final-auth-styles'))return;const s=document.createElement('style');s.id='biicode-final-auth-styles';s.textContent=`
 .biicode-welcome{position:fixed!important;inset:0!important;z-index:9999!important;background:#050d17!important;padding:0!important;overflow:auto!important}
 .biicode-welcome-inner{width:100%!important;max-width:540px!important;min-height:100%!important;margin:auto!important;background:#050d17!important}
-.biicode-welcome-photo{position:relative!important;width:100%!important;overflow:hidden!important;aspect-ratio:709/930!important}
+.biicode-welcome-photo{position:relative!important;width:100%!important;overflow:hidden!important;aspect-ratio:709/900!important}
 .biicode-welcome-art{display:block!important;width:100%!important;height:auto!important;pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
 .biicode-real-cta{position:relative!important;z-index:10002!important;padding:12px 24px calc(18px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,rgba(5,13,23,0),#050d17 18%,#050d17 100%)!important}
 .biicode-real-cta button{font-family:inherit!important;cursor:pointer!important}
