@@ -18,12 +18,13 @@ function style(){if(q('#biicode-final-auth-styles'))return;const s=document.crea
 .biicode-network-image{display:block!important;width:100%!important;height:auto!important;max-width:540px!important;align-self:flex-start!important}
 .biicode-network-close{position:fixed!important;z-index:30001!important;top:calc(12px + env(safe-area-inset-top))!important;left:14px!important;width:42px!important;height:42px!important;border:1px solid rgba(255,255,255,.4)!important;border-radius:50%!important;background:rgba(4,12,21,.84)!important;color:#fff!important;font-size:27px!important}
 `;document.head.appendChild(s)}
-function login(){if(typeof window.login==='function')return window.login();alert('Accesso non disponibile. Ricarica la pagina.')}
+function leaveWelcome(){q('.biicode-welcome')?.remove();const nav=q('#nav');if(nav)nav.classList.add('hidden')}
+function login(){leaveWelcome();if(typeof window.login==='function')return window.login();alert('Accesso non disponibile. Ricarica la pagina.')}
 function info(){q('#biicode-network-overlay')?.remove();const o=document.createElement('div');o.id='biicode-network-overlay';o.className='biicode-network-overlay';o.innerHTML='<button class="biicode-network-close" type="button">×</button><div class="biicode-network-page"><img class="biicode-network-image" src="./assets/biicode-how-it-works.webp?v=18" alt="Come funziona BIICODE"></div>';document.body.appendChild(o);o.querySelector('button').onclick=()=>o.remove()}
 function ensureWelcome(){let root=q('.biicode-welcome');if(root)return root;const main=q('#main');if(!main)return null;if(localStorage.getItem('biicode_session'))return null;const nav=q('#nav');if(nav)nav.classList.add('hidden');main.innerHTML='<div class="biicode-welcome"><div class="biicode-welcome-inner"></div></div>';return q('.biicode-welcome')}
 function render(){style();const root=ensureWelcome();if(!root)return;const inner=root.querySelector('.biicode-welcome-inner')||root;if(inner.dataset.controller==='20')return;inner.dataset.controller='20';inner.innerHTML='<div class="biicode-welcome-photo"><img class="biicode-welcome-art" src="./assets/biicode-welcome-final.webp?v=20260918d" alt="BIICODE community"></div><div class="biicode-real-cta"><button class="biicode-info-btn" type="button"><span style="font-size:30px;margin-right:14px">♧</span> COME FUNZIONA? <span style="float:right;font-size:28px">›</span></button><div class="biicode-cta-row"><button class="biicode-register-btn" type="button">＋ REGISTRA</button><button class="biicode-login-btn" type="button">♙ ACCEDI</button></div></div>';
 inner.querySelector('.biicode-info-btn').onclick=info;
-inner.querySelector('.biicode-register-btn').onclick=()=>{if(typeof window.register==='function')window.register()};
+inner.querySelector('.biicode-register-btn').onclick=()=>{leaveWelcome();if(typeof window.register==='function')window.register()};
 inner.querySelector('.biicode-login-btn').onclick=login}
 new MutationObserver(()=>requestAnimationFrame(render)).observe(document.body,{childList:true,subtree:true});render();setTimeout(render,100);setTimeout(render,700);
 })();
