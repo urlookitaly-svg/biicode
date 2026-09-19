@@ -26,5 +26,5 @@ function render(){style();const root=ensureWelcome();if(!root)return;const inner
 inner.querySelector('.biicode-info-btn').onclick=info;
 inner.querySelector('.biicode-register-btn').onclick=()=>{leaveWelcome();if(typeof window.register==='function')window.register()};
 inner.querySelector('.biicode-login-btn').onclick=login}
-new MutationObserver(()=>requestAnimationFrame(render)).observe(document.body,{childList:true,subtree:true});render();setTimeout(render,100);setTimeout(render,700);
+render();setTimeout(render,100);setTimeout(render,700);
 })();
