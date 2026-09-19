@@ -8,7 +8,7 @@ function style(){if(q('#biicode-final-auth-styles'))return;const s=document.crea
 .biicode-welcome-art{display:block!important;width:100%!important;height:auto!important;pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
 .biicode-real-cta{position:relative!important;z-index:10002!important;padding:12px 24px calc(18px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,rgba(5,13,23,0),#050d17 18%,#050d17 100%)!important}
 .biicode-real-cta button{font-family:inherit!important;cursor:pointer!important}
-.biicode-info-btn{width:100%!important;min-height:72px!important;border:2px solid #1594ff!important;border-radius:34px!important;background:#0a3158!important;color:#fff!important;font-size:17px!important;font-weight:900!important;box-shadow:0 0 18px rgba(21,148,255,.35)!important}
+.biicode-info-btn{width:100%!important;min-height:72px!important;border:2px solid #1594ff!important;border-radius:34px!important;background:#0a3158!important;color:#fff!important;font-size:17px!important;font-weight:900!important;line-height:1!important;padding-top:3px!important;box-shadow:0 0 18px rgba(21,148,255,.35)!important}
 .biicode-cta-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:10px!important}
 .biicode-register-btn,.biicode-login-btn{min-height:68px!important;border-radius:28px!important;font-size:15px!important;font-weight:900!important;color:#fff!important}
 .biicode-register-btn{border:0!important;background:#087cf0!important}
