@@ -1,14 +1,18 @@
-/* BIICODE welcome: one full-screen interaction layer, no overlapping buttons. */
+/* BIICODE welcome: real visible HTML controls, no image hit-maps. */
 (function(){'use strict';
 const q=s=>document.querySelector(s);
 function style(){if(q('#biicode-final-auth-styles'))return;const s=document.createElement('style');s.id='biicode-final-auth-styles';s.textContent=`
-.biicode-welcome{position:fixed!important;inset:0!important;z-index:9999!important;background:#050d17!important;padding:0!important;overflow:hidden!important}
-.biicode-welcome-inner,.biicode-welcome-photo{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:540px!important;margin:auto!important;padding:0!important;overflow:hidden!important;background:#050d17!important}
-.biicode-welcome-art{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
-.biicode-welcome-hit{position:absolute!important;left:5%!important;width:90%!important;z-index:10002!important;border:0!important;background:transparent!important;color:transparent!important;padding:0!important;margin:0!important;-webkit-appearance:none!important;appearance:none!important;touch-action:manipulation!important}
-.biicode-welcome-hit-info{top:72%!important;height:6%!important}
-.biicode-welcome-hit-register{top:79.2%!important;height:5.8%!important}
-.biicode-welcome-hit-login{top:85.8%!important;height:6.2%!important}
+.biicode-welcome{position:fixed!important;inset:0!important;z-index:9999!important;background:#050d17!important;padding:0!important;overflow:auto!important}
+.biicode-welcome-inner{width:100%!important;max-width:540px!important;min-height:100%!important;margin:auto!important;background:#050d17!important}
+.biicode-welcome-photo{position:relative!important;width:100%!important}
+.biicode-welcome-art{display:block!important;width:100%!important;height:auto!important;pointer-events:none!important;user-select:none!important;-webkit-user-select:none!important}
+.biicode-real-cta{position:sticky!important;bottom:0!important;z-index:10002!important;padding:10px 14px calc(12px + env(safe-area-inset-bottom))!important;background:linear-gradient(180deg,rgba(5,13,23,0),#050d17 18%,#050d17 100%)!important}
+.biicode-real-cta button{font-family:inherit!important;cursor:pointer!important}
+.biicode-info-btn{width:100%!important;min-height:58px!important;border:2px solid #1594ff!important;border-radius:22px!important;background:#0a3158!important;color:#fff!important;font-size:16px!important;font-weight:900!important;box-shadow:0 0 18px rgba(21,148,255,.35)!important}
+.biicode-cta-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:10px!important}
+.biicode-register-btn,.biicode-login-btn{min-height:62px!important;border-radius:20px!important;font-size:15px!important;font-weight:900!important;color:#fff!important}
+.biicode-register-btn{border:0!important;background:#087cf0!important}
+.biicode-login-btn{border:2px solid #2987c8!important;background:#09233b!important}
 .biicode-network-overlay{position:fixed!important;inset:0!important;z-index:30000!important;background:#07101b!important;overflow:auto!important}
 .biicode-network-page{min-height:100dvh!important;background:#07101b!important;display:flex!important;justify-content:center!important}
 .biicode-network-image{display:block!important;width:100%!important;height:auto!important;max-width:540px!important;align-self:flex-start!important}
@@ -16,11 +20,10 @@ function style(){if(q('#biicode-final-auth-styles'))return;const s=document.crea
 `;document.head.appendChild(s)}
 function login(){if(typeof window.login==='function')return window.login();alert('Accesso non disponibile. Ricarica la pagina.')}
 function info(){q('#biicode-network-overlay')?.remove();const o=document.createElement('div');o.id='biicode-network-overlay';o.className='biicode-network-overlay';o.innerHTML='<button class="biicode-network-close" type="button">×</button><div class="biicode-network-page"><img class="biicode-network-image" src="./assets/biicode-how-it-works.webp?v=18" alt="Come funziona BIICODE"></div>';document.body.appendChild(o);o.querySelector('button').onclick=()=>o.remove()}
-function ensureWelcome(){let root=q('.biicode-welcome');if(root)return root;const main=q('#main');if(!main)return null;const hasSession=!!localStorage.getItem('biicode_session');if(hasSession)return null;const nav=q('#nav');if(nav)nav.classList.add('hidden');main.innerHTML='<div class="biicode-welcome"><div class="biicode-welcome-inner"></div></div>';return q('.biicode-welcome')}
-function render(){style();const root=ensureWelcome();if(!root)return;const inner=root.querySelector('.biicode-welcome-inner')||root;if(inner.dataset.controller==='17')return;inner.dataset.controller='17';inner.innerHTML='<div class="biicode-welcome-photo"><img class="biicode-welcome-art" src="./assets/biicode-welcome-final.webp?v=20260918d" alt="BIICODE community"><button class="biicode-welcome-hit biicode-welcome-hit-info" type="button" aria-label="Come funziona BIICODE"></button><button class="biicode-welcome-hit biicode-welcome-hit-register" type="button" aria-label="Registra la mia bici"></button><button class="biicode-welcome-hit biicode-welcome-hit-login" type="button" aria-label="Accedi"></button></div>';
-const [bInfo,bRegister,bLogin]=inner.querySelectorAll('.biicode-welcome-hit');
-bInfo.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();info()});
-bRegister.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(typeof window.register==='function')window.register()});
-bLogin.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();login()})}
+function ensureWelcome(){let root=q('.biicode-welcome');if(root)return root;const main=q('#main');if(!main)return null;if(localStorage.getItem('biicode_session'))return null;const nav=q('#nav');if(nav)nav.classList.add('hidden');main.innerHTML='<div class="biicode-welcome"><div class="biicode-welcome-inner"></div></div>';return q('.biicode-welcome')}
+function render(){style();const root=ensureWelcome();if(!root)return;const inner=root.querySelector('.biicode-welcome-inner')||root;if(inner.dataset.controller==='20')return;inner.dataset.controller='20';inner.innerHTML='<div class="biicode-welcome-photo"><img class="biicode-welcome-art" src="./assets/biicode-welcome-final.webp?v=20260918d" alt="BIICODE community"></div><div class="biicode-real-cta"><button class="biicode-info-btn" type="button">COME FUNZIONA?</button><div class="biicode-cta-row"><button class="biicode-register-btn" type="button">＋ REGISTRA</button><button class="biicode-login-btn" type="button">♙ ACCEDI</button></div></div>';
+inner.querySelector('.biicode-info-btn').onclick=info;
+inner.querySelector('.biicode-register-btn').onclick=()=>{if(typeof window.register==='function')window.register()};
+inner.querySelector('.biicode-login-btn').onclick=login}
 new MutationObserver(()=>requestAnimationFrame(render)).observe(document.body,{childList:true,subtree:true});render();setTimeout(render,100);setTimeout(render,700);
 })();
