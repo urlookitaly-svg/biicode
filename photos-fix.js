@@ -49,6 +49,30 @@
     }catch(e){console.error('BIICODE photo upload:',e);alert('Non sono riuscito a caricare le foto.\n\n'+String(e?.message||e||'Errore sconosciuto')+'\n\nRiprova.');if(btn){btn.disabled=false;btn.textContent='＋ AGGIUNGI FOTO'}}
   };
 
+  function enhancePhotoDetail(){
+    const modal=document.querySelector('.modal');
+    if(!modal||modal.querySelector('.biicode-special-mark'))return;
+    const title=modal.querySelector('h1'); if(!title)return;
+    const txt=modal.textContent||''; if(!/BIICODE/.test(txt))return;
+    const encMatch=modal.innerHTML.match(/toggle\('([^']+)'\)/); if(!encMatch)return;
+    const enc=encMatch[1],id=decodeURIComponent(enc);
+    const bike=(typeof bikes!=='undefined'&&Array.isArray(bikes))?bikes.find(x=>x&&x.biicode_id===id):null;if(!bike)return;
+    const photos=Array.isArray(bike.photos)?bike.photos:[];
+    const box=document.createElement('div');box.className='card biicode-special-mark';
+    box.innerHTML='<div class="biicode-special-badge">📸 FOTO FORTEMENTE CONSIGLIATA</div><h2>Segni particolari</h2><div class="muted">Fotografa un dettaglio che rende unica e riconoscibile la tua bicicletta: graffi, ammaccature, adesivi, segni sul telaio, riparazioni o altre caratteristiche particolari.</div><div class="biicode-special-tip">Un piccolo dettaglio può essere decisivo per riconoscere la tua bici.</div><label>Foto del segno particolare</label><input id="biicodeSpecialPhoto" type="file" accept="image/*" capture="environment"><label>Descrivi il segno particolare</label><textarea id="biicodeSpecialDescription" maxlength="300" placeholder="Es. Graffio di circa 3 cm sul tubo superiore, lato destro."></textarea><button type="button" class="btn biicode-special-save">SALVA SEGNO PARTICOLARE</button>';
+    const first=modal.querySelector('.card');if(first)first.insertAdjacentElement('afterend',box);else modal.appendChild(box);
+    box.querySelector('.biicode-special-save').onclick=async()=>{
+      const file=box.querySelector('#biicodeSpecialPhoto').files[0],desc=box.querySelector('#biicodeSpecialDescription').value.trim();
+      if(!file)return alert('Seleziona la foto del segno particolare.');
+      if(photos.length>=MAX_PHOTOS)return alert('Hai già raggiunto il limite di 5 foto. Elimina o sostituisci una foto per aggiungere quella dei segni particolari.');
+      try{await window.biicodeUploadPhotos(enc,[file]);if(desc)localStorage.setItem('biicode_special_'+id,desc)}catch(e){}
+    };
+    const saved=localStorage.getItem('biicode_special_'+id);if(saved)box.querySelector('#biicodeSpecialDescription').value=saved;
+  }
+  const specialObserver=new MutationObserver(()=>requestAnimationFrame(enhancePhotoDetail));
+  specialObserver.observe(document.body,{childList:true,subtree:true});
+  setTimeout(enhancePhotoDetail,100);
+
   /* BIICODE visual refresh: presentation only, no data/auth behaviour changes. */
   const style=document.createElement('style');
   style.textContent=`
@@ -88,6 +112,12 @@
     .bio-card-content{min-width:0;flex:1;padding-right:28px}
     .bio-card-content strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .bio-card-photo-count{font-size:10px;color:#7f90a4;margin-top:6px;letter-spacing:.05em}
+    .biicode-special-mark{margin-top:14px!important;border:1px solid rgba(21,101,255,.48)!important}
+    .biicode-special-mark h2{margin:8px 0 8px;font-size:21px}
+    .biicode-special-badge{display:inline-block;background:rgba(21,101,255,.14);color:#78adff;border:1px solid rgba(21,101,255,.35);border-radius:999px;padding:7px 10px;font-size:10px;font-weight:900;letter-spacing:.06em}
+    .biicode-special-tip{margin:13px 0;padding:11px 12px;border-radius:12px;background:#0a1523;color:#dce9f8;font-size:12px;font-weight:750}
+    .biicode-special-mark textarea{width:100%;min-height:92px;resize:vertical;padding:13px 14px;background:#09111c;border:1px solid #26374b;border-radius:15px;color:#fff;font:inherit;outline:0}
+    .biicode-special-mark input[type=file]{padding:12px;min-height:auto}
     @media(max-width:380px){.bio-card-photo{width:62px;height:62px;flex-basis:62px}.bio-card-content strong{font-size:15px!important}}
   `;
   document.head.appendChild(style);
