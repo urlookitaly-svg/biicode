@@ -58,6 +58,15 @@
     const enc=encMatch[1],id=decodeURIComponent(enc);
     const bike=(typeof bikes!=='undefined'&&Array.isArray(bikes))?bikes.find(x=>x&&x.biicode_id===id):null;if(!bike)return;
     const photos=Array.isArray(bike.photos)?bike.photos:[];
+    const primary=modal.querySelector('.card');
+    if(primary&&!primary.querySelector('.biicode-transfer-runtime')){
+      const transfer=document.createElement('button');
+      transfer.type='button';transfer.className='btn secondary biicode-transfer-runtime';
+      transfer.textContent='⇄ TRASFERISCI PROPRIETÀ';
+      transfer.onclick=()=>{if(typeof window.biicodeTransferBike==='function')window.biicodeTransferBike(enc);else alert('Funzione di trasferimento non disponibile.');};
+      const del=[...primary.querySelectorAll('button')].find(x=>/ELIMINA BICI/i.test(x.textContent||''));
+      if(del)primary.insertBefore(transfer,del);else primary.appendChild(transfer);
+    }
     const box=document.createElement('div');box.className='card biicode-special-mark';
     box.innerHTML='<div class="biicode-special-badge">📸 FOTO FORTEMENTE CONSIGLIATA</div><h2>Segni particolari</h2><div class="muted">Fotografa un dettaglio che rende unica e riconoscibile la tua bicicletta: graffi, ammaccature, adesivi, segni sul telaio, riparazioni o altre caratteristiche particolari.</div><div class="biicode-special-tip">Un piccolo dettaglio può essere decisivo per riconoscere la tua bici.</div><label>Foto del segno particolare</label><input id="biicodeSpecialPhoto" type="file" accept="image/*" capture="environment"><label>Descrivi il segno particolare</label><textarea id="biicodeSpecialDescription" maxlength="300" placeholder="Es. Graffio di circa 3 cm sul tubo superiore, lato destro."></textarea><button type="button" class="btn biicode-special-save">SALVA SEGNO PARTICOLARE</button>';
     const first=modal.querySelector('.card');if(first)first.insertAdjacentElement('afterend',box);else modal.appendChild(box);
