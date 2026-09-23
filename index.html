@@ -77,7 +77,13 @@ async function biicodeTransferBike(enc){
  if(b.stolen)return alert('Una bicicletta segnalata come rubata non può essere trasferita.');
  const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let token='';const a=new Uint8Array(24);crypto.getRandomValues(a);for(const n of a)token+=alphabet[n%alphabet.length];
  try{
-  if(!session?.access_token||!user?.id)throw new Error('Sessione non valida. Esci e accedi nuovamente.');
+  if(!session?.refresh_token||!user?.id)throw new Error('Sessione non valida. Esci e accedi nuovamente.');
+  // Refresh explicitly: old local sessions may contain an expired or non-user token.
+  const refreshed=await api('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:session.refresh_token})});
+  if(!refreshed?.access_token||!refreshed?.user?.id)throw new Error('Accesso scaduto. Esci e accedi nuovamente.');
+  const payload=JSON.parse(atob(refreshed.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+  if(payload.sub!==refreshed.user.id||payload.role!=='authenticated')throw new Error('Token utente non valido. Esci e accedi nuovamente.');
+  await setSession(refreshed);
   const verified=await api('/auth/v1/user');
   if(!verified?.id||verified.id!==user.id)throw new Error('Sessione non verificata. Esci e accedi nuovamente.');
   await api('/rest/v1/rpc/create_bike_transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_biicode_id:b.biicode_id,p_token:token})});
