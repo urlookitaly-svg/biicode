@@ -77,6 +77,9 @@ async function biicodeTransferBike(enc){
  if(b.stolen)return alert('Una bicicletta segnalata come rubata non può essere trasferita.');
  const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let token='';const a=new Uint8Array(24);crypto.getRandomValues(a);for(const n of a)token+=alphabet[n%alphabet.length];
  try{
+  if(!session?.access_token||!user?.id)throw new Error('Sessione non valida. Esci e accedi nuovamente.');
+  const verified=await api('/auth/v1/user');
+  if(!verified?.id||verified.id!==user.id)throw new Error('Sessione non verificata. Esci e accedi nuovamente.');
   await api('/rest/v1/rpc/create_bike_transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_biicode_id:b.biicode_id,p_token:token})});
   const link=location.origin+location.pathname+'?transfer='+encodeURIComponent(token);
   openModal('<button type="button" class="back" onclick="detail(\''+encodeURIComponent(b.biicode_id)+'\')">‹ Indietro</button><h1>Trasferisci proprietà</h1><div class="card"><strong>'+esc(b.brand)+' '+esc(b.model)+'</strong><div class="id">'+esc(b.biicode_id)+'</div><p class="muted">Stai vendendo o cedendo questa bici? Invia il link al nuovo proprietario. Dovrà accedere o creare un account BIICODE e accettare il trasferimento.</p><div class="msg ok">Il link scade tra 24 ore. La bici manterrà lo stesso BIICODE e la propria storia.</div><input id="transferLink" readonly><button class="btn" id="copyTransfer">COPIA LINK DI TRASFERIMENTO</button></div>');
