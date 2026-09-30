@@ -74,9 +74,17 @@
       const file=box.querySelector('#biicodeSpecialPhoto').files[0],desc=box.querySelector('#biicodeSpecialDescription').value.trim();
       if(!file)return alert('Seleziona la foto del segno particolare.');
       if(photos.length>=MAX_PHOTOS)return alert('Hai già raggiunto il limite di 5 foto. Elimina o sostituisci una foto per aggiungere quella dei segni particolari.');
-      try{await window.biicodeUploadPhotos(enc,[file]);if(desc)localStorage.setItem('biicode_special_'+id,desc)}catch(e){}
+      try{
+        await window.biicodeUploadPhotos(enc,[file]);
+        const latest=(typeof bikes!=='undefined'&&Array.isArray(bikes))?bikes.find(x=>x&&x.biicode_id===id):null;
+        const latestPhotos=Array.isArray(latest?.photos)?latest.photos:[];
+        const specialPhoto=latestPhotos.length?latestPhotos[latestPhotos.length-1]:null;
+        const r=await fetch(SUPABASE_URL+'/rest/v1/bikes?biicode_id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:headers(true,'application/json'),body:JSON.stringify({special_mark_description:desc||null,special_mark_photo:specialPhoto})});
+        if(!r.ok)throw new Error(await responseText(r));
+        localStorage.removeItem('biicode_special_'+id);
+      }catch(e){alert('Foto caricata, ma non sono riuscito a salvare i dati identificativi. '+String(e?.message||e||''))}
     };
-    const saved=localStorage.getItem('biicode_special_'+id);if(saved)box.querySelector('#biicodeSpecialDescription').value=saved;
+    const saved=bike.special_mark_description||localStorage.getItem('biicode_special_'+id);if(saved)box.querySelector('#biicodeSpecialDescription').value=saved;
   }
   const specialObserver=new MutationObserver(()=>requestAnimationFrame(enhancePhotoDetail));
   specialObserver.observe(document.body,{childList:true,subtree:true});
