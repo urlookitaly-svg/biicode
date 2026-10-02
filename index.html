@@ -77,21 +77,16 @@ async function biicodeTransferBike(enc){
  if(b.stolen)return alert('Una bicicletta segnalata come rubata non può essere trasferita.');
  const alphabet='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let token='';const a=new Uint8Array(24);crypto.getRandomValues(a);for(const n of a)token+=alphabet[n%alphabet.length];
  try{
-  if(!session?.refresh_token||!user?.id)throw new Error('Sessione non valida. Esci e accedi nuovamente.');
-  // Refresh explicitly: old local sessions may contain an expired or non-user token.
-  const refreshed=await api('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:session.refresh_token})});
-  if(!refreshed?.access_token||!refreshed?.user?.id)throw new Error('Accesso scaduto. Esci e accedi nuovamente.');
-  const payload=JSON.parse(atob(refreshed.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-  if(payload.sub!==refreshed.user.id||payload.role!=='authenticated')throw new Error('Token utente non valido. Esci e accedi nuovamente.');
+  if(!session?.refresh_token||!user?.id)throw new Error('SESSION_REQUIRED');
+  const refreshed=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:session.refresh_token})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.message||'SESSION_REQUIRED');return d});
   await setSession(refreshed);
-  const verified=await api('/auth/v1/user');
-  if(!verified?.id||verified.id!==user.id)throw new Error('Sessione non verificata. Esci e accedi nuovamente.');
-  await api('/rest/v1/rpc/create_bike_transfer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p_biicode_id:b.biicode_id,p_token:token})});
+  const r=await fetch(SUPABASE_URL+'/rest/v1/rpc/create_bike_transfer',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+refreshed.access_token,'Content-Type':'application/json'},body:JSON.stringify({p_biicode_id:b.biicode_id,p_token:token})});
+  if(!r.ok){let d={};try{d=await r.json()}catch{};throw new Error(d.message||'TRANSFER_ERROR')}
   const link=location.origin+location.pathname+'?transfer='+encodeURIComponent(token);
-  openModal('<button type="button" class="back" onclick="detail(\''+encodeURIComponent(b.biicode_id)+'\')">‹ Indietro</button><h1>Trasferisci proprietà</h1><div class="card"><strong>'+esc(b.brand)+' '+esc(b.model)+'</strong><div class="id">'+esc(b.biicode_id)+'</div><p class="muted">Stai vendendo o cedendo questa bici? Invia il link al nuovo proprietario. Dovrà accedere o creare un account BIICODE e accettare il trasferimento.</p><div class="msg ok">Il link scade tra 24 ore. La bici manterrà lo stesso BIICODE e la propria storia.</div><input id="transferLink" readonly><button class="btn" id="copyTransfer">COPIA LINK DI TRASFERIMENTO</button></div>');
+  openModal('<button type="button" class="back" onclick="detail(\\''+encodeURIComponent(b.biicode_id)+'\\')">‹ Indietro</button><h1>Trasferisci proprietà</h1><div class="card"><strong>'+esc(b.brand)+' '+esc(b.model)+'</strong><div class="id">'+esc(b.biicode_id)+'</div><p class="muted">Invia questo link al nuovo proprietario. Dovrà accedere o creare un account BIICODE e accettare il trasferimento.</p><div class="msg ok">Il link scade tra 24 ore. La bici manterrà lo stesso BIICODE e la propria storia.</div><input id="transferLink" readonly><button class="btn" id="copyTransfer">COPIA LINK DI TRASFERIMENTO</button></div>');
   document.getElementById('transferLink').value=link;
   document.getElementById('copyTransfer').onclick=async()=>{try{await navigator.clipboard.writeText(link);alert('Link copiato.')}catch(e){document.getElementById('transferLink').select();alert('Seleziona e copia il link.')}};
- }catch(e){alert('Non sono riuscito a creare il trasferimento. '+(e.message||''))}
+ }catch(e){const m=String(e.message||e);const friendly=m.includes('NOT_OWNER')?'Questa bici non risulta associata al tuo account sul server.':m.includes('SESSION_REQUIRED')||m.includes('missing sub')?'La sessione BIICODE non è valida. Esci e accedi nuovamente.':m.includes('STOLEN_BIKE')?'Una bici segnalata come rubata non può essere trasferita.':'Non sono riuscito a creare il trasferimento. '+m;alert(friendly)}
 }
 async function acceptTransferToken(t){
  if(!t||!user)return;
