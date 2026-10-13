@@ -31,6 +31,7 @@ main{padding-bottom:145px!important}.modal{background:#07101b!important}.modalin
 </style>
 
 <script id="biicode-cache-v7">(async()=>{const V='biicode-v30';try{if(localStorage.getItem('biicode_cache_version')!==V){if('caches' in window){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}localStorage.setItem('biicode_cache_version',V);location.reload()}}catch(e){}})();</script>
+<script src="./i18n.js?v=20261013-1" defer></script>
 </head>
 <body>
 <main id="main"></main><div id="nav" class="nav hidden"></div><div id="modal" class="modal"><div id="modalin" class="modalin"></div></div>
@@ -103,7 +104,7 @@ async function logout(){try{if(session?.access_token)await api('/auth/v1/logout'
 (async()=>{login();const ok=await restoreSession();if(ok)await enter()})();
 </script>
 <script src="./qr.js?v=20260912"></script>
-<script src="./photos-fix.js?v=20260930-passport1"></script>
+<script src="./photos-fix.js?v=20261013-two-photos"></script>
 <script>window.BIICODE_BUILD="20261007-loginfix1";</script>
 <script src="./biicode-ui-v8.js?v=11"></script>
 
