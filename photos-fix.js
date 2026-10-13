@@ -19,7 +19,7 @@
     try{const retryHeaders=new Headers(init?.headers || (input instanceof Request ? input.headers : undefined));retryHeaders.set('apikey',LEGACY_KEY);retryHeaders.set('Authorization','Bearer '+LEGACY_KEY);const retryInit={...(init||{}),headers:retryHeaders};if(input instanceof Request)return nativeFetch(new Request(input,{headers:retryHeaders}),retryInit);return nativeFetch(input,retryInit)}catch(e){return r}
   };
   const PHOTO_BUCKET='bike-photos';
-  const MAX_PHOTOS=5;
+  const MAX_PHOTOS=2;
   const token=()=>typeof session!=='undefined'&&session?.access_token?session.access_token:null;
   const userId=()=>typeof user!=='undefined'&&user?.id?user.id:null;
   const headers=(withAuth=true,contentType)=>{const h={apikey:SUPABASE_KEY};if(withAuth&&token())h.Authorization='Bearer '+token();if(contentType)h['Content-Type']=contentType;return h};
@@ -40,7 +40,7 @@
   function updateLocal(id,photos){try{const uid=userId();if(!uid)return;const k='biicode_v3_'+uid,rows=JSON.parse(localStorage.getItem(k)||'[]');if(!Array.isArray(rows))return;for(const b of rows)if(b&&b.biicode_id===id)b.photos=photos;localStorage.setItem(k,JSON.stringify(rows))}catch(e){}}
   window.biicodeUploadPhotos=async function(encoded,files){
     const id=decodeURIComponent(encoded||''),b=await getBike(id);if(!b)return alert('Bici non trovata.');
-    const current=Array.isArray(b.photos)?b.photos.filter(Boolean).slice(0,MAX_PHOTOS):[],picked=Array.from(files||[]),selected=picked.slice(0,MAX_PHOTOS-current.length);if(!selected.length)return alert('Puoi caricare fino a 5 foto per bici.');
+    const current=Array.isArray(b.photos)?b.photos.filter(Boolean).slice(0,MAX_PHOTOS):[],picked=Array.from(files||[]),selected=picked.slice(0,MAX_PHOTOS-current.length);if(!selected.length)return alert('Puoi caricare fino a 2 foto per bici.');
     const btn=document.querySelector('.biicode-add-photo');if(btn){btn.disabled=true;btn.textContent='CARICAMENTO FOTO…'}
     const uploaded=[];
     try{for(let i=0;i<selected.length;i++){const blob=await compress(selected[i]),uid=userId()||'public',safe=Date.now()+'-'+Math.random().toString(36).slice(2,9)+'-'+i+'.jpg';uploaded.push(await upload(uid+'/'+id+'/'+safe,blob))}
@@ -73,7 +73,7 @@
     box.querySelector('.biicode-special-save').onclick=async()=>{
       const file=box.querySelector('#biicodeSpecialPhoto').files[0],desc=box.querySelector('#biicodeSpecialDescription').value.trim();
       if(!file)return alert('Seleziona la foto del segno particolare.');
-      if(photos.length>=MAX_PHOTOS)return alert('Hai già raggiunto il limite di 5 foto. Elimina o sostituisci una foto per aggiungere quella dei segni particolari.');
+      if(photos.length>=MAX_PHOTOS)return alert('Hai già raggiunto il limite di 2 foto. Elimina o sostituisci una foto per aggiungere quella dei segni particolari.');
       try{
         await window.biicodeUploadPhotos(enc,[file]);
         const latest=(typeof bikes!=='undefined'&&Array.isArray(bikes))?bikes.find(x=>x&&x.biicode_id===id):null;
